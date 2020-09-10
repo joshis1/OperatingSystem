@@ -1,0 +1,8 @@
+# ignore all object files generated
+*.o
+# ignore the elf file generated
+*.elf
+# ignore the binary file generated
+*.bin
+# ignore the libary generated 
+*.d

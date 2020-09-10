@@ -1,0 +1,817 @@
+STM32 MCU -- 
+
+System Memory -- 
+
+30 KB .
+
+Begins @0x1FFF_0000
+
+Boot 0 and Boot 1 
+
+The memory is read only..
+
+memory aliasing - 0x00 to this region --
+
+Configure the MCU to boot from this memory 
+by using the boot pins.
+
+BOOT1 0, BOOT0 -- as Vcc --
+
+Reset the board.. --
+
+Activate the bootloader - 
+
+Schematics of your board.
+
+Nucleo-- schematics board.
+
+Morpho connector -- BOOT0
+Boot1 -- on micro-controller. 
+
+PB2 --  Boot 1 is grounded.
+
+Boot0 as Vcc -- 
+
+
+Pin 7 and Pin 5 Short.
+
+CN7 -- 
+
+##Boot the board using System Memory--
+
+Stm32 AN2606 -- STM32 micro-controller System memory 
+boot mode.
+
+####
+
+Initialization of data --
+
+##############
+
+Custom bootloader --
+######################
+
+STM32 Flash loader demonstrator.
+
+create Hex File is created. 
+
+Streams of bytes and this will flash this hex file 
+into flash memory of the board - in application 
+programming.
+
+Bootloader --
+
+VCOM - USART2 
+
+Debug USART3 
+
+-USART2 -- micro-controller in order to receive -- 
+VCOM -  sending bootloader commands and receiving replies.
+
+Debug Port - USART 3-  printf statement -- USB to UART 
+-- to PC.
+
+Nucleo - USART2 -- 
+
+Bootloader - Code Placement in Flash -- 
+
+ROM(30KB)
+
+ST bootloader -- 
+
+Our Bootloader -- Sector 0 (16KB)
+             --- Sector 1(16 KB)
+##
+Sector 2 to Sector -7 our user application.
+
+0x0800 0000 - Sector 0 - custom bootloader  - 16 Kilo bytes.
+
+0x0800 8000 -- sector 2 - User Application.  - 16 Kilo bytes.
+
+#########
+
+Bootloader commands -
+
+host sends -- 
+BL_GET_VER -- 0x51 -- Bootloader Version number - 1 byte.
+BL_GET_HELP --0x52 -- All supported comman code - 10 bytes.
+
+>>>>>>>>><<<<<<<<<<<<<<<<
+
+BL_GET_CID - Chip identification number.
+
+GET_RDP_STATUS - read flash read protection level.
+
+BL_GO_TO_ADDR - bootloader jumps to that address.
+
+BL_FLASH_ERASE - mass erase or sector erase.
+
+BL_MEM_WRITE -- write data to differenet memories of the mcu.
+
+BL_ENDIS_RW_PROTECT - enable disable 
+
+BL_OTP_READ -- 
+
+##########################################################
+
+
+HOST (PC) ---> Target MCU - bootloader --
+
+Reset Clcok UART -- 
+
+Host -> command Packet --> MCU bootloader 
+
+
+ACK/NACK + length to follow - 2 bytes.
+
+--> CRC - byte integrity . + length to follow.
+
+Reply of ("length to follow" bytes) 
+
+#########
+
+Host Bootloader communication --
+
+Command Packet -- that will come from host.
+
+KEIL - or eclipse development.
+
+####
+CubeMx -- 
+bootloader_stm32 -- 
+
+Toolchain MDk5 -- 
+
+USART2 --> enable-- asynchronous.->PA2 and PA3..
+
+-> vcom -->
+
+USART 3- > debug message.
+
+Enable CRC engine --
+
+RCC - Disable - HSE -
+###############
+
+Clock Configuration - don't change anything.
+SysClock - HCLK - 84 Mhz. 
+###################################
+
+if--> buttonPress -> bootloader uart read data
+>>>>>>
+
+
+
+
+else --> bootloader_jump_to_user_app();
+>>>>>>>
+
+user application -- sector number 2 -- 0x08000 00004 
+
+PC -13 - button--
+
+user app - 
+
+CubeMx -- 
+Settings -- Blinky_Led- UserApp - STM32F44xxx
+
+MDK5 - OK.
+Application to generate button interrupts.
+>>
+>>>>> 
+GPIO - PA5 -- LED -- Green LED -
+GPIO - Output Push Pull mode.
+PC13 - button is in the mode - external interrupt.
+
+>>>
+
+NVIC ->>
+EXTI line -- (15:10) interrupts -enable. 
+###########
+
+IRQ handler -- Generate IRQ handler .
+
+Clock Configuration -->
+-------->
+----------->
+
+EXTI5_10_IRQHandler()
+-->>
+
+Keil IDE -- Options for Target -- 
+ROM1 -- 
+Linker -- 
+R/O base - 0x800.800
+
+User application in base of sector 2.
+
+Flash sector 0 to Sector 7.
+STM32 ST link utility - 
+STM32 ST link - Flash utility.
+
+################################
+
+Stored our user application --
+
+>> Code to different flash codes --
+
+Linker -- stm32 ld --
+
+>>
+
+BL_FLASH_ERASE -- 
+
+8 sectors - 0 to 7, which sector to be erases.
+
+Sector number -- number of sectors.
+
+######################
+
+>> BL_MEM_WRITE -->
+
+4 byte base address - 
+Payload len - number of bytes to write.
+Payload to write.
+
+BL_MEM_READ - 
+BaseMemeory address - len , CRC -- 
+
+Length to Follow -> Command Code -> Base Memory addr.  len  CRC --
+
+############
+
+BL_ENR_R_W_PROTECT --
+
+Put read and write protection for different parts of the sector.
+
+Sector details - 8 bits -- 
+Protection --Mode -- > Write protection, R/W protection.
+
+####
+
+BL_DISABLE_R_W_PROTECT --
+
+Disable active protection on all the sectors.
+
+BL_READ_SECtor_STATUS -->
+Protection status of different sectors .
+
+############
+
+bootloader_jump_to_user_app(); -->
+
+
+
+bootloader_uart_read_data(); 
+
+uint8_t bl_rx_buff[200];
+
+while(1)
+{
+  memset(bl_rx_buff, 0, 200);
+  UART_RECEIVE(); -> 1byte
+  rec_len = b1_Rx_buffer[0];
+  HAL_UART_RECEIVE();
+  
+  switch(b1_Rx_buffer[1])
+  {
+      
+    
+  }
+  
+#######################################
+pyserial 
+
+python -m pip install pyserial.
+
+sudo apt-get install python3-serial
+
+curl <pypa.io.get-pip.py> > get-pip.py
+
+sudo python get-pip.py
+sudo pip install pyserial.
+
+############################
+
+BL Get Version and reply command.
+
+>>> Flash management - 
+
+Embedded Flash memory interface - 
+
+Main Memory - ROM,code and Vector table - 
+
+Sector 0 to Sector 7 -- 
+
+System memory -- 
+
+OTP 
+
+Option bytes.
+
+Erase, write and read - Flash.
+
+not protected - -non erasable, non-readable and non-writeable.
+
+Option bytes - are used to manage the security levels on this flash.
+option bytes are 16 bytes.
+
+0x1FFF C000 --> ROP & user option btyes 
+
+0x1FFF C008 --> write protection n WRP bits for sectors 0 to 7.
+
+###
+
+Optyes Bit 15:8 -- RDP - read protection bytes. 
+
+to protect the software code stored in flash memory.
+
+0XAA -- level 0 - no protection.
+0xCC --> level 2 - chip protection .
+level1 - protection --
+
+###
+Level 1 -  read protection enabled. 
+
+When the RDP level 1 i set - 
+-- no acess - read , erase and program option.
+-- a bus error is generated in case of read request.
+>>
+
+>>RDP level to level 1 -- customer cannot access that customer code
+from debugger.
+
+READ, ERASE< Program to flash - when booting from flash memory.
+
+From level 1 to level 0 - the whole erase is required.
+
+Level 2 - 
+booting from RAM or system memory bootloader is no more allowed.
+
+JTAG, SWV, ETM and boundary scan are disable.
+user option bytes can no longer be changed.
+
+Memory read protection level 2 is an irreversible operation.
+level 2 is activated. 
+
+RDP - reading protection -- 
+RDP level -- 
+Option bytes -- 0x1FFF C000 
+
+Bit 15:8 -- 0xAA - level 0, no protection
+        -0xcc - level 2 - chip protection, debug and boot from 
+		RAM features disabled.
+		-- others level 1: read protection of memories - 
+	debug features limited. 
+
+#####################################
+
+STLINK utility - 
+Read Address -- 
+
+Option bytes - 
+Read Out Protection - 
+
+-- Level 1
+-- Level 0
+###########################
+
+BL_GO_TO_ADDR - bootloader will jump to that address.
+#############
+
+BL - go to command - 
+
+Lenght to follow - Command COde -> Memory Address - LE - CRC 
+
+
+//send ACK -- 
+extract the go_address  
+
+verify the go_address  only jump to RAM location, user flash 
+location, external memory location.
+
+can we jump to System memory yes 
+can we jump to sram 1 memory yes
+can we jump to sram2 memory yes
+can we jump to backup sram memory yes 
+can we jump to peripheral memory - it's possible.-- but don't allow.
+can we jump to external memory - yes.
+
+if ( go_address >= SRAM1_BASE && go_address <= SRAM1_END 
+
+if( go_address >= SRAM2_BASE && go_address <= SRAM2_END 
+
+if ( go_address >= FLASH_BASE && go_address <= FLASH_END)
+
+BKPSRAM_BASE  and BKPSRAM_END - valid 
+
+if address is valid -- 
+tell the host 
+
+go_address +=1; // make T bit 1
+void (*lets_jump)(void = (void*) go_address;
+
+lets_jump();
+
+### In order to write anything in flash -
+first we need to erase it then only you can change it.
+
+Flash writing sequence -
+
+Erase and program operations.
+#######
+
+Erase a given sector or mass erase the entire main memory 
+- 
+Erase means making everything as 0xFF 
+If you have to write something then it has to be erased first.
+
+###
+Sector Erase --
+
+no flash memory opertion is ongoing by checking the BSY bit in 
+the FLASH_SR register
+
+--> Set the SER bit and select the sector out of the 7 sectors 
+in the main memory block you wish to erase SNB in the FLASH
+CR register
+Set the STRT bit in the flash cr register
+Wait for the BSY bit to be cleared.
+
+## 
+hal_flash_ex.c -> flash extension.c 
+
+HAL_FLASHEx_Erase -->
+
+FLASH_TYPEERASE_SECTORS  
+
+FLASH_TYPEERASE_MASS
+
+Flash banks -- > 
+
+Sector -> Initial flash  sectors to erase. 
+####
+
+hal_flash_ex.c ->
+
+SectorError -- that the sector is corrupted.
+
+0xFFFFFFFu means that all the sector have been correctly
+erased.
+
+FLASH_TYPEERASE_SECTORS
+FLASH_TYPEERASE_MASS
+
+Banks -->
+Sector ->	
+
+VoltageRange -- some Voltage has to be maintained.
+
+FLASHEx_Voltage_Range FLASH Voltage Range.
+
+FLASH_VOLTAGE_RANGE_3 -- 2.7v to 3.6 v
+
+HAL_FLASHEx_Erase()
+
+execute_flash_erase(pBuffer[2],  puBuffer[3])
+
+
+execute_flash_erase(int sector_number, int number_of_sectors)
+{
+
+}
+
+erase_status -- 
+
+Starting 
+
+HAL_GPIO_WRItePin(LD2_GPIO_PIN
+
+--
+
+if( sector_number == 0xff 
+
+if( sector_nuber - 0xff)
+
+masserase.
+
+Typerase - sector erase.
+sector = sector_number
+numberof_sectors  
+FLASH_BANK_1
+
+HAL_FLASH_Unlock();
+HAL_FLASHEx_Eerase 
+HAL_FLASH_Lock();
+
+status 
+
+###
+
+BL_MEM_WRITE -->
+Length to follow -> Command Code -> Base memory address -> payload length ->  payload -> CRC
+
+payload - x -> bytes to write. 
+
+1 byte - bootloader reply..
+
+####
+
+bootloader_handle_mem_write_cmd()
+>>
+ mem_address = *(uint32_t *) ( &pBuffer[2]));
+ payload_len = pbuffer[6];
+ 
+ execute_mem_write(&pbuffer[7], mem_address, payload_len);
+
+####
+
+execute_mem_write(
+
+HAL_FLASH_Unlock()
+
+for(uint32_t i = 0; i < len; i++)
+{
+  status = HAL_FLASH_Program(FLASH_TYPEPROGRAM_BYTE, mem_address+i, pbuffer[i])
+
+}
+
+HAL_FLASH_Unlock();
+
+
+16Kb is 2^10 * 2 ^4 =     14zeroes i.e   0x4000
+
+>> Programming -->
+
+binary file ->
+user application - binary file -->
+
+fromelf.exe --bin -output=user_app.bin user_app_STM32.axf
+
+axf - contains code as well as debug information.
+
+binary - pure opcode file.
+
+open binary with hex editor.
+
+>>
+4792 Kb - 
+
+4792/255 = 19 times. 
+>>>>>>>>>Test<<<<<<<<<<<<<<<<<<<<<
+
+binary - Python script is stored.
+
+user_app.bin  
+>> Erase Sector 2 -->
+###########
+
+Sector 0 and Sector -1 - bootloader code.
+
+restrictions on different sectors. 
+
+Option bytes -- 
+##
+Bit 7:0 -- 
+SPRMOD is reset - 
+0 - is write protective
+1 - not protective.
+
+
+if SPRMOD is 1 .
+>> then read write bits are protected.
+
+0 = no PCROP .
+1- PCROP protection - 
+Proprietary code readout protection .
+###
+
+>> Check that no flash operation is on going.
+>> FLASH_OPTCR register -- 
+>>  set the option start bit (OPTSTRT) in the 
+FLASH_OPTCR register.
+>> Wait for the BSY 
+
+##########
+
+Enable disable read/write protection.
+
+#######
+St Link utility. 
+
+Option bytes -- 
+
+Sector 0 and Sector 1 -- write protection.
+
+###############################################
+
+Flash protection - write protection 
+and read write protection.
+#####################################
+Read write protection to write protection 
+or disabling Read write protection will generate
+a full chip erase.
+
+#################
+
+BL_EN_R_W_PROTECT
+BL_DIS_R_W_PROTECT
+BL_READ_SECTOR_STATUS.
+
+####
+
+Read sector protection status - 
+
+11--> 
+
+BL_EN_R_ protect -- 
+
+len to follow - command > sector details-
+protection mode, CRC
+
+
+sector details -- 8 bits  1 byte
+0th bit is sector 0.
+protection mode
+ - 1  write protection 
+2 - R/W protection.
+
+
+pbuffer2 - sector details 
+
+pbuffer[3] - protection mode. 
+
+en_rw_protect --
+>>
+configure_flash_sector_rw_protection
+(pBuffer[2], pBuffer[3],0);
+
+configure_flash_sector_rw_protection
+(
+
+// first configure the protection mode
+// protection mode = 1, means 
+write protect of the user flash sectors.
+// protection mode =2, means read/write 
+protect of the user flash sectors.
+// accordign to reference manual - 
+Table - 
+
+FLASH_OPTCR -
+volatile uint32_t *pOPTCR = (uint32_t*) 0x40023C14;
+
+bits 16:23 
+
+sector_details, protection_mode, disable)
+if(disable)
+{
+  HAL_FLASH_OB_Unlock();
+  while(__HAL_FLASH_GET_FLAG(FLASH_FLAG_BSY) != RESET);
+
+}
+
+if( protection_mode == 1)
+{
+  OB_UNlock()
+  while(__HAL_FLASH_GET_FLAG(FLASH_FLAG_BSY) != RESET);
+}
+
+1: protection 
+0: no protection 
+
+1: write protection
+2: R/W protection.
+
+handle_en_rw_protect
+>>
+pBuffer[2] -> sector details
+
+pBuffer[3] --> protection mode.
+
+if disable - disable all r/w protection mode. 
+
+if prtectio mode == 1 // write protection.
+
+HAL_FLASH_OB_Unlock
+
+while(_HAL_FLASH_GET_FLAG(FLASH_FLAG_BSY) != RESET);
+
+set write protection for the sectors 
+
+clear the 31st bit - FLASH_OPTCR -- SPRMOD - 
+
+*pOPTCR &= ~(1<<31);
+
+*pOPTCR &= ~(sector_details << 16); bit [16]--
+
+// set the  start bit 
+*pOPTCR | = (1 >>1);
+while( == !=REset);
+HAL_FLASH_Lock();
+
+##############################
+Modifying user option bytes - reference manual.
+
+// Page 92.
+
+Check no flash memory operation is going .
+
+Write the bank 2 option btye value in the 
+FLASH_OPTCR1 register.
+
+Write the bank1  option byte value in the FLASH_OPTCR
+
+Set the option start bit - OPTSRT in the FLASH_OPTCR 
+
+Wait for the Bsy bit to be cleared.
+
+//Page 108 -- FLASH_OPTCR 
+
+Bit 31 - SPRMOD - 
+Selection of protection mode for nWPRi bits
+
+0 - PCROP disabled  
+1 - PCRPOB enabled - 
+
+Bits 27:16 -- nWRP[11:0] - not write protect 
+
+sectors o to 11. 
+SPRMOD - 0 - 
+0 - write protecton 
+1- no write protection
+SPRMOD -1 
+
+0 - PCRPOP -- 
+1- PRCROP - active on sector i .
+
+bit 1 - OPTSTRT - Option Start 
+
+################################################
+
+
+Code blocks --:
+
+windows --> Serial Port Configuration.
+
+WindowsSerialPort.c -->
+
+Serial_Port_Configuration -->
+
+CreateFile( comPortFileName, 
+
+read_serial_port 
+
+Host application -->
+
+decode_menu_command_code -
+
+Make command packet.
+
+###########
+
+#define USER_APP -- 
+
+Command Name
+Command len 
+
+decode_menu_command_code 
+
+case 14:
+
+bootloader_reply:
+first read ack - if it is good then .
+new case -- 
+process_command->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
