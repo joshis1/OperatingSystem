@@ -6,3 +6,4 @@
 *.bin
 # ignore the libary generated 
 *.d
+/Debug/
