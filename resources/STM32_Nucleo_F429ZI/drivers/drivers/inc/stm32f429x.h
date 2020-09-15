@@ -208,6 +208,13 @@ typedef struct
 #define SPI3_PCLK_DI() (RCC->RCC_APB1ENR &= ~(1U <<15))
 
 
+/** general defines **/
+
+#define ENABLE  (1)
+#define DISABLE (0)
+#define SET     ENABLE
+#define RESET   DISABLE
+
 
 
 #endif /* STM32F429X_H_ */
