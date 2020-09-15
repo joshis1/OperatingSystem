@@ -100,16 +100,16 @@
 //8.4.11 GPIO register map - Reference manual.
 typedef struct 
 {
- _VO uint32_t moder;    // -- mode register - like input, output, AF, Analog - address offset   0x00 
- _VO uint32_t otyper;   //- output type - push pull or open drain - address offset   0x04 
- _VO uint32_t ospeedr;  //- output speed register - address offset   0x08 
- _VO uint32_t pupdr;    //- pull up and pull down register - address offset   0x0C
- _VO uint32_t idr;      //- input data register - address offset   0x10
-  _VO uint32_t odr;      //- output data register - address offset   0x14
- _VO uint32_t bsrr;     //- bit set reset bit - address offset   0x18
- _VO uint32_t lckr;     //- lock register - address offset   0x1C
- _VO uint32_t afrl;     //- AF low register i.e. 0 to 7 pins - address offset   0x20
- _VO uint32_t afrh;     //- AF high register i.e. 8 to 15 pins - address offset   0x24
+	_VO uint32_t moder;    // -- mode register - like input, output, AF, Analog - address offset   0x00
+	_VO uint32_t otyper;   //- output type - push pull or open drain - address offset   0x04
+	_VO uint32_t ospeedr;  //- output speed register - address offset   0x08
+	_VO uint32_t pupdr;    //- pull up and pull down register - address offset   0x0C
+	_VO uint32_t idr;      //- input data register - address offset   0x10
+	_VO uint32_t odr;      //- output data register - address offset   0x14
+	_VO uint32_t bsrr;     //- bit set reset bit - address offset   0x18
+	_VO uint32_t lckr;     //- lock register - address offset   0x1C
+	_VO uint32_t afrl;     //- AF low register i.e. 0 to 7 pins - address offset   0x20
+	_VO uint32_t afrh;     //- AF high register i.e. 8 to 15 pins - address offset   0x24
 }GPIO_RegDef_t;
 
 #define GPIOA   ((GPIO_RegDef_t *)GPIOA_BASEADDR)
@@ -128,43 +128,40 @@ typedef struct
 /** Table 34. RCC register map and reset values **/
 typedef struct 
 {
-  _VO uint32_t RCC_CR;    //     - address offset   0x00 
-  _VO uint32_t RCC_PLLCFGR;   // -  address offset   0x04 
-  _VO uint32_t RCC_CFGR;     //- address offset   0x08 
-  _VO uint32_t RCC_CIR;    //- address offset   0x0C
-  _VO uint32_t RCC_AHB1RSTR;      //- address offset   0x10
-  _VO uint32_t RCC_AHB2RSTR;      //- address offset   0x14
-  _VO uint32_t RCC_AHB3RSTR;     //- address offset   0x18
-  _VO uint32_t Reserved_1;     //- address offset   0x1C
-  _VO uint32_t RCC_APB1RSTR;     //- address offset   0x20
-  _VO uint32_t RCC_APB2RSTR;     //- address offset   0x24
-  
-  _VO uint32_t Reserved_2;    // - address offset   0x28
-  _VO uint32_t Reserved_3;   //  - address offset   0x2C
-  _VO uint32_t RCC_AHB1ENR;  //-   address offset   0x30 
-  _VO uint32_t RCC_AHB2ENR;    //- address offset   0x34
-  _VO uint32_t RCC_AHB3ENR;      //- address offset   0x38
-  _VO uint32_t Reserved_val;      //- address offset   0x3C
-  _VO uint32_t RCC_APB1ENR;      //- address offset   0x40
-  _VO uint32_t RCC_APB2ENR;     //- address offset   0x44
-  _VO uint32_t Reserved_4;     //address offset   0x48
-  _VO uint32_t Reserved_5;     //- address offset   0x4C
-  _VO uint32_t RCC_AHB1LPENR;     //- address offset   0x50
-  
-  
-  _VO uint32_t RCC_AHB2LPENR;    // - address offset   0x54 
-  _VO uint32_t RCC_AHB3LPENR;   //-  address offset   0x58 
-  _VO uint32_t Reserved_6;  //-  address offset   0x5C 
-  _VO uint32_t RCC_APB1LPENR;    //- address offset   0x60
-  _VO uint32_t RCC_APB2LPENR;      //- address offset   0x64
-  _VO uint32_t Reserved_7;      //- address offset   0x68
-  _VO uint32_t Reserved_8;     //- address offset   0x6C
-  _VO uint32_t RCC_BDCR;     //- address offset   0x70
-  _VO uint32_t RCC_CSR;     //- address offset   0x74
-  _VO uint32_t Reserved_9;     //- address offset   0x78  
-  _VO uint32_t Reserved_10;    // - address offset   0x7C 
-  _VO uint32_t RCC_SSCGR;   //- address offset   0x80 
-  _VO uint32_t RCC_PLLI2SCFGR;  //- address offset   0x84
+	_VO uint32_t RCC_CR;    //     - address offset   0x00
+	_VO uint32_t RCC_PLLCFGR;   // -  address offset   0x04
+	_VO uint32_t RCC_CFGR;     //- address offset   0x08
+	_VO uint32_t RCC_CIR;    //- address offset   0x0C
+	_VO uint32_t RCC_AHB1RSTR;      //- address offset   0x10
+	_VO uint32_t RCC_AHB2RSTR;      //- address offset   0x14
+	_VO uint32_t RCC_AHB3RSTR;     //- address offset   0x18
+	_VO uint32_t Reserved_1;     //- address offset   0x1C
+	_VO uint32_t RCC_APB1RSTR;     //- address offset   0x20
+	_VO uint32_t RCC_APB2RSTR;     //- address offset   0x24
+	_VO uint32_t Reserved_2;    // - address offset   0x28
+	_VO uint32_t Reserved_3;   //  - address offset   0x2C
+	_VO uint32_t RCC_AHB1ENR;  //-   address offset   0x30
+	_VO uint32_t RCC_AHB2ENR;    //- address offset   0x34
+	_VO uint32_t RCC_AHB3ENR;      //- address offset   0x38
+	_VO uint32_t Reserved_val;      //- address offset   0x3C
+	_VO uint32_t RCC_APB1ENR;      //- address offset   0x40
+	_VO uint32_t RCC_APB2ENR;     //- address offset   0x44
+	_VO uint32_t Reserved_4;     //address offset   0x48
+	_VO uint32_t Reserved_5;     //- address offset   0x4C
+	_VO uint32_t RCC_AHB1LPENR;     //- address offset   0x50
+	_VO uint32_t RCC_AHB2LPENR;    // - address offset   0x54
+	_VO uint32_t RCC_AHB3LPENR;   //-  address offset   0x58
+	_VO uint32_t Reserved_6;  //-  address offset   0x5C
+	_VO uint32_t RCC_APB1LPENR;    //- address offset   0x60
+	_VO uint32_t RCC_APB2LPENR;      //- address offset   0x64
+	_VO uint32_t Reserved_7;      //- address offset   0x68
+	_VO uint32_t Reserved_8;     //- address offset   0x6C
+	_VO uint32_t RCC_BDCR;     //- address offset   0x70
+	_VO uint32_t RCC_CSR;     //- address offset   0x74
+	_VO uint32_t Reserved_9;     //- address offset   0x78
+	_VO uint32_t Reserved_10;    // - address offset   0x7C
+	_VO uint32_t RCC_SSCGR;   //- address offset   0x80
+	_VO uint32_t RCC_PLLI2SCFGR;  //- address offset   0x84
 }RCC_RegDef_t;
 
 
