@@ -9,6 +9,7 @@
 
 int main()
 {
+	GPIOA_PCLK_EN();
     for(;;);
 
 }
