@@ -14,6 +14,44 @@
 #define GPIO_PIN_SET        SET
 #define GPIO_PIN_RESET      RESET
 
+/*
+ *  @GPIO_PIN_MODES
+ *  GPIO pin possible modes
+ */
+
+#define GPIO_MODE_IN       (0)  /** Input mode  **/
+#define GPIO_MODE_OUT      (1)  /** Output mode **/
+#define GPIO_MODE_ALTFN    (2)  /** Alternate function mode **/
+#define GPIO_MODE_ANALOG   (3)  /** Analog mode **/
+#define GPIO_MODE_IT_FT    (4)  /** Falling edge **/
+#define GPIO_MODE_IT_RT    (5)  /** Rising edge **/
+#define GPIO_MODE_IT_RFT   (6)  /** Rising and Falling edge **/
+
+
+/*
+ *  GPIO pin possible output types
+ */
+#define GPIO_OP_TYPE_PP  (0)  /** Push Pull **/
+#define GPIO_OP_TYPE_OD  (1)  /** Open drain **/
+
+/*
+ *  @GPIO Pin Speed
+ *  GPIO pin possible output speed
+ */
+#define GPIO_SPEED_LOW    (0)
+#define GPIO_SPEED_MEDIUM (1)
+#define GPIO_SPEED_FAST   (2)
+#define GPIO_SPEED_HIGH   (3)
+
+/*
+ * GPIO pin pull and pull down configuration macros
+ *
+ */
+#define GPIO_NO_PUPD  (0)
+#define GPIO_PIN_PU   (1)
+#define GPIO_PIN_PD   (2)
+
+
 typedef struct
 {
   uint8_t gpio_pinNumber;
