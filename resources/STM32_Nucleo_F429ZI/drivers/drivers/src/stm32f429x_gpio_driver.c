@@ -140,13 +140,15 @@ void GPIO_Init(GPIO_Handle_t *pGPIOHandle)
    pGPIOHandle->pGPIOx->ospeedr &= ~(0x3 << ( 2 * pGPIOHandle->gpio_pinConfig.gpio_pinNumber));
    pGPIOHandle->pGPIOx->ospeedr |= temp;
 
-   //configure the pupd
+   //configure the pupd - internal - pull up, pull down resistor
    temp = pGPIOHandle->gpio_pinConfig.gpio_pinPuPdControl << ( 2 * pGPIOHandle->gpio_pinConfig.gpio_pinNumber);
    pGPIOHandle->pGPIOx->pupdr &= ~(0x3 << ( 2 * pGPIOHandle->gpio_pinConfig.gpio_pinNumber));
    pGPIOHandle->pGPIOx->pupdr |= temp;
 
    //configure the optype
-   temp = pGPIOHandle->gpio_pinConfig.gpio_opType << pGPIOHandle->gpio_pinConfig.gpio_pinNumber;
+   pGPIOHandle->pGPIOx->otyper |= pGPIOHandle->gpio_pinConfig.gpio_opType << pGPIOHandle->gpio_pinConfig.gpio_pinNumber;
+
+   //configure the speed
    pGPIOHandle->pGPIOx->ospeedr &= ~(0x1 << pGPIOHandle->gpio_pinConfig.gpio_pinNumber);
    pGPIOHandle->pGPIOx->ospeedr |= temp;
 
