@@ -8,8 +8,8 @@
 #include "stm32f429x.h"
 #include "stm32f429x_gpio_driver.h"
 
-#define __GPIO_OUTPUT_OPEN_DRAIN
-//#define __GPIO_OUTPUT_PUSH_PULL
+//#define __GPIO_OUTPUT_OPEN_DRAIN
+#define __GPIO_OUTPUT_PUSH_PULL
 
 
 //Toggle PB7 LED i.e. User Blue LED
