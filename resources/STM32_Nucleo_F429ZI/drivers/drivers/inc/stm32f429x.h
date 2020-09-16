@@ -208,6 +208,63 @@ typedef struct
 #define SPI3_PCLK_DI() (RCC->RCC_APB1ENR &= ~(1U <<15))
 
 
+#define GPIOA_REG_RESET()   do \
+                            { \
+	                          RCC->RCC_AHB1RSTR |= (0x1 << 0); \
+							  RCC->RCC_AHB1RSTR &= ~(0x1 << 0); \
+                            }while(0)
+
+
+#define GPIOB_REG_RESET()   do \
+                            { \
+	                          RCC->RCC_AHB1RSTR |= (0x1 << 1); \
+							  RCC->RCC_AHB1RSTR &= ~(0x1 << 1); \
+                            }while(0)
+
+
+#define GPIOC_REG_RESET()   do \
+                            { \
+	                          RCC->RCC_AHB1RSTR |= (0x1 << 2); \
+							  RCC->RCC_AHB1RSTR &= ~(0x1 << 2); \
+                            }while(0)
+
+#define GPIOD_REG_RESET()   do \
+                            { \
+	                          RCC->RCC_AHB1RSTR |= (0x1 << 3); \
+							  RCC->RCC_AHB1RSTR &= ~(0x1 << 3); \
+                            }while(0)
+
+#define GPIOE_REG_RESET()   do \
+                            { \
+	                          RCC->RCC_AHB1RSTR |= (0x1 << 4); \
+							  RCC->RCC_AHB1RSTR &= ~(0x1 << 4); \
+                            }while(0)
+
+#define GPIOF_REG_RESET()   do \
+                            { \
+	                          RCC->RCC_AHB1RSTR |= (0x1 << 5); \
+							  RCC->RCC_AHB1RSTR &= ~(0x1 << 5); \
+                            }while(0)
+
+#define GPIOG_REG_RESET()   do \
+                            { \
+	                          RCC->RCC_AHB1RSTR |= (0x1 << 6); \
+							  RCC->RCC_AHB1RSTR &= ~(0x1 << 6); \
+                            }while(0)
+
+#define GPIOH_REG_RESET()   do \
+                            { \
+	                          RCC->RCC_AHB1RSTR |= (0x1 << 7); \
+							  RCC->RCC_AHB1RSTR &= ~(0x1 << 7); \
+                            }while(0)
+
+#define GPIOI_REG_RESET()   do \
+                            { \
+	                          RCC->RCC_AHB1RSTR |= (0x1 << 8); \
+							  RCC->RCC_AHB1RSTR &= ~(0x1 << 8); \
+                            }while(0)
+
+
 /** general defines **/
 
 #define ENABLE  (1)
