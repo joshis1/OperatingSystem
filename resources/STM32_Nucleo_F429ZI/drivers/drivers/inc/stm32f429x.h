@@ -85,8 +85,23 @@
 #define UART7_BASEADDR         (0x40007800U)  // APB1 bus 
 #define UART8_BASEADDR         (0x40007C00U)  // APB1 bus 
 
+//Processor specific - ARM Cortex M4 - Generic user guide
+//NVIC - Interrupt Set enable register
+// Interrupt set enable register
+#define NVIC_ISER0             (0xE000E100U)  // 0 to 31
+#define NVIC_ISER1             (0xE000E100U + 0x04) //32 to 63
+#define NVIC_ISER2             (0xE000E100U + 0x08) // 64 to 95
 
-// Reset and Clock Control
+
+//Interrupt clear enable register
+#define NVIC_ICER0             (0XE000E180U)
+#define NVIC_ICER1             (0XE000E180U + 0x04) //32 to 63
+#define NVIC_ICER2             (0XE000E180U + 0x08) // 64 to 95
+
+//Interrupt priority register
+#define NVIC_IPR0              (0xE000E400U)
+
+//Reset and Clock Control
 #define RCC_BASEADDR           (0x40023800U) // AHB1 bus 
 
 //System configuration and controller
@@ -167,6 +182,35 @@ typedef struct
 
 #define RCC   ((RCC_RegDef_t *)RCC_BASEADDR)
 
+/** Table 41. SYSCFG register map and reset values **/
+typedef struct
+{
+	_VO uint32_t SYSCFG_MEMRMP;    //     - address offset   0x00
+	_VO uint32_t SYSCFG_PMC;   // -  address offset   0x04
+	_VO uint32_t SYSCFG_EXTICR[4];     //- address offset   0x08
+	_VO uint32_t Reserved_1;     //- address offset   0x18
+	_VO uint32_t Reserved_2;     //- address offset   0x1C
+	_VO uint32_t SYSCFG_CMPCR;     //- address offset   0x20
+}SYSCFG_RegDef_t;
+
+
+#define SYSCFG ((SYSCFG_RegDef_t *)SYSCFG_BASEADDR)
+
+/** Table 34. RCC register map and reset values **/
+typedef struct
+{
+	_VO uint32_t EXTI_IMR;    //     - address offset   0x00
+	_VO uint32_t EXTI_EMR;   // -  address offset   0x04
+	_VO uint32_t EXTI_RTSR;     //- address offset   0x08
+	_VO uint32_t EXTI_FTSR;    //- address offset   0x0C
+	_VO uint32_t EXTI_SWIER;      //- address offset   0x10
+	_VO uint32_t EXTI_PR;      //- address offset   0x14
+}EXTI_RegDef_t;
+
+
+#define EXTI ((EXTI_RegDef_t *)EXTI_BASEADDR)
+
+
 
 #define GPIOA_PCLK_EN() (RCC->RCC_AHB1ENR |= (1U <<0))
 #define GPIOB_PCLK_EN() (RCC->RCC_AHB1ENR |= (1U <<1))
@@ -206,6 +250,11 @@ typedef struct
 #define SPI1_PCLK_DI() (RCC->RCC_APB2ENR &= ~(1U <<12))  //APB2 -- connected to
 #define SPI2_PCLK_DI() (RCC->RCC_APB1ENR &= ~(1U <<14))
 #define SPI3_PCLK_DI() (RCC->RCC_APB1ENR &= ~(1U <<15))
+
+
+// Page
+#define SYSCFG_PCLK_EN() (RCC->RCC_APB2ENR |= (1U <<14))  //APB2 -
+#define SYSCFG_PCLK_DI() (RCC->RCC_APB2ENR &= ~(1U <<14))
 
 
 #define GPIOA_REG_RESET()   do \
@@ -272,6 +321,15 @@ typedef struct
 #define SET     ENABLE
 #define RESET   DISABLE
 
+
+/** Table 62. Vector table for STM32F42xxx **/
+#define IRQ_EXTI0           (6)
+#define IRQ_EXTI1           (7)
+#define IRQ_EXTI2           (8)
+#define IRQ_EXTI3           (9)
+#define IRQ_EXTI4           (10)
+#define IRQ_EXTI9_5         (23)
+#define IRQ_EXTI15_10       (40)
 
 
 #endif /* STM32F429X_H_ */

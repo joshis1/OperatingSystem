@@ -16,7 +16,7 @@ void led_init()
 	GPIOB->MODER &= ~(0x3 << 14);  //PB7 -- Blue LED
 	GPIOB->MODER |= (0x1 << 14);  //01b is output mode
 
-	GPIOB->MODER &= ~(0x3 << 28);  //PB14 -- Blue LED
+	GPIOB->MODER &= ~(0x3 << 28);  //PB14 -- Red LED
     GPIOB->MODER |= (0x1 << 28);  //01b is output mode
 
 }

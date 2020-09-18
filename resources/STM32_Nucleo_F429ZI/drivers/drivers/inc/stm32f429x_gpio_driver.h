@@ -52,6 +52,17 @@
 #define GPIO_PIN_PD   (2)
 
 
+#define GPIO_BASEADDR_TO_CODE(x) (x == GPIOA) ? 0 : \
+		                         (x == GPIOB) ? 1 : \
+		                         (x == GPIOC) ? 2 : \
+		                         (x == GPIOD) ? 3 : \
+		                         (x == GPIOE) ? 4 : \
+		                         (x == GPIOF) ? 5 : \
+		                         (x == GPIOG) ? 6 : \
+		                         (x == GPIOH) ? 7 : \
+		                         (x == GPIOI) ? 8 : 0
+
+
 typedef struct
 {
   uint8_t gpio_pinNumber;
@@ -67,6 +78,7 @@ typedef struct
 	GPIO_RegDef_t *pGPIOx;
 	GPIO_PinConfig_t gpio_pinConfig;
 }GPIO_Handle_t;
+
 
 
 /** APIs **/
@@ -87,8 +99,9 @@ void GPIO_WriteToOutputPort(GPIO_RegDef_t *pGPIOx, uint16_t val);
 void GPIO_ToggleOutputPin(GPIO_RegDef_t *pGPIOx,  uint8_t pinNumber);
 
 
-/**IRQ handling **/
-void GPIO_IRQConfig(uint8_t irqNumber, uint8_t irqPriority, uint8_t EnorDi); //interrupt configuration
+/**IRQ handling  - NVIC side i.e. Processor side **/
+void GPIO_IRQInterruptConfig(uint8_t irqNumber, uint8_t EnorDi); //interrupt configuration
+void GPIO_IRQPriorityConfig(uint8_t irqNumber, uint16_t priority); //interrupt priority configuration
 void GPIO_IRQHandling(uint8_t pinNumber);
 
 

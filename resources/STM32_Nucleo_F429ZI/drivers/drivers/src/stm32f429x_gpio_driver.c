@@ -120,57 +120,86 @@ void GPIO_PeriClockControl(GPIO_RegDef_t *pGPIOx, uint8_t EnOrDi)
  */
 void GPIO_Init(GPIO_Handle_t *pGPIOHandle)
 {
-   uint32_t temp = 0;
-   uint8_t pin_val;
+	uint32_t temp = 0;
+	uint8_t pin_val;
+	uint32_t temp1;
 
-   if(pGPIOHandle->gpio_pinConfig.gpio_pinMode <= GPIO_MODE_ANALOG)
-   {
-	   //setting mode
-	   temp = pGPIOHandle->gpio_pinConfig.gpio_pinMode << ( 2 * pGPIOHandle->gpio_pinConfig.gpio_pinNumber);
-	   pGPIOHandle->pGPIOx->moder &= ~(0x3 << (2 * pGPIOHandle->gpio_pinConfig.gpio_pinNumber));
-	   pGPIOHandle->pGPIOx->moder |= temp;
-   }
-   else
-   {
-	   //Interrupt mode.
-   }
+	if(pGPIOHandle->gpio_pinConfig.gpio_pinMode <= GPIO_MODE_ANALOG)
+	{
+		//setting mode
+		temp = pGPIOHandle->gpio_pinConfig.gpio_pinMode << ( 2 * pGPIOHandle->gpio_pinConfig.gpio_pinNumber);
+		pGPIOHandle->pGPIOx->moder &= ~(0x3 << (2 * pGPIOHandle->gpio_pinConfig.gpio_pinNumber));
+		pGPIOHandle->pGPIOx->moder |= temp;
+	}
+	else //Interrupt mode.
+	{
+		/** Peripheral side interrupt configuration **/
+		// Falling edge trigger.
+		if(pGPIOHandle->gpio_pinConfig.gpio_pinMode  == GPIO_MODE_IT_FT )
+		{
+			EXTI->EXTI_FTSR |= (0x1U << pGPIOHandle->gpio_pinConfig.gpio_pinNumber);
+			EXTI->EXTI_RTSR &= ~(0x1U << pGPIOHandle->gpio_pinConfig.gpio_pinNumber);
+		}
+		//Rising edge trigger
+		else if(pGPIOHandle->gpio_pinConfig.gpio_pinMode  == GPIO_MODE_IT_RT)
+		{
+			EXTI->EXTI_RTSR |= (0x1U << pGPIOHandle->gpio_pinConfig.gpio_pinNumber);
+			EXTI->EXTI_FTSR &= ~(0x1U << pGPIOHandle->gpio_pinConfig.gpio_pinNumber);
+		}
+		// Falling and Rising Edge trigger interrupt
+		else if(pGPIOHandle->gpio_pinConfig.gpio_pinMode  == GPIO_MODE_IT_RFT )
+		{
+			EXTI->EXTI_FTSR |= (0x1U << pGPIOHandle->gpio_pinConfig.gpio_pinNumber);
+			EXTI->EXTI_RTSR |= (0x1U << pGPIOHandle->gpio_pinConfig.gpio_pinNumber);
+		}
 
-   // configure the speed
-   temp = pGPIOHandle->gpio_pinConfig.gpio_pinSpeed << ( 2 * pGPIOHandle->gpio_pinConfig.gpio_pinNumber);
-   pGPIOHandle->pGPIOx->ospeedr &= ~(0x3 << ( 2 * pGPIOHandle->gpio_pinConfig.gpio_pinNumber));
-   pGPIOHandle->pGPIOx->ospeedr |= temp;
+		/** SYSCFG CLK Enable **/
+		temp = pGPIOHandle->gpio_pinConfig.gpio_pinNumber / 4;
+		temp1 = pGPIOHandle->gpio_pinConfig.gpio_pinNumber % 4;
+		SYSCFG_PCLK_EN();
+		//Enabled the EXTI-line now.
+		SYSCFG->SYSCFG_EXTICR[temp] &= ~(0xF << (temp1 *4)); //clear and then enable
+		SYSCFG->SYSCFG_EXTICR[temp] |= (GPIO_BASEADDR_TO_CODE(pGPIOHandle->pGPIOx) << (temp1 * 4));
+		// unmask the interrupt i.e. enable it.
+		EXTI->EXTI_IMR |= (0x1U << pGPIOHandle->gpio_pinConfig.gpio_pinNumber);
+		/** Peripheral side interrupt configuration Ends here **/
+	}
 
-   //configure the pupd - internal - pull up, pull down resistor
-   temp = pGPIOHandle->gpio_pinConfig.gpio_pinPuPdControl << ( 2 * pGPIOHandle->gpio_pinConfig.gpio_pinNumber);
-   pGPIOHandle->pGPIOx->pupdr &= ~(0x3 << ( 2 * pGPIOHandle->gpio_pinConfig.gpio_pinNumber));
-   pGPIOHandle->pGPIOx->pupdr |= temp;
+	// configure the speed
+	temp = pGPIOHandle->gpio_pinConfig.gpio_pinSpeed << ( 2 * pGPIOHandle->gpio_pinConfig.gpio_pinNumber);
+	pGPIOHandle->pGPIOx->ospeedr &= ~(0x3 << ( 2 * pGPIOHandle->gpio_pinConfig.gpio_pinNumber));
+	pGPIOHandle->pGPIOx->ospeedr |= temp;
 
-   //configure the optype
-   pGPIOHandle->pGPIOx->otyper |= pGPIOHandle->gpio_pinConfig.gpio_opType << pGPIOHandle->gpio_pinConfig.gpio_pinNumber;
+	//configure the pupd - internal - pull up, pull down resistor
+	temp = pGPIOHandle->gpio_pinConfig.gpio_pinPuPdControl << ( 2 * pGPIOHandle->gpio_pinConfig.gpio_pinNumber);
+	pGPIOHandle->pGPIOx->pupdr &= ~(0x3 << ( 2 * pGPIOHandle->gpio_pinConfig.gpio_pinNumber));
+	pGPIOHandle->pGPIOx->pupdr |= temp;
 
-   //configure the speed
-   pGPIOHandle->pGPIOx->ospeedr &= ~(0x1 << pGPIOHandle->gpio_pinConfig.gpio_pinNumber);
-   pGPIOHandle->pGPIOx->ospeedr |= temp;
+	//configure the optype
+	if(pGPIOHandle->gpio_pinConfig.gpio_pinMode == GPIO_MODE_OUT)
+	{
+		pGPIOHandle->pGPIOx->otyper |= pGPIOHandle->gpio_pinConfig.gpio_opType << pGPIOHandle->gpio_pinConfig.gpio_pinNumber;
+	}
 
-   //configure the alt func
-   if(pGPIOHandle->gpio_pinConfig.gpio_pinMode == GPIO_MODE_ALTFN)
-   {
-	   temp = pGPIOHandle->gpio_pinConfig.gpio_pinAltFuncMode; // 4 bit value
+	//configure the alt func
+	if(pGPIOHandle->gpio_pinConfig.gpio_pinMode == GPIO_MODE_ALTFN)
+	{
+		temp = pGPIOHandle->gpio_pinConfig.gpio_pinAltFuncMode; // 4 bit value
 
-	   if(pGPIOHandle->gpio_pinConfig.gpio_pinNumber < 8)  /** 0 to 7 AF - low register */
-	   {
-		   pGPIOHandle->pGPIOx->afrl &= ~(0xF << (pGPIOHandle->gpio_pinConfig.gpio_pinNumber * 4));
-		   pGPIOHandle->pGPIOx->afrl |= (temp << (pGPIOHandle->gpio_pinConfig.gpio_pinNumber * 4));
+		if(pGPIOHandle->gpio_pinConfig.gpio_pinNumber < 8)  /** 0 to 7 AF - low register */
+		{
+			pGPIOHandle->pGPIOx->afrl &= ~(0xF << (pGPIOHandle->gpio_pinConfig.gpio_pinNumber * 4));
+			pGPIOHandle->pGPIOx->afrl |= (temp << (pGPIOHandle->gpio_pinConfig.gpio_pinNumber * 4));
 
-	   }
-	   else   /**  AF High register. **/
-	   {
-		   pin_val = pGPIOHandle->gpio_pinConfig.gpio_pinNumber % 8;
-		   pGPIOHandle->pGPIOx->afrh &= ~(0xF << (pin_val * 4));
-		   pGPIOHandle->pGPIOx->afrh |= (temp << (pin_val * 4));
-	   }
+		}
+		else   /**  AF High register. **/
+		{
+			pin_val = pGPIOHandle->gpio_pinConfig.gpio_pinNumber % 8;
+			pGPIOHandle->pGPIOx->afrh &= ~(0xF << (pin_val * 4));
+			pGPIOHandle->pGPIOx->afrh |= (temp << (pin_val * 4));
+		}
 
-   }
+	}
 
 }
 
@@ -336,7 +365,7 @@ void GPIO_ToggleOutputPin(GPIO_RegDef_t *pGPIOx,  uint8_t pinNumber)
 }
 
 /*********************************************************************
- * @fn      		  - GPIO_IRQConfig
+ * @fn      		  - GPIO_IRQInterruptConfig
  *
  * @brief             -
  *
@@ -348,9 +377,85 @@ void GPIO_ToggleOutputPin(GPIO_RegDef_t *pGPIOx,  uint8_t pinNumber)
  *
  * @Note              -  none
  */
-void GPIO_IRQConfig(uint8_t irqNumber, uint8_t irqPriority, uint8_t EnorDi)
+void GPIO_IRQInterruptConfig(uint8_t irqNumber, uint8_t EnorDi)
 {
+	uint8_t bit_pos = 0;
+	bit_pos = irqNumber % 32;
+	volatile uint32_t *nvic_reg;
 
+	if(EnorDi == ENABLE)
+	{
+		if(irqNumber >= 0 && irqNumber < 32)
+		{
+			nvic_reg = (uint32_t *)NVIC_ISER0;
+			*nvic_reg  = (0x1U << bit_pos);
+		}
+		else if(irqNumber >= 32 && irqNumber < 64)
+		{
+			nvic_reg = (uint32_t *)NVIC_ISER1;
+			*nvic_reg  = (0x1U << bit_pos);
+
+		}
+		else if(irqNumber >= 64 && irqNumber < 96)
+		{
+			nvic_reg = (uint32_t *)NVIC_ISER2;
+			*nvic_reg  = (0x1U << bit_pos);
+		}
+		else
+		{
+			//probably shouldn't reach here.
+		}
+	}
+
+	else
+	{
+		if(irqNumber >= 0 && irqNumber < 32)
+		{
+			nvic_reg = (uint32_t *)NVIC_ICER0;
+			*nvic_reg  = (0x1U << bit_pos);
+		}
+		else if(irqNumber >= 32 && irqNumber < 64)
+		{
+			nvic_reg = (uint32_t *)NVIC_ICER1;
+			*nvic_reg  = (0x1U << bit_pos);
+		}
+		else if(irqNumber >= 64 && irqNumber < 96)
+		{
+			nvic_reg = (uint32_t *)NVIC_ICER2;
+			*nvic_reg  = (0x1U << bit_pos);
+		}
+		else
+		{
+			//probably shouldn't reach here.
+		}
+	}
+}
+
+/*********************************************************************
+ * @fn      		  - GPIO_IRQPriorityConfig
+ *
+ * @brief             -
+ *
+ * @param[in]         -
+ * @param[in]         -
+ * @param[in]         -
+ *
+ * @return            -  none
+ *
+ * @Note              -  none
+ */
+void GPIO_IRQPriorityConfig(uint8_t irqNumber, uint16_t priority)
+{
+   uint8_t nvic_priority_reg_offset = 0;
+   uint8_t bit_pos = 0;
+   volatile uint32_t *nvic_register;
+   //each PR can fit 4 IRQNumber
+   nvic_priority_reg_offset = irqNumber / 4;
+   nvic_register = (uint32_t *)(NVIC_IPR0 + (nvic_priority_reg_offset * 4));
+   bit_pos = irqNumber % 4;
+   //lower 4 bits of priority are not implemented in STM32
+   // each priority value takes 8 bits
+   *nvic_register = (priority << ((bit_pos * 8) + 4));
 }
 
 /*********************************************************************
@@ -368,6 +473,10 @@ void GPIO_IRQConfig(uint8_t irqNumber, uint8_t irqPriority, uint8_t EnorDi)
  */
 void GPIO_IRQHandling(uint8_t pinNumber)
 {
-
+	// clear the pending bit if the IRQ pending bit is set.
+	if( EXTI->EXTI_PR & (0x1U << pinNumber))
+	{
+		EXTI->EXTI_PR |= (0x1U << pinNumber);
+	}
 }
 
