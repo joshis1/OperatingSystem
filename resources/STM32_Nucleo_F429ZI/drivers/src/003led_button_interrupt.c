@@ -23,6 +23,10 @@ void delay(uint32_t delay_val)
 int main()
 {
 	GPIO_Handle_t  gpioLed, gpioButton;
+	memset(&gpioLed, 0, sizeof(gpioLed));
+	memset(&gpioButton, 0, sizeof(gpioButton));
+
+
 	gpioLed.pGPIOx = GPIOB; //Port B
 
 	gpioLed.gpio_pinConfig.gpio_pinMode = GPIO_MODE_OUT; // output mode

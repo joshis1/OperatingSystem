@@ -154,12 +154,14 @@ void GPIO_Init(GPIO_Handle_t *pGPIOHandle)
 		}
 
 		/** SYSCFG CLK Enable **/
+		uint8_t port;
 		temp = pGPIOHandle->gpio_pinConfig.gpio_pinNumber / 4;
 		temp1 = pGPIOHandle->gpio_pinConfig.gpio_pinNumber % 4;
+		port = GPIO_BASEADDR_TO_CODE(pGPIOHandle->pGPIOx);
 		SYSCFG_PCLK_EN();
 		//Enabled the EXTI-line now.
 		SYSCFG->SYSCFG_EXTICR[temp] &= ~(0xF << (temp1 *4)); //clear and then enable
-		SYSCFG->SYSCFG_EXTICR[temp] |= (GPIO_BASEADDR_TO_CODE(pGPIOHandle->pGPIOx) << (temp1 * 4));
+		SYSCFG->SYSCFG_EXTICR[temp] |= ( port << (temp1 * 4));
 		// unmask the interrupt i.e. enable it.
 		EXTI->EXTI_IMR |= (0x1U << pGPIOHandle->gpio_pinConfig.gpio_pinNumber);
 		/** Peripheral side interrupt configuration Ends here **/
