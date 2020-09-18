@@ -165,11 +165,6 @@ void GPIO_Init(GPIO_Handle_t *pGPIOHandle)
 		/** Peripheral side interrupt configuration Ends here **/
 	}
 
-	// configure the speed
-	temp = pGPIOHandle->gpio_pinConfig.gpio_pinSpeed << ( 2 * pGPIOHandle->gpio_pinConfig.gpio_pinNumber);
-	pGPIOHandle->pGPIOx->ospeedr &= ~(0x3 << ( 2 * pGPIOHandle->gpio_pinConfig.gpio_pinNumber));
-	pGPIOHandle->pGPIOx->ospeedr |= temp;
-
 	//configure the pupd - internal - pull up, pull down resistor
 	temp = pGPIOHandle->gpio_pinConfig.gpio_pinPuPdControl << ( 2 * pGPIOHandle->gpio_pinConfig.gpio_pinNumber);
 	pGPIOHandle->pGPIOx->pupdr &= ~(0x3 << ( 2 * pGPIOHandle->gpio_pinConfig.gpio_pinNumber));
@@ -179,6 +174,12 @@ void GPIO_Init(GPIO_Handle_t *pGPIOHandle)
 	if(pGPIOHandle->gpio_pinConfig.gpio_pinMode == GPIO_MODE_OUT)
 	{
 		pGPIOHandle->pGPIOx->otyper |= pGPIOHandle->gpio_pinConfig.gpio_opType << pGPIOHandle->gpio_pinConfig.gpio_pinNumber;
+
+		// configure the speed
+		temp = pGPIOHandle->gpio_pinConfig.gpio_pinSpeed << ( 2 * pGPIOHandle->gpio_pinConfig.gpio_pinNumber);
+		pGPIOHandle->pGPIOx->ospeedr &= ~(0x3 << ( 2 * pGPIOHandle->gpio_pinConfig.gpio_pinNumber));
+		pGPIOHandle->pGPIOx->ospeedr |= temp;
+
 	}
 
 	//configure the alt func
