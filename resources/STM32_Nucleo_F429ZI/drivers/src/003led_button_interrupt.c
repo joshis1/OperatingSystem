@@ -62,6 +62,7 @@ int main()
 
 void EXTI15_10_IRQHandler(void)
 {
+	// due to button debouncing we add this delay otherwise we will get more number of interrupts.
 	delay(250 * 1000);
 	GPIO_IRQHandling(13);  //EXTI - pin number
 	GPIO_ToggleOutputPin(GPIOB,7);
