@@ -391,18 +391,18 @@ void GPIO_IRQInterruptConfig(uint8_t irqNumber, uint8_t EnorDi)
 		if(irqNumber >= 0 && irqNumber < 32)
 		{
 			nvic_reg = (uint32_t *)NVIC_ISER0;
-			*nvic_reg  = (0x1U << bit_pos);
+			*nvic_reg  |= (0x1U << bit_pos);
 		}
 		else if(irqNumber >= 32 && irqNumber < 64)
 		{
 			nvic_reg = (uint32_t *)NVIC_ISER1;
-			*nvic_reg  = (0x1U << bit_pos);
+			*nvic_reg  |= (0x1U << bit_pos);
 
 		}
 		else if(irqNumber >= 64 && irqNumber < 96)
 		{
 			nvic_reg = (uint32_t *)NVIC_ISER2;
-			*nvic_reg  = (0x1U << bit_pos);
+			*nvic_reg  |= (0x1U << bit_pos);
 		}
 		else
 		{
@@ -415,17 +415,17 @@ void GPIO_IRQInterruptConfig(uint8_t irqNumber, uint8_t EnorDi)
 		if(irqNumber >= 0 && irqNumber < 32)
 		{
 			nvic_reg = (uint32_t *)NVIC_ICER0;
-			*nvic_reg  = (0x1U << bit_pos);
+			*nvic_reg  |= (0x1U << bit_pos);
 		}
 		else if(irqNumber >= 32 && irqNumber < 64)
 		{
 			nvic_reg = (uint32_t *)NVIC_ICER1;
-			*nvic_reg  = (0x1U << bit_pos);
+			*nvic_reg  |= (0x1U << bit_pos);
 		}
 		else if(irqNumber >= 64 && irqNumber < 96)
 		{
 			nvic_reg = (uint32_t *)NVIC_ICER2;
-			*nvic_reg  = (0x1U << bit_pos);
+			*nvic_reg  |= (0x1U << bit_pos);
 		}
 		else
 		{
