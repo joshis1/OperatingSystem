@@ -133,6 +133,8 @@ void GPIO_Init(GPIO_Handle_t *pGPIOHandle)
 	}
 	else //Interrupt mode.
 	{
+		//Input mode - interrupt
+	    pGPIOHandle->pGPIOx->moder &= ~(0x3 << (2 * pGPIOHandle->gpio_pinConfig.gpio_pinNumber));
 		/** Peripheral side interrupt configuration **/
 		// Falling edge trigger.
 		if(pGPIOHandle->gpio_pinConfig.gpio_pinMode  == GPIO_MODE_IT_FT )
@@ -173,7 +175,7 @@ void GPIO_Init(GPIO_Handle_t *pGPIOHandle)
 	pGPIOHandle->pGPIOx->pupdr |= temp;
 
 	//configure the optype
-	if(pGPIOHandle->gpio_pinConfig.gpio_pinMode == GPIO_MODE_OUT)
+	if( pGPIOHandle->gpio_pinConfig.gpio_pinMode == GPIO_MODE_OUT)
 	{
 		pGPIOHandle->pGPIOx->otyper |= pGPIOHandle->gpio_pinConfig.gpio_opType << pGPIOHandle->gpio_pinConfig.gpio_pinNumber;
 
@@ -181,9 +183,7 @@ void GPIO_Init(GPIO_Handle_t *pGPIOHandle)
 		temp = pGPIOHandle->gpio_pinConfig.gpio_pinSpeed << ( 2 * pGPIOHandle->gpio_pinConfig.gpio_pinNumber);
 		pGPIOHandle->pGPIOx->ospeedr &= ~(0x3 << ( 2 * pGPIOHandle->gpio_pinConfig.gpio_pinNumber));
 		pGPIOHandle->pGPIOx->ospeedr |= temp;
-
 	}
-
 	//configure the alt func
 	if(pGPIOHandle->gpio_pinConfig.gpio_pinMode == GPIO_MODE_ALTFN)
 	{
