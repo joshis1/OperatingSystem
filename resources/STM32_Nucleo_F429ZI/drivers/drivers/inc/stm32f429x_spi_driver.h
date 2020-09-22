@@ -46,7 +46,7 @@ typedef enum
 
 
 /*
- * @busConfig
+ * @dff
  */
 typedef enum
 {
@@ -111,6 +111,10 @@ void SPI_DeInit(SPI_RegDef_t *pSPIx);  // Use RCC - reset register RCC_AHB1RSTR
 
 void SPI_SendData(SPI_RegDef_t *pSPIx, uint8_t *pTxBuffer, uint32_t len);
 void SPI_ReceiveData(SPI_RegDef_t *pSPIx, uint8_t *pRxBuffer, uint32_t len);
+
+void SPI_SSIControl(SPI_RegDef_t *pSPIx, uint8_t EnOrDi);
+
+void SPI_PeriControl(SPI_RegDef_t *pSPIx, uint8_t EnOrDi);
 
 
 /** SPI CR1 registers - SPI control register 1 (SPI_CR1) **/

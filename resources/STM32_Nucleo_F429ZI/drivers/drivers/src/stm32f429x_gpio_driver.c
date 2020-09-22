@@ -175,10 +175,11 @@ void GPIO_Init(GPIO_Handle_t *pGPIOHandle)
 	pGPIOHandle->pGPIOx->pupdr |= temp;
 
 	//configure the optype
-	if( pGPIOHandle->gpio_pinConfig.gpio_pinMode == GPIO_MODE_OUT)
-	{
-		pGPIOHandle->pGPIOx->otyper |= pGPIOHandle->gpio_pinConfig.gpio_opType << pGPIOHandle->gpio_pinConfig.gpio_pinNumber;
 
+	pGPIOHandle->pGPIOx->otyper |= pGPIOHandle->gpio_pinConfig.gpio_opType << pGPIOHandle->gpio_pinConfig.gpio_pinNumber;
+
+	if(pGPIOHandle->gpio_pinConfig.gpio_pinMode == GPIO_MODE_OUT)
+	{
 		// configure the speed
 		temp = pGPIOHandle->gpio_pinConfig.gpio_pinSpeed << ( 2 * pGPIOHandle->gpio_pinConfig.gpio_pinNumber);
 		pGPIOHandle->pGPIOx->ospeedr &= ~(0x3 << ( 2 * pGPIOHandle->gpio_pinConfig.gpio_pinNumber));
