@@ -331,5 +331,29 @@ typedef struct
 #define IRQ_EXTI9_5         (23)
 #define IRQ_EXTI15_10       (40)
 
+/** SPI Handling **/
+
+/**Table 129. SPI register map **/
+typedef struct
+{
+	_VO uint32_t SPI_CR1;    //     - address offset   0x00
+	_VO uint32_t SPI_CR2;   // -  address offset   0x04
+	_VO uint32_t SPI_SR;     //- address offset   0x08
+	_VO uint32_t SPI_DR;    //- address offset   0x0C
+	_VO uint32_t SPI_CRCPR;      //- address offset   0x10
+	_VO uint32_t SPI_RXCRCR;      //- address offset   0x14
+	_VO uint32_t SPI_TXCRCR;      //- address offset   0x18
+	_VO uint32_t SPI_I2SCFGR;      //- address offset   0x1C
+	_VO uint32_t SPI_I2SPR;      //- address offset   0x20
+}SPI_RegDef_t;
+
+#define SPI1   ((SPI_RegDef_t *)SPI1_BASEADDR)
+#define SPI2   ((SPI_RegDef_t *)SPI2_BASEADDR)
+#define SPI3   ((SPI_RegDef_t *)SPI3_BASEADDR)
+#define SPI4   ((SPI_RegDef_t *)SPI4_BASEADDR)
+#define SPI5   ((SPI_RegDef_t *)SPI5_BASEADDR)
+#define SPI6   ((SPI_RegDef_t *)SPI6_BASEADDR)
+
+
 
 #endif /* STM32F429X_H_ */
