@@ -7,6 +7,7 @@
 
 #include "stm32f429x.h"
 #include "stm32f429x_gpio_driver.h"
+#include <string.h>
 
 
 //Toggle PB7 LED i.e. User Blue LED when the user button is pressed.
