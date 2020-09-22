@@ -100,6 +100,8 @@ int main()
 
 	SPI_SendData(SPI2, (uint8_t *)user_data, len);  //data send here.
 
+	SPI_PeriControl(SPI2, DISABLE); // After SPI communication disable the SPI
+
 	while(1)
 	{
 		//forever
