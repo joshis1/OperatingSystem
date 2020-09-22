@@ -100,12 +100,55 @@ void SPI_PeriControl(SPI_RegDef_t *pSPIx, uint8_t EnOrDi)
 	}
 }
 
-void SPI_SendData(SPI_RegDef_t *pSPIx, uint8_t *pTxBuffer, uint32_t Len)
+uint8_t SPI_GetFlagStatus(SPI_RegDef_t *pSPIx, uint8_t flag)
+{
+	if(pSPIx->SPI_SR & flag)
+	{
+		return 1;
+	}
+
+	return 0;
+}
+
+void SPI_SendData(SPI_RegDef_t *pSPIx, uint8_t *pTxBuffer, uint32_t len)
+{
+	while( len > 0)
+	{
+		while(!(SPI_GetFlagStatus(pSPIx, SPI_SR_TXE))); //Wait until Tx buffer is not empty
+		if(pSPIx->SPI_CR1 & (0x1 << SPI_CR1_DFF))
+		{
+			//16-bits i.e. 2 bytes are written.
+			pSPIx->SPI_DR = *(uint16_t *)pTxBuffer;
+			len--;
+			len--;
+			(uint16_t *)pTxBuffer++;
+		}
+		else
+		{
+			// 8-bits i.e. 1 byte is written
+			pSPIx->SPI_DR = *pTxBuffer;
+			len--;
+			pTxBuffer++;
+		}
+	}
+}
+
+void SPI_ReceiveData(SPI_RegDef_t *pSPIx, uint8_t *pRxBuffer, uint32_t len)
 {
 
 }
 
-void SPI_ReceiveData(SPI_RegDef_t *pSPIx, uint8_t *pRxBuffer, uint32_t Len)
+/*
+ *  Internal Slave Select -only useful if Software Select Management is used.
+ */
+void SPI_SSIControl(SPI_RegDef_t *pSPIx, uint8_t EnOrDi)
 {
-
+	if( EnOrDi == ENABLE)
+	{
+		pSPIx->SPI_CR1 |= (0x1 << SPI_CR1_SSI);
+	}
+	else
+	{
+		pSPIx->SPI_CR1 &= ~(0x1 << SPI_CR1_SSI);
+	}
 }

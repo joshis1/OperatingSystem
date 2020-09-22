@@ -109,8 +109,8 @@ void SPI_PeriClockControl(SPI_RegDef_t *pSPIx, uint8_t EnOrDi);
 void SPI_Init(SPI_Handle_t *pSPIHandle);  // Initialize SPI
 void SPI_DeInit(SPI_RegDef_t *pSPIx);  // Use RCC - reset register RCC_AHB1RSTR
 
-void SPI_SendData(SPI_RegDef_t *pSPIx, uint8_t *pTxBuffer, uint32_t Len);
-void SPI_ReceiveData(SPI_RegDef_t *pSPIx, uint8_t *pRxBuffer, uint32_t Len);
+void SPI_SendData(SPI_RegDef_t *pSPIx, uint8_t *pTxBuffer, uint32_t len);
+void SPI_ReceiveData(SPI_RegDef_t *pSPIx, uint8_t *pRxBuffer, uint32_t len);
 
 
 /** SPI CR1 registers - SPI control register 1 (SPI_CR1) **/
