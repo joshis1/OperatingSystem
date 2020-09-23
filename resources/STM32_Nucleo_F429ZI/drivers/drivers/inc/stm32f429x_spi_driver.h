@@ -116,6 +116,8 @@ void SPI_SSIControl(SPI_RegDef_t *pSPIx, uint8_t EnOrDi);
 
 void SPI_PeriControl(SPI_RegDef_t *pSPIx, uint8_t EnOrDi);
 
+void SPI_SSOEControl(SPI_RegDef_t *pSPIx, uint8_t EnOrDi);
+
 
 /** SPI CR1 registers - SPI control register 1 (SPI_CR1) **/
 #define SPI_CR1_CPHA      (0)

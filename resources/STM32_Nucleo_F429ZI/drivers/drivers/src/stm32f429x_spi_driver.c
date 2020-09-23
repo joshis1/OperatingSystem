@@ -152,3 +152,22 @@ void SPI_SSIControl(SPI_RegDef_t *pSPIx, uint8_t EnOrDi)
 		pSPIx->SPI_CR1 &= ~(0x1 << SPI_CR1_SSI);
 	}
 }
+
+/*
+ *  Hardware Slave Select -only useful if Software Select Management is 0 i.e. hardware based management.
+ *  Used only when the MCU is in the master mode.
+ *  the NSS pin will be 0 whenever the SPE bit is enabled from the Master - automatically.
+ *  Once the SPE bit is 0 then the NSS will be held high and the Slave will be deselect.
+ */
+void SPI_SSOEControl(SPI_RegDef_t *pSPIx, uint8_t EnOrDi)
+{
+	if( EnOrDi == ENABLE)
+	{
+		pSPIx->SPI_CR2 |= (0x1 << SPI_CR2_SSOE);
+	}
+	else
+	{
+		pSPIx->SPI_CR2 &= ~(0x1 << SPI_CR2_SSOE);
+	}
+}
+
