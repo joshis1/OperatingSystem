@@ -118,6 +118,8 @@ void SPI_PeriControl(SPI_RegDef_t *pSPIx, uint8_t EnOrDi);
 
 void SPI_SSOEControl(SPI_RegDef_t *pSPIx, uint8_t EnOrDi);
 
+uint8_t SPI_GetFlagStatus(SPI_RegDef_t *pSPIx, uint8_t flag);
+
 
 /** SPI CR1 registers - SPI control register 1 (SPI_CR1) **/
 #define SPI_CR1_CPHA      (0)

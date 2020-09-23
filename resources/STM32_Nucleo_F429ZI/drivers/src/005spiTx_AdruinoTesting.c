@@ -35,7 +35,7 @@ void gpio_spi_inits()
 	gpioB12_nss.gpio_pinConfig.gpio_pinMode = GPIO_MODE_ALTFN;
 	gpioB12_nss.gpio_pinConfig.gpio_pinAltFuncMode = 5;
 	gpioB12_nss.gpio_pinConfig.gpio_pinNumber = 12;
-	gpioB12_nss.gpio_pinConfig.gpio_pinPuPdControl = GPIO_NO_PUPD;
+	gpioB12_nss.gpio_pinConfig.gpio_pinPuPdControl = GPIO_PIN_PU;
 	gpioB12_nss.gpio_pinConfig.gpio_opType = GPIO_OP_TYPE_PP;
 	GPIO_Init(&gpioB12_nss);
 
@@ -43,7 +43,7 @@ void gpio_spi_inits()
 	gpioB13_sck.gpio_pinConfig.gpio_pinMode = GPIO_MODE_ALTFN;
 	gpioB13_sck.gpio_pinConfig.gpio_pinAltFuncMode = 5;
 	gpioB13_sck.gpio_pinConfig.gpio_pinNumber = 13;
-	gpioB13_sck.gpio_pinConfig.gpio_pinPuPdControl = GPIO_NO_PUPD;
+	gpioB13_sck.gpio_pinConfig.gpio_pinPuPdControl = GPIO_PIN_PU;
 	gpioB13_sck.gpio_pinConfig.gpio_opType = GPIO_OP_TYPE_PP;
 	GPIO_Init(&gpioB13_sck);
 
@@ -51,7 +51,7 @@ void gpio_spi_inits()
 	gpioB14_miso.gpio_pinConfig.gpio_pinMode = GPIO_MODE_ALTFN;
 	gpioB14_miso.gpio_pinConfig.gpio_pinAltFuncMode = 5;
 	gpioB14_miso.gpio_pinConfig.gpio_pinNumber = 14;
-	gpioB14_miso.gpio_pinConfig.gpio_pinPuPdControl = GPIO_NO_PUPD;
+	gpioB14_miso.gpio_pinConfig.gpio_pinPuPdControl = GPIO_PIN_PU;
 	gpioB14_miso.gpio_pinConfig.gpio_opType = GPIO_OP_TYPE_PP;
 	GPIO_Init(&gpioB14_miso);
 
@@ -59,7 +59,7 @@ void gpio_spi_inits()
 	gpioB15_mosi.gpio_pinConfig.gpio_pinMode = GPIO_MODE_ALTFN;
 	gpioB15_mosi.gpio_pinConfig.gpio_pinAltFuncMode = 5;
 	gpioB15_mosi.gpio_pinConfig.gpio_pinNumber = 15;
-	gpioB15_mosi.gpio_pinConfig.gpio_pinPuPdControl = GPIO_NO_PUPD;
+	gpioB15_mosi.gpio_pinConfig.gpio_pinPuPdControl = GPIO_PIN_PU;
 	gpioB15_mosi.gpio_pinConfig.gpio_opType = GPIO_OP_TYPE_PP;
 	GPIO_Init(&gpioB15_mosi);
 
@@ -149,6 +149,10 @@ void EXTI15_10_IRQHandler(void)
 	SPI_PeriControl(SPI2, ENABLE); // Very important this makes the SPI enable bit to 1.
 	len = strlen(user_data);
 	SPI_SendData(SPI2, (uint8_t *)user_data, len);  //data send here.
+
+	while(SPI_GetFlagStatus(SPI2,SPI_SR_BSY)); //wait until the bsy flag is 0.
+
 	SPI_PeriControl(SPI2, DISABLE); // After SPI communication disable the SPI
+
 
 }
