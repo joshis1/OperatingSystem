@@ -135,7 +135,25 @@ void SPI_SendData(SPI_RegDef_t *pSPIx, uint8_t *pTxBuffer, uint32_t len)
 
 void SPI_ReceiveData(SPI_RegDef_t *pSPIx, uint8_t *pRxBuffer, uint32_t len)
 {
-
+	while(len > 0)
+	{
+		while(!(SPI_GetFlagStatus(pSPIx, SPI_SR_RXNE))); // Wait until the Rx buffer is  empty.
+		if(pSPIx->SPI_CR1 & (0x1 << SPI_CR1_DFF))
+		{
+			// 16 bits i.e. 2 bytes to be read
+			*(uint16_t *)pRxBuffer = pSPIx->SPI_DR;
+			len--;
+			len--;
+			(uint16_t *)pRxBuffer++;
+		}
+		else
+		{
+			// 8 bits i.e. 1 byte to be read
+			*pRxBuffer = pSPIx->SPI_DR;
+			len--;
+			pRxBuffer++;
+		}
+	}
 }
 
 /*

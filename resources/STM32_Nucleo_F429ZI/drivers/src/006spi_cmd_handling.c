@@ -1,10 +1,9 @@
 /*
- * 005spiTx_AdruinoTesting.c
+ * 006spi_cmd_handling.c
  *
- *  Created on: 23Sep.,2020
- *      Author: shreyas.joshi
+ *  Created on: 24/09/2020
+ *      Author: sjoshi
  */
-
 
 
 /** PB12 - SPI2 - NSS  -AF5
@@ -26,6 +25,8 @@
 #include "stm32f429x_spi_driver.h"
 #include <string.h>  // for memset and strlen
 
+
+extern void initialise_monitor_handles();
 
 void gpio_spi_inits()
 {
@@ -122,12 +123,15 @@ char user_data[] = "Hello World";
 
 int main()
 {
-
+	initialise_monitor_handles();
 	gpio_spi_inits();  //AF functions enabled
+	printf("gpio spi init done!\r\n");
 	spi_inits();   //SPI init initialize - master mode, DFF, duplex, clk speed, cpha, cpol, etc.
 	gpio_button_init();
+	printf("gpio_button_init done!\r\n");
 
 	SPI_SSOEControl(SPI2, ENABLE); //enable Hardware based Slave Select from Master MCU.
+	printf("SPI_SSOEControl done!\r\n");
 
 	while(1)
 	{
