@@ -189,3 +189,104 @@ void SPI_SSOEControl(SPI_RegDef_t *pSPIx, uint8_t EnOrDi)
 	}
 }
 
+void SPI_IRQInterruptConfig(uint8_t irqNumber, uint8_t EnorDi)
+{
+	uint8_t bit_pos = 0;
+	bit_pos = irqNumber % 32;
+	volatile uint32_t *nvic_reg;
+
+	if(EnorDi == ENABLE)
+	{
+		if(irqNumber >= 0 && irqNumber < 32)
+		{
+			nvic_reg = (uint32_t *)NVIC_ISER0;
+			*nvic_reg  |= (0x1U << bit_pos);
+		}
+		else if(irqNumber >= 32 && irqNumber < 64)
+		{
+			nvic_reg = (uint32_t *)NVIC_ISER1;
+			*nvic_reg  |= (0x1U << bit_pos);
+
+		}
+		else if(irqNumber >= 64 && irqNumber < 96)
+		{
+			nvic_reg = (uint32_t *)NVIC_ISER2;
+			*nvic_reg  |= (0x1U << bit_pos);
+		}
+		else
+		{
+			//probably shouldn't reach here.
+		}
+	}
+
+	else
+	{
+		if(irqNumber >= 0 && irqNumber < 32)
+		{
+			nvic_reg = (uint32_t *)NVIC_ICER0;
+			*nvic_reg  |= (0x1U << bit_pos);
+		}
+		else if(irqNumber >= 32 && irqNumber < 64)
+		{
+			nvic_reg = (uint32_t *)NVIC_ICER1;
+			*nvic_reg  |= (0x1U << bit_pos);
+		}
+		else if(irqNumber >= 64 && irqNumber < 96)
+		{
+			nvic_reg = (uint32_t *)NVIC_ICER2;
+			*nvic_reg  |= (0x1U << bit_pos);
+		}
+		else
+		{
+			//probably shouldn't reach here.
+		}
+	}
+}
+
+void SPI_IRQPriorityConfig(uint8_t irqNumber, uint16_t priority)
+{
+	uint8_t nvic_priority_reg_offset = 0;
+	uint8_t bit_pos = 0;
+	volatile uint32_t *nvic_register;
+	//each PR can fit 4 IRQNumber
+	nvic_priority_reg_offset = irqNumber / 4;
+	nvic_register = (uint32_t *)(NVIC_IPR0 + (nvic_priority_reg_offset * 4));
+	bit_pos = irqNumber % 4;
+	//lower 4 bits of priority are not implemented in STM32
+	// each priority value takes 8 bits
+	*nvic_register = (priority << ((bit_pos * 8) + 4));
+}
+
+/**SPI data send - Interrupt based **/
+uint8_t SPI_SendDataIT(SPI_Handle_t *pSPIHandle, uint8_t *pTxBuffer, uint32_t len)
+{
+	//Save the Tx buffer address and len information
+	// mark the SPI state as busy in transmission
+	// no other code can take same SPI peripheral until transmission is over
+	// Enable the TXEIE control bit to get interrupt whenever TXE bit is set in Status Register
+	// Data transmission will be handled by the ISR
+	uint8_t state = pSPIHandle->txState;
+	if(state != SPI_BSY_IN_TX)
+	{
+		pSPIHandle->pTxBuffer = pTxBuffer;
+		pSPIHandle->txLen = len;
+		pSPIHandle->txState = SPI_BSY_IN_TX;
+		pSPIHandle->pSPIx->SPI_CR2 |= (0x1 << SPI_CR2_TXEIE); // Enable the TXEIE - control bit
+	}
+	return state;
+}
+
+/**SPI data receive - Interrupt based **/
+uint8_t SPI_ReceiveDataIT(SPI_Handle_t *pSPIHandle, uint8_t *pRxBuffer, uint32_t len)
+{
+	uint8_t state = pSPIHandle->rxState;
+	if(state != SPI_BSY_IN_RX)
+	{
+		pSPIHandle->pRxBuffer = pRxBuffer;
+		pSPIHandle->rxLen = len;
+		pSPIHandle->rxState = SPI_BSY_IN_RX;
+		pSPIHandle->pSPIx->SPI_CR2 |= (0x1 << SPI_CR2_RXNEIE); // Enable the RXNEIE - control bit
+	}
+	return state;
+
+}

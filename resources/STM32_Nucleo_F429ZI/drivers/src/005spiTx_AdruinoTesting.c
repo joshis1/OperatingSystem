@@ -157,8 +157,8 @@ void EXTI15_10_IRQHandler(void)
 	len = strlen(user_data);
 	//send length here
 	SPI_SendData(SPI2, (uint8_t *)&len, 1);  //length here
-	delay(250 * 1000);
-	SPI_SendData(SPI2, (uint8_t *)user_data, len);  //data send here.
+	delay(10 * 1000);
+	SPI_SendData(SPI2, (uint8_t *)&user_data, strlen(user_data));  //data send here.
 
 	while(SPI_GetFlagStatus(SPI2,SPI_SR_BSY)); //wait until the bsy flag is 0.
 

@@ -99,6 +99,12 @@ typedef struct
 {
 	SPI_RegDef_t *pSPIx;
 	SPI_Config_t spi_pinConfig;
+	uint8_t *pTxBuffer;
+	uint8_t *pRxBuffer;
+	uint8_t txLen;
+	uint8_t rxLen;
+	uint8_t txState;
+	uint8_t rxState;
 }SPI_Handle_t;
 
 /** APIs **/
@@ -119,6 +125,15 @@ void SPI_PeriControl(SPI_RegDef_t *pSPIx, uint8_t EnOrDi);
 void SPI_SSOEControl(SPI_RegDef_t *pSPIx, uint8_t EnOrDi);
 
 uint8_t SPI_GetFlagStatus(SPI_RegDef_t *pSPIx, uint8_t flag);
+
+/**Interrupt handling **/
+/**IRQ handling  - NVIC side i.e. Processor side **/
+void SPI_IRQInterruptConfig(uint8_t irqNumber, uint8_t EnorDi); //interrupt configuration
+void SPI_IRQPriorityConfig(uint8_t irqNumber, uint16_t priority); //interrupt priority configuration
+
+/**Interrupt based SPI send and receive **/
+uint8_t SPI_SendDataIT(SPI_Handle_t *pSPIHandle, uint8_t *pTxBuffer, uint32_t len);
+uint8_t SPI_ReceiveDataIT(SPI_Handle_t *pSPIHandle, uint8_t *pRxBuffer, uint32_t len);
 
 
 /** SPI CR1 registers - SPI control register 1 (SPI_CR1) **/
@@ -177,5 +192,12 @@ uint8_t SPI_GetFlagStatus(SPI_RegDef_t *pSPIx, uint8_t flag);
 	                           RCC->RCC_APB2RSTR |= (0x1 << 12); \
 	                           RCC->RCC_APB2RSTR &= ~(0x1 << 12); \
                             }while(0)
+
+
+/** SPI State **/
+#define SPI_READY       (0)
+#define SPI_BSY_IN_RX   (1)
+#define SPI_BSY_IN_TX   (2)
+
 
 #endif /* INC_STM32F429X_SPI_DRIVER_H_ */
