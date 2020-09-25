@@ -26,6 +26,8 @@
 #include <string.h>  // for memset and strlen
 
 
+#define COMMAND_SENSOR_READ     (0x51)
+
 extern void initialise_monitor_handles();
 
 void gpio_spi_inits()
@@ -151,19 +153,57 @@ void delay(uint32_t delay_val)
 //ISR - defined in startup_stm32.s - can be overridden here.
 // this is .weak that means can be overridden.
 
+uint8_t commandCode;
+uint8_t dummy_read;
+uint8_t dummy_write = 0xff;
+uint8_t ackByte = 0;
+uint8_t args[2];
+uint8_t analog_read = 11;
+
+#define ANALOG_PIN0 	0
+
 void EXTI15_10_IRQHandler(void)
 {
 	// due to button debouncing we add this delay otherwise we will get more number of interrupts.
 	delay(250 * 1000);
 	GPIO_IRQHandling(13);  //EXTI - pin number
+	commandCode = COMMAND_SENSOR_READ;
 
 	SPI_PeriControl(SPI2, ENABLE); // Very important this makes the SPI enable bit to 1.
-	len = strlen(user_data);
-	SPI_SendData(SPI2, (uint8_t *)user_data, len);  //data send here.
+	//Send command
+	SPI_SendData(SPI2, &commandCode, 1);
+
+	//do dummy read to clear off the RX buffer.
+	SPI_ReceiveData(SPI2, &dummy_read, 1);
+
+	//send some dummy byte to fetch the response from the slave.
+	SPI_SendData(SPI2, &dummy_write, 1);
+
+	//read the ack byte received.
+	SPI_ReceiveData(SPI2, &ackByte, 1);
+
+	if(ackByte == (uint8_t)0xF5)
+	{
+		args[0] = ANALOG_PIN0;
+		//send arguments
+		SPI_SendData(SPI2, args, 1); // sending one byte of
+
+		// do dummy read to clear off the RXNE
+		SPI_ReceiveData(SPI2, &dummy_read, 1);
+
+
+		delay(250 *1000);
+
+		//send some dummy byte - 1 byte to fetch the response from slave
+		SPI_SendData(SPI2, &dummy_write,1);
+
+		SPI_ReceiveData(SPI2, &analog_read,1);
+
+		printf("analog read is %d\r\n", analog_read);
+
+	}
 
 	while(SPI_GetFlagStatus(SPI2,SPI_SR_BSY)); //wait until the bsy flag is 0.
 
 	SPI_PeriControl(SPI2, DISABLE); // After SPI communication disable the SPI
-
-
 }
