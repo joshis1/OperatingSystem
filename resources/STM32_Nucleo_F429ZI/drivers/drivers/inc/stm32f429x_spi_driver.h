@@ -135,6 +135,8 @@ void SPI_IRQPriorityConfig(uint8_t irqNumber, uint16_t priority); //interrupt pr
 uint8_t SPI_SendDataIT(SPI_Handle_t *pSPIHandle, uint8_t *pTxBuffer, uint32_t len);
 uint8_t SPI_ReceiveDataIT(SPI_Handle_t *pSPIHandle, uint8_t *pRxBuffer, uint32_t len);
 
+void SPI_IRQHandling(SPI_Handle_t *pSPIHandle);
+
 
 /** SPI CR1 registers - SPI control register 1 (SPI_CR1) **/
 #define SPI_CR1_CPHA      (0)

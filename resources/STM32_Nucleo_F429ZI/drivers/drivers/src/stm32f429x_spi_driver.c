@@ -7,6 +7,11 @@
 
 #include "stm32f429x_spi_driver.h"
 
+static void spi_txe_interrupt_handle(SPI_Handle_t *pSPIHandle);
+static void spi_rxne_interrupt_handle(SPI_Handle_t *pSPIHandle);
+static void spi_ovr_err_interrupt_handle(SPI_Handle_t *pSPIHandle);
+
+
 /** APIs **/
 /** Peripheral clock enable/disable - RCC - Enable/Disable  **/
 void SPI_PeriClockControl(SPI_RegDef_t *pSPIx, uint8_t EnOrDi)
@@ -288,5 +293,51 @@ uint8_t SPI_ReceiveDataIT(SPI_Handle_t *pSPIHandle, uint8_t *pRxBuffer, uint32_t
 		pSPIHandle->pSPIx->SPI_CR2 |= (0x1 << SPI_CR2_RXNEIE); // Enable the RXNEIE - control bit
 	}
 	return state;
+
+}
+
+
+void SPI_IRQHandling(SPI_Handle_t *pSPIHandle)
+{
+	uint8_t status_register_val;
+	uint8_t control2_register_val;
+
+	status_register_val = pSPIHandle->pSPIx->SPI_SR & ( 0x1 << SPI_SR_TXE);
+	control2_register_val = pSPIHandle->pSPIx->SPI_CR2 & ( 0x1  << SPI_CR2_TXEIE);
+
+	if( status_register_val & control2_register_val)
+	{
+		spi_txe_interrupt_handle(pSPIHandle);
+	}
+
+	status_register_val = pSPIHandle->pSPIx->SPI_SR & ( 0x1 << SPI_SR_RXNE);
+	control2_register_val = pSPIHandle->pSPIx->SPI_CR2 & ( 0x1  << SPI_CR2_RXNEIE);
+
+	if( status_register_val & control2_register_val)
+	{
+		spi_rxne_interrupt_handle(pSPIHandle);
+	}
+
+	status_register_val = pSPIHandle->pSPIx->SPI_SR & ( 0x1 << SPI_SR_OVR);
+	control2_register_val = pSPIHandle->pSPIx->SPI_CR2 & ( 0x1  << SPI_CR2_ERRIE);
+	if( status_register_val & control2_register_val)
+	{
+		spi_ovr_err_interrupt_handle(pSPIHandle);
+	}
+
+}
+
+static void spi_txe_interrupt_handle(SPI_Handle_t *pSPIHandle)
+{
+
+}
+
+static void spi_rxne_interrupt_handle(SPI_Handle_t *pSPIHandle)
+{
+
+}
+
+static void spi_ovr_err_interrupt_handle(SPI_Handle_t *pSPIHandle)
+{
 
 }
