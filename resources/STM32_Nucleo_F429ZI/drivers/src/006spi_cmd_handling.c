@@ -87,7 +87,7 @@ void spi_inits()
 	spi2.spi_pinConfig.deviceMode = master_mode;
 	spi2.spi_pinConfig.dff = SPI_DFF_8BITS;
 	spi2.spi_pinConfig.sclkSpeed = SCLK_SPEED_DIV128;
-	spi2.spi_pinConfig.ssm = SSM_ENABLE;
+	spi2.spi_pinConfig.ssm = SSM_DISABLE;
 
 	SPI_Init(&spi2);
 
