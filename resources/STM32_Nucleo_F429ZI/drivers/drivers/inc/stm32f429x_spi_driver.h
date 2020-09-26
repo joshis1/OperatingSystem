@@ -137,6 +137,12 @@ uint8_t SPI_ReceiveDataIT(SPI_Handle_t *pSPIHandle, uint8_t *pRxBuffer, uint32_t
 
 void SPI_IRQHandling(SPI_Handle_t *pSPIHandle);
 
+void SPI_ClearOVRFlag(SPI_RegDef_t *pSPIx);
+void SPI_CloseTransmission(SPI_Handle_t *pSPIHandle);
+void SPI_CloseReception(SPI_Handle_t *pSPIHandle);
+
+__attribute__((weak)) void SPI_ApplicationEventCallback(SPI_Handle_t *pSPIHandle, uint8_t event);
+
 
 /** SPI CR1 registers - SPI control register 1 (SPI_CR1) **/
 #define SPI_CR1_CPHA      (0)
@@ -201,5 +207,10 @@ void SPI_IRQHandling(SPI_Handle_t *pSPIHandle);
 #define SPI_BSY_IN_RX   (1)
 #define SPI_BSY_IN_TX   (2)
 
+/**SPI data events for user application **/
+
+#define SPI_EVENT_TX_COMPLETE  (1)
+#define SPI_EVENT_RX_COMPLETE  (2)
+#define SPI_EVENT_OVR_ERR      (3)
 
 #endif /* INC_STM32F429X_SPI_DRIVER_H_ */

@@ -7,6 +7,7 @@
 
 #include "stm32f429x_spi_driver.h"
 
+
 static void spi_txe_interrupt_handle(SPI_Handle_t *pSPIHandle);
 static void spi_rxne_interrupt_handle(SPI_Handle_t *pSPIHandle);
 static void spi_ovr_err_interrupt_handle(SPI_Handle_t *pSPIHandle);
@@ -329,15 +330,91 @@ void SPI_IRQHandling(SPI_Handle_t *pSPIHandle)
 
 static void spi_txe_interrupt_handle(SPI_Handle_t *pSPIHandle)
 {
+	if(pSPIHandle->pSPIx->SPI_CR1 & (0x1 << SPI_CR1_DFF))
+	{
+		//16-bits i.e. 2 bytes are written.
+		pSPIHandle->pSPIx->SPI_DR = *(uint16_t *)pSPIHandle->pTxBuffer;
+		pSPIHandle->txLen--;
+		pSPIHandle->txLen--;
+		(uint16_t *)pSPIHandle->pTxBuffer++;
+	}
+	else
+	{
+		// 8-bits i.e. 1 byte is written
+		pSPIHandle->pSPIx->SPI_DR = *pSPIHandle->pTxBuffer;
+		pSPIHandle->txLen--;
+		pSPIHandle->pTxBuffer++;
+	}
 
+	if(pSPIHandle->txLen == 0)  //all data transmitted
+	{
+		SPI_CloseTransmission(pSPIHandle);
+		SPI_ApplicationEventCallback(pSPIHandle,SPI_EVENT_TX_COMPLETE);
+	}
 }
 
 static void spi_rxne_interrupt_handle(SPI_Handle_t *pSPIHandle)
 {
-
+	if(pSPIHandle->pSPIx->SPI_CR1 & (0x1 << SPI_CR1_DFF))
+	{
+		// 16 bits i.e. 2 bytes to be read
+		*(uint16_t *)pSPIHandle->pRxBuffer = pSPIHandle->pSPIx->SPI_DR;
+		pSPIHandle->rxLen--;
+		pSPIHandle->rxLen--;
+		(uint16_t *)pSPIHandle->pRxBuffer++;
+	}
+	else
+	{
+		// 8 bits i.e. 1 byte to be read
+		*pSPIHandle->pRxBuffer = pSPIHandle->pSPIx->SPI_DR;
+		pSPIHandle->rxLen--;
+		pSPIHandle->pRxBuffer++;
+	}
+	if(pSPIHandle->rxLen == 0)  //all data received
+	{
+		SPI_CloseReception(pSPIHandle);
+		SPI_ApplicationEventCallback(pSPIHandle,SPI_EVENT_RX_COMPLETE);
+	}
 }
 
 static void spi_ovr_err_interrupt_handle(SPI_Handle_t *pSPIHandle)
 {
 
+	if(pSPIHandle->txState != SPI_BSY_IN_TX)
+	{
+		SPI_ClearOVRFlag(pSPIHandle->pSPIx);
+	}
+
+	SPI_ApplicationEventCallback(pSPIHandle,SPI_EVENT_OVR_ERR);
+}
+
+void SPI_ClearOVRFlag(SPI_RegDef_t *pSPIx)
+{
+	uint8_t temp = 0;
+	//clear the ovr flag
+	temp = pSPIx->SPI_DR;
+	temp = pSPIx->SPI_SR;
+	(void)temp; //unused here
+}
+
+void SPI_CloseTransmission(SPI_Handle_t *pSPIHandle)
+{
+	pSPIHandle->pSPIx->SPI_CR2 &= ~(0x1 << SPI_CR2_TXEIE);
+	pSPIHandle->pTxBuffer = NULL;
+	pSPIHandle->txLen = 0;
+	pSPIHandle->txState = SPI_READY;
+
+}
+
+void SPI_CloseReception(SPI_Handle_t *pSPIHandle)
+{
+	pSPIHandle->pSPIx->SPI_CR2 &= ~(0x1 << SPI_CR2_RXNEIE);
+	pSPIHandle->pRxBuffer = NULL;
+	pSPIHandle->rxLen = 0;
+	pSPIHandle->rxState = SPI_READY;
+}
+
+__attribute__((weak)) void SPI_ApplicationEventCallback(SPI_Handle_t *pSPIHandle, uint8_t event)
+{
+	// weak callback - overridden by the user application
 }

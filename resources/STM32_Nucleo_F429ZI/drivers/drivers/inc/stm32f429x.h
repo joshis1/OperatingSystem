@@ -9,6 +9,7 @@
 #define STM32F429X_H_
 
 #include <stdint.h>
+#include <stddef.h>  //definition of NULL
 
 
 #define _VO  volatile
