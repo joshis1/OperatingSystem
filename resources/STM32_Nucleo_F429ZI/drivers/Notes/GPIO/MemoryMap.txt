@@ -1,0 +1,1633 @@
+Memory Map of the MCU - STM32F407x
+
+ARM cortex M4 
+
+
+width of the system bus is 32 bits.
+the processor can produce 2 ^32 of different addresses. 4G of 
+different memory address.
+
+0x0000_0000 to 0xffff_ffff
+
+#####
+Memory Map - 
+
+When the processor produces 0x4002 0000 on the system 
+bus, it is actually referring to the GPIO A registers.
+
+What's the base address of AHB1 bus peripherals?
+AHB1_PERI_START_Address - 0x4002_0000
+AHB1_PER_END_Address - 0x4007_FFFF
+
+What's the base address of GPIOA registers?
+0x4002_0000
+
+What's the base address of RCC engine registers of the MCU?
+RCC - connected to AHB1 - 
+0x4002 3800
+
+What's the base address of APB1 peripheral address bus?
+0x4000_0000 
+End address - 0x4000_7FFF
+
+What's the base address of Flash memory?
+0x0800_000
+
+
+What's the base address of SRAM1?
+0x2000_0000
+size of SRAM1 = x
+
+What's the base address of SRAM2?
+
+BASE_ADDRESS_OF_SRAM1 + size_of_sRAM1
+
+what's the base address of ADC1 registers?
+0x4001_2000
+###################################################
+
+notes about MCU bus interfaces 
+
+-- Processor bus -
+I-Bus  - instruction bus
+D-Bus - data bus
+S-Bus - System bus
+
+## 
+const data is stored in the ROM i.e. flash memory.
+
+the non constant data is stored in SRAM.
+
+######
+
+Flash memory -->
+---> Instruction 
+------> const data  ( Read only data)
+--------> Vector tables. 
+##########
+
+ARM Cortex M4 --> IBus, DBUS , S-BUS.
+
+I-Bus to fetch the instruction from flash.
+D-Bus to fetch the const data - R-Only. from the flash.
+Also, D-Bus - data is fetched using d-bus.
+
+I-BUS and D-Bus can operate in parallel.
+
+I-BUS and D-Bus connected to AHB Bus matrix.
+
+The flash controller is connected to the AHB Bus matrix.
+
+Flash controller --> Flash.
+
+ARM Cortex M4 processor technical document.
+
+Interfaces. 
+
+##
+
+3 external bus - AHB lite for I-Bus, D-BUS, and S-Bus 
+
+Bus Interfaces - ARM Cortex M4 technical document.
+Processor matches the AMBA 3 specification. 
+
+I-Code - Instruction fetches from code memory space, 
+0x0000 0000 to 0x1FFF FFFC -- 32 bit AHB-lite bus.
+
+Dcode - Data fetches from memory space, 
+0x0000 0000 to 0x1FFF FFFC -- 32 bit AHB-lite bus.
+
+System interface --- instruciton fetches and 
+data access can be done but should be in the address
+range - 0x2000_0000 to 0xDFFF FFF
+and 0xE010 0000 to 0x1FFF FFFF
+
+################################
+
+If the instructions are present in between the mmeory  locations
+
+0x0000 to 0x1FFFFFC then the cortex procesor will the 
+insruction using ICODE interface.
+
+if the insructions are present 0x2000_0000 to 0xDFFF FFF
+and 0xE010 0000 to 0x1FFF FFFF then it will use System bus.
+
+Flash uses I-Bus and D-Bus.
+
+## Memory map of MCU -
+
+All periperhasl fall outside of 0x0000 to 0x1FFFFFC
+that's why for peripheral access we use System bus.
+
+System bus is use to talk to SRAM.
+
+System bus meets a bridge - APB1 
+
+AHB to APB bus .
+
+APB is slower than AHB. 
+
+AHB is of higher speed. 
+
+GPIO is hanging on AHB1 bus --
+GPIO can run fast.
+
+AHB can connect to external peripherals 
+###################################################
+
+APB can run at 90 Mhz.
+
+What is the max. Hclk max of MCU?
+
+HCLK - abbrevation -- Clock frequency of AHB bus -
+
+180Mhz.
+
+max P1Clk -- > abbrevation of clock of APB1 bus -- 
+45 Mhz.
+
+P2Clk  --> abbrievation of clock of APB2 bus - 
+90Mhz. 
+
+##############################
+
+AN4031 -- Application note -- DMA controller. 
+
+Bus Matrix - 
+
+FSMC - external memory controller. 
+
+I-Bus can talk to FSMC and Flash.
+
+
+###########
+
+Clocks --
+
+Micro-controller - digital circuit synchronous 
+with clock. 
+
+Clock - 
+Square wave signals with certain frequency. 
+
+Power consumption with frequency of clock.
+ 
+3 different clock sourses to drive system clock - SYSCLK
+
+1) HSI oscillator clock 
+2) HSE oscillator clock 
+3) Main PLL clock .
+
+
+Reference Manual - RCC - 
+
+1) Crystal oscillator  - external component. 
+>>
+
+2) RC oscillator  ( interna to the MCU)
+>> comes inside the micro-controller. 
+
+3) PLL ( Phase Locked Loop)
+>> PLL ( internal to the MCU) - clock generating engine.
+
+#####################
+
+RC - resitor and capactive osciallator
+
+Reference manual - 
+>>
+RCC peripheral -> reset and clock control.
+>>
+
+Clock Tree -->
+
+Stm32 Cubemx.
+
+HSI - High speed internal - RC - 
+
+HSE - high speed external - Crystal oscillator - 8 Mhz.
+
+###################################
+
+For nucleo board - HSE is from ST link circuitry. - 8Mhz.
+
+HSI clock signal is generated from an internal 
+16Mhz RC oscillator -- HSI as its default clock.
+
+HSI clock as its main system clock.
+
+System clock Mux -> HSI, HSE, PLL Clk.
+
+On reset, the system clock used is HSI.
+
+HCLK  16 MHZ - derived from System Clock ( AHB Prescalaer)
+
+
+PLL is used to boost the system clock.
+PLL has divider and multiplier and that can boost
+the system clock to very high value.
+By default PLL uses HSI but it can also use HSE.
+
+Default HSI i..e default value is 16 Mhz.
+
+I2s peripheral needs clock from PLL i.e. higher 
+frequency clock like 190 Mhz. 
+
+### Peripheral Clock Configuration ###
+
+enable its peripheral clock using peripheral clock 
+registers.
+> By default, peripherl clocks of amost all peripheral
+will be disabled to save power.
+
+RCC peripheral.  
+
+
+Code Implementation -->
+
+RCC CFGR register -->
+
+21 and 22 - MCO 1 -- 
+
+RCC_CFGR_REG_OFFSET 0x08UL
+
+uint32_t *pRccCFgREg ;
+
+// configure PA8 to AF0 mode - MCO1 signal.
+
+Enable GPIOA peripheral
+
+AHB1ENR - 0x30 
+
+####
+
+Enable the HSE clock using HSEON bit - RCC CFGR
+
+HSE Measurement -
+
+HSEON bit - RCC CR -
+Wait until HSE clock from the external crystal 
+stabilizes.
+
+
+HSEBYP bit -- in NUcleo bit - RCC CR.
+Enable the HSE clock - HSEON bit - RCC Crystal
+switch the systemclock to HSE 
+DO MCO1 settings to measure it.
+
+####
+
+Vector table ?
+
+table of vectors ?
+direction ( pointers or addresses) 
+
+addresses of what?
+
+addresses of exceptin handlers - system exceptions
++ interrupts.
+
+Vector table of addresses of various exception handlers.
+
+15 system exceptions + 240 interrupts.
+
+Vector table for STM32F4
+
+position also known as IRQ  - 
+
+position are actually  - 
+
+RESET 
+NMI 
+Hardfault 
+MemManage 
+BusFault
+USageFault
+###
+
+Position are with respect to NVIC. 
+
+WWDG - exception is at position 0 of NVIC. 
+
+IRQ number for WWDG is  0.
+
+Priority - 
+
+Type of Priority - 
+
+Highest priority is of Reset 
+Second priority is NMI .
+Third priority is Hardfault.
+Fixed priority - Reset, NMI, Hardfault.
+>>>
+
+Highest priority is of RESET and it is fixed.
+
+NMI is the second highest and it is fixed.
+Hardfault is the third highest and it is fixed.
+
+####
+
+Function pointers -- 0x0000_0004 -- reset handlers
+           - 0x0000_00008  NMI 
+		   - 0x0000_000C - HardFault handler.
+		   
+The first addrress always will have a special data
+called Stack pointer value. 
+
+0x0000_0000 - Stack Pointer.
+Stack pointer must be initialized before entering
+into Exception handler.
+
+#######################################################
+__initial_sp 
+Reset_handler
+
+######################################################
+
+Startup file implements 
+
+Reset Handler - 
+
+EXTI_IMR - interrupt request from line x is masked. by default.
+1 - Interrupt request from line x is not masked.
+
+Rising trigger selection register - 
+
+EXTI_RTSR --> 
+
+TR0 - bit enable - 
+
+Pending register -- EXI_PR -->
+
+Update the events -- 
+This bit is cleared by programming it to zero. 
+
+EXTI pending register is enabled - 
+
+
+EXTI line is 0. 
+
+NVIC and CPU are together part of the processor.
+
+##################
+
+PA0 will have interrupt over EXT line 0.
+
+EXTI0_IRQHandler(void)
+
+>> Pending register - EXTI_PR -
+
+address offset 0x14 -- EXTI Controller - 
+
+
+0x4001 3C00 -->
+
+clear of the exti interrupt pending bit.
+
+>>>>>>>>>>
+
+>>>>>>>>>>
+
+#############################################
+
+Volatile qualifier in C - 
+
+>>
+
+main.c -->
+
+Read data from SRAM memory location --
+
+#define SRAM1_ADDRESS (0x200004U)
+
+int main(void)
+{
+  uint32_t val = 0;
+  volatile uint32_t *p = (uin32_t *)SRAM1_ADDRESS;
+  while(1)
+  {
+     value = *p;
+	 if(value)
+	  break;
+  }
+  
+  while(1);
+  return 0;
+}
+
+>> UART or SPI- are highly volatile in nature.
+
+data registers changes when the application is running.
+>>
+this pointer - SRAM/-ADDRESS is volatile.
+################
+
+When memory location it is best to use volatile.
+Writing or reading at memory location.
+############ 
+GPIO - - General purpose input output.
+
+GPIO to drive LED, reading digital signals, 
+issuing interrupts and waking up the processor.
+
+Must know concepts in GPIO.
+
+GPIO Port is a collection of IO ports.
+GPIO port A has 16 IO pins or 16 bits wide.
+
+STM32 Cortex M4 supports - 
+GPIO Port A --> 16 bits wide. 
+
+#############################
+
+GPIO Pin behind the scene. 
+
+GPIO implemented inside the MCU.
+
+GPIO pin has output buffer and input buffer -
+
+
+buffer is a 2 CMOS transistors. 
+PMOS and NMOS. 
+
+GPIO Input works with high impedence state as HI-Z state.
+
+keep the pin floating i.e. not connecting to GND 
+
+HIGH-Z state - can lead to leakage current. 
+
+GPIO Input mode -- 
+
+INput mode -->
+
+internal pull - up 
+or internal pull -down. 
+############
+unused GPIO pins into one of those stages.
+
+###########
+
+GPIO output mode with open drain state -- 
+
+GPIO Programming Structure 
+
+GPIO registers -- 
+
+POrt direction mode  register  
+- input/ouput/analog.
+
+port speed register 
+
+port output type register. 
+
+Port Input Data register
+
+Port Ouptut data register.
+
+##########################################
+
+I/O ports are nothing but GPIO ports.
+
+GPIO port has all those configurations.
+
+##################
+
+GPIO Port MOde register --
+
+Reference manual -- 
+
+GPIO registers -
+
+GPIO register map ==
+
+### GPIO port mode regiser -- 
+
+GPIOx_MODER ( x = A to I) 
+
+GPIOA_MODER - 32 bit register.
+
+Reset values are important. 
+
+Default value when the processor goes on power cycle.
+
+00 - input
+01 - general output mode
+10 - Alternate function mode.
+11 - Analog mode. 
+
+Analog mode we use it when dealing with ADC or DAC.
+###
+INput mode inside the micro-controller.
+
+An MCU GPIO pin can be used as --
+
+-- Input -- Interrupt to the processor. 
+-- Ouput
+-- ALT .Function
+-- ANALOG 
+
+##############################
+
+Power pin - is not a GPIO because you cannot configure
+it as input.
+
+For every AHB1 clock cycle the input data register 
+will be updated.
+
+In the input mode - the output driver is open circuit.
+
+no pull up or pull down register - by default.
+-- floating value 
+
+internal pull up resistor is very important 
+otherwise the state is undefined.
+
+we need to configure the internal pull up resistor
+so that a value is held with some value otherwise 
+the value will fluctuate due to the noise in the 
+circuit.
+
+If you don't have internal pull up resistor than 
+you need to have an external pull up resistor.
+
+internal pull up or pull down - 
+
+When to use internal and when to use external pull up resistor.
+
+Resistance value and capactive delays -- different recommended 
+value of resistor then you need to use external pull up resistor.
+
+Summary --
+
+## Output configuration - push pull - 
+
+GPIO two o/p mode - 
+Open drain 
+push pull - 
+
+push-pull - output type - 
+
+P-MOS - will turn on when the input is 0
+
+N-MOS will turn on when the input is 1.
+
+pMOS
+
+NMOS 
+
+In push pull they either have high or ground state - 
+High or ground state.
+
+########################
+
+Open Drain -- 
+High or float state. 
+
+Open drain - PMOS doesn't exist -- 
+
+IO state is not defined 1->F --
+
+In open drain - you need to use either 
+internal pull up resistor to get the correct value.
+or external pull up resistor to get the correct value.
+
+For open drain, you need to use -external pull up resistor.
+
+i2c specification - open drain - I/O pin has to 
+be in open drain type. 
+
+In output configuration - read is also possible 
+since the input engine is not turned off.
+
+##################################################
+
+Alternate function mode -- 
+
+UART Tx or UART Rx -->
+
+Alternate function output - 
+not outpdat data register is not used 
+
+
+AF input - to on-chip peripheral.
+
+######################
+
+GPIO port output type register -- 
+o/p type register - 
+
+Output type - 
+
+PUSH pull or open drain -- 
+
+16 bits are used and 16 bits are reserved.
+
+0 - o/p push-pull - reset state
+1- o/p open-drain .
+
+GPIO Port speed register.
+It makes sense when it is in o/p mode.
+
+I/O pin in output mode. 
+control the slew rate of a pin.
+
+00 Low speed   - 8 Mhz
+01 medium speed   -- 50 Mhz
+10 high speed    -- 100 Mhz.
+11 very high speed. -- 180 Mhz.
+
+#######################################
+
+GPIO port pull up / pull-down register.
+
+16 groups -- 
+
+00 - no pull up , pull down
+01 - pull - up 
+10 - pull down 
+11- Reserved 
+
+#############
+
+GPIO input data register - to read the 
+GPIO port data register - 
+
+INput data register is updated for every 1 AHB1 
+clock cycle.
+
+GPIO port output data register - 
+
+GPIO functional summary -- 
+
+Input floating 
+Input pull-up 
+input-pull-down
+Analog mode - 
+
+
+Output open drain with pull up or pull down capabilities
+Ouptut push-pull with pull up or pull-down capability
+Alernate funciton push-pull with pull-up or pull-downalt
+alternate funciton open-drain with pull up or pull 
+down capabilities
+
+push-pull - current sourcing from micro-controller.
+
+Open drain - High or floating state - 
+
+For open drain we need to activate the 
+internal pull up resistor or use external pull up 
+resistor.
+
+In open drain configuration, the Vdd is not connected.
+
+In open drain - you need to use external pull up resistor.
+
+##################################################
+
+Open drain is used - 
+
+When you want high or low -- > motor, relay , LED -
+use push pull configuration.
+
+Some application require - HIZ state - open drain 
+Serial - I2c -- to have IO pin as open drain configuration.
+
+### Alternate functionality - 
+
+AF - it can be used for 16 different functionalities.
+
+AF0 - System
+AF1 - TIM1/TIM2
+AF2 - TIM1/TIM2
+AF3 - 
+AF4 - I2C1 
+AF5- SPI 
+AF6 - SPI6 -
+
+AF15 -- 
+
+16 possible AF supported by GPIO-8
+
+Only 6 are supported.
+
+PA8 -- MCO1, TIM1_CH1, I2cS3_SCL , 
+UART1_CK, OTG_FS_SOF, 
+
+AF0, AF1, AF4, AF7, AF10, EVENT_OUT.
+
+#####################################
+
+PC6 -- AF  -- 
+Datasheet - Page Table 12. STM32F427xx and STM32F429xx alternate function mapping (continued)
+
+
+
+1) TIM3_CH1
+2) TIM8_CH1 
+3) I2S2_MCK
+4) USART6_TX 
+5) SDIO_D6
+6) DCMI_DO 
+7) LCD_HSYC
+8) EVENT OUT
+
+GPIO - AF registers --
+
+AF low register - 
+
+8 groups -- 
+AFRL0[3:0] - 0 to 7
+
+AF high register 
+
+-- Pins - 8 to 15 
+ 
+#####################
+AFx mod eand AFR - 
+
+PA0 as UART4_TX
+PA1 as UART4_RX
+PA10 as TIM1_CH3
+
+PA0 - UART4_TX 
+
+looking at the table - this should 
+be configured to AF8 
+
+and has to be low register - 
+GPIOA_AFRL -- 1000 bits[3:0]
+
+GPIO_AFRL is GPIO + 0x20 offset.
+
+PA1 as UART4_RX -->
+
+AF8 
+
+GPIOA_AFRL - 1000 -- bits [4:7]
+
+###
+
+
+PA10 -- as TIM1_CH3 
+
+AF1 -- 
+
+GPIO_AFRH - high register -- 
+
+bits[8:11]  --
+0001 -- value 
+
+###
+Enabling/disabling GPIO clock .
+
+RCC -- Per Clock Enable registers.
+
+GPIO ports are connected to AHB1 bus 
+
+RCC -> RCC_AHB1_ENR - enable the ABH1 enable
+registers.
+######################
+
+Peripheral driver development 
+
+Simple Applications 
+
+
+Driver layer -- 
+
+gpio_driver.c, .h 
+i2c_driver.c, .h 
+spi_driver.c, .h 
+uart_driver.c, .h 
+
+Device header - STM32F07xx.h 
+
+### 
+
+GPIO, SPI, I2C, UART 
+###
+MCU specific header file.
+
+Device header file and what it contains --
+
+MCU such as 
+-- Base address of FLASH, SRAM1, SRAM2, ROM, etc.
+
+####
+
+Base address of various memory present in the MCU 
+such as FLASH, SRAM1, SRAM2, ROM,etc.
+
+-base address of various bus domains such as 
+AHBx, APBx 
+
+- base address of various peripherals present in 
+different bus domain of the mCu.
+
+- Clock management macros - i.e. enable and disable macros.
+
+- IRQ definitions
+- periperhal register defintion structures.
+- peripherla register bit definitions.
+-#####################################
+
+Device header is used by both application and driver files.
+
+##
+
+Project name - stm32f429x_drivers 
+
+language - C 
+
+--> empty.
+
+new folder - drivers 
+
+drivers-> inc and src 
+
+inc-> header file -> stm32f420x.h
+
+#define FLASH_BASEADDR
+#define SRAM1_BASEADDR
+#define SRAM1 (SRAM1_BASEADDR)
+
+#define SRAM2_BASEADDDR  SRAM1_BASE_ADDR +  1c00
+
+#define SYSTEM_MEMORY // ROM actually.
+
+define the base address of vaarious bus domans.
+
+Peripheral base - 
+
+-APB1 
+-APB2 
+AHB1
+AHB2 
+
+###
+
+PERIPH_BASE - 0x4000_0000 - TIM2 -- TIMx_CR1- control register 1
+
+###
+
+Peripeheral base -- APB1 peripheral base ..
+
+PERIP_BASE  -x4000000000000
+
+APB1_PERI_BASE    pERIPBASE
+APB2_PERI 0x400100000
+
+APB2 peripherlal base 
+AHB1 peripheral base  0x40020000
+AHB2 peripheral base.  0x5000000
+
+
+###
+base addres of AHB1 peripherals.
+
+
+GPIOA, GPIOB, GPIOC.............GPIOI 
+
+
+APB1 
+I2C1 I2C2 I2C3  SP12 SPI3 USART2 USART3 UART4 UART5
+
+APB2 
+SPI1 USART1 USART6 EXTI SYSCFG
+
+###############################
+
+#define GPIOA_BASEADDR AHB1PERI_BASE + 0x0000
+#define GPIOB_BASSEADD  AHB1 + 0x0400
+
+
+all GOPIOID 
+#############
+
+APB1 -  
+
+#define I2C1_BASEADDR =  (APB1 +5400)
+
+
+APB2 - 
+#define EXTI_BASEADDR =  APB2_BASE + 3C00 
+##
+
+UART4 - cannot work in syncrhonoous mode.
+
+USART - can work in syncrhonous mode also.
+
+
+#define DRV_FLASH_BASEADDR 
+
+###
+addresses of the peripheral registers.
+
+GPIOA -->
+
+MODE REg   --  0x00
+OuptputType Reg  -- 0x04
+Speed reg   -- 0x08
+PUPDR reg   -- 0x0C
+IDR regise   --0x10
+ODR regi     - 0x14
+BSRR reg   - 0x18
+
+############
+
+GPIO - port mode reg - 
+
+structuring periperhal register details 
+
+GPIOA -->
+
+#define _VO volatile
+
+#include <stdint.h> for shorthand notations.
+
+typedef struct 
+{
+ _VO uint32_t MODER;  // address offset 0x00 
+ _VO uin32_t  OTYPER;  //address offset 0x04 
+ uin32_t OSPEEDR;  //address offset 0x08
+ uin32_t PUSPR;  //address offset 0x0C
+ uin32_t IDR;  //address offset 0x10
+ uin32_t ODR;  //address offset 0x14
+ uin32_t BSRRL;  // address offset -0x18
+ uin32_t BSRRH;  //address offset - 0x1A
+ uin32_t LCKR;  //address offse t - 0x1C
+ uin32_t AFR[2];  // 0x20 and 0x24 - low and high register.
+}GPIO_RegDef_t;
+
+
+GPIO_RegDef_t *pGPIOA = (GPIO_RegDef_t *) GPIOA;
+
+#define GPIOA  (GPIO_RegDef_t*)GPIOA_BASE 
+
+###
+
+Reference manual - GPIO register map.
+
+###
+Peripheral macros to enable disable clock .
+
+
+peripheral definitions 
+
+#define GPIOA  (GPIO_RegDEft_t *) GPIOA_BASEADDR;
+..
+GPIOI - 
+peripheral clock enable and clock disable. 
+
+typedef struct 
+{
+
+
+
+}RCC_RegDef_t;
+
+RCC_BASE_ADDR (
+
+#define RCC    -- 
+
+#define GPIOA_PCLK_EN() (RCC->AHB1ENR |= (1 <<0))
+
+#define GPIOB_PCLK_ENB   -- (1 <<1);
+
+-- I2C1_PCLK_EN  - 
+
+SPIx Peripherals - 
+
+
+USART 
+SYSCFG 
+
+/** Clock disable Macros 
+
+GPIOA_PCLK_DI() (RCC->AHB1ENR &= ~(1 <<0))
+########
+
+##########################
+
+Creating a GPIO driver header and source file.
+
+
+src --> stm32f429_gpio_driver.c 
+
+inc - stm32f429_gpio_driver.h
+
+-- 
+stm32f429_gpio_driver.h 
+contains -- the device.h file. 
+
+>>
+
+#include <stm32f429_gpio_driver.h>
+gpio_driver.c 
+
+
+############
+
+GPIO handle and configuration structures. 
+
+GPIOx peripheral - 
+
+GPIO Port name 
+GPIO Pin number 
+GPIO mode 
+GPIO speed 
+GPIO outputtype
+GPIO Pul up - pull down
+GPIO_Alt_function mode 
+
+handle and configuration strucutre. 
+
+handle structure - 
+
+typedef struct
+{
+ //  pointer to hold the base address of the GPIO periper
+ GPIO_RegDEft_t *pGPIOx;
+ GPIO_PinConfig_t GPIO_PinConfig;
+ 
+}
+{GPIO_Handle_t;
+
+
+GPIO_PinConfig{
+ uin8_t GPIO_PinNumber;
+ uin8_t GPIO-Pin MOde;
+  pinspeed;
+  pinPuPdControl
+  PinOPType;
+  PinAltFunMode;
+};
+
+GPIO API Requirements -- 
+
+GPIO Init 
+Enable/Disable GPIO port clock 
+Read from a GPIO pin .
+Read from GPIO port
+Write to GPIO pin
+Write to GPIO port.
+configure alternate functionality 
+Interrupt handling - capability. 
+
+### API prototypes -- 
+
+/* Peripheral clock setup 
+*/
+
+#define ENABLE 1 
+#define DISABLE 0 
+#define SET  ENABLE 
+#define RESET DISABLE 
+
+
+void GPIO_PeriClockControl(GPIO_RegDef_t *pGPIOx, uin8_t EnorDi); //enable or disable the GPIO clock.
+
+Init and De-init 
+
+
+void GPIO_Init(GPIO_handle_t *pGPIOHandle); // initialize port and pin.
+void GPIO_DeInit(GPIO_RegDef_t *pGPIOx); // reset state  //RCC - reset register
+RCC_AHB1RSTR 
+
+#define GPIO_PIN_SET SET
+#define GPIO_PIN_RESET RESET 
+
+//REad and write 
+uin8_t GPIO_ReadFromInputPin(GPIO_RegDef_t *pGPIOx, uin8_t pinNumber);
+uint16_t GPIO_ReadFromInputPort(GPIO_RegDef_t *pGPIOx);
+void GPIO_WriteToOuputPin(GPIO_RegDef_t *pGPIOx, uin8_t pinNumber, int val);
+void GPIO_WriteToOutputPort(GPIO_RegDef_t *pGPIOx, uint16_t value);
+void GPIO_ToggleOutputPin(GPIO_RegDef_t *pGPIOx, uin8_t pinNumber);
+
+//IRQ handling .
+void GPIO_IRQConfig(uint8_t irqnumber, uin8_t irqPriority, uint8_t EnorDi); //interrupt configuration
+void GPIO_IRQHandling(uin8_t pinNumber);
+
+Definition -- Add Function headers.
+
+GPIO_PeriClockControl
+
+if(EnorDI == enable)
+{
+   if(pGPIOx == GPIOA)
+   {
+      GPIOA_PCLK_EN();
+   }
+   else if(pGPIOx == GPIOC 
+   {
+   
+   }
+}
+
+else
+{
+
+}
+
+}
+
+#define GPIO_MODE_IN 0 
+#define GPIO_MODE_OUT 1
+#defien GPIO_MODE_ALTFN 2
+#define GPIO_MODE_ANALOG 3 
+#define GPIO_MODE_IT_FT 4
+#define GPIO_MODE_IT_RT 5 
+#define GPIO_MODE_IT_RFT 6
+
+#define GPIO_OP_TYPE_PP 0
+#define GPIO_OP_TYPE_OD 1 
+
+
+#define GPIO_SPEED_LOW 0
+#define GPIO_SPEED_HIGHT 1
+..
+
+#define GPIO_NO_PUPD 0 
+#define GPIO_PIN_PU  1 
+..
+
+
+
+##########
+GPIO_Init(GPIO_Handle_t *pGPIOHandle)
+// Configrure the mode of gpio pin -- 
+if(pGPIOHandle->GPIOPIndCOnfig.GPIOPind_Mode <= GPIO_MODE_ANALOG
+{
+  temp = PinMode << ( 2 * Pin Number));
+  pGPIOHandle->pGPIOx->MODER |= temp;
+}
+
+else
+{
+  //interrupt mode. 
+
+}
+
+
+// configure the speed 
+
+temp = GPIO_PinSpeed <<  (2 * PinNumber);
+OSPEEDR |= temp;
+
+// configure the pupd settings 
+
+GPIOPinPudControl = 
+
+
+// configure the optype 
+pGPIOHanlde->pGPIOx->OTYPER |= temp; 
+
+// configure the alt functionality 
+
+if PinMode == GPIO_MODE_ALTFN 
+{
+
+}
+
+
+
+#define GPIO_PIN_NO_0 0 
+#define GPIO_PIN_NO_1 1
+
+
+AF mode - 
+
+if mode is AF --
+
+if mode == AFN
+{
+   AFR[0] -- low register 
+   AFR[1] - high register
+}
+
+9/8 = 1 
+
+8/8 = 0 
+
+9%8 = 1
+0XF 
+
+GPIO DeInit .
+
+RCC_AHB1RSTR --
+
+RST -1 and then 0.
+
+GPIOA_REG_RESET()
+
+do{
+RCC->AHB1RSTR |= ( 1<<0) ;
+RCC -> AHB1RSTR &= ~(1 <<0);
+}while(0)
+
+GPIO_ReadFromInputPin 
+
+uint8_t val;
+####
+WAP to toggle the on board LED with some delay.
+Case 1 - Use push pull configuration for the output pin
+Case 2 - use open drain configuraiton for the output pin
+
+Case 1 - 
+
+PD12 -- 
+
+For my case it is PB7 -- Blue LED - 
+
+src -->  001led_toggle.c 
+
+#include "stm32fx..h"
+
+
+void delay(void)
+
+{
+   for i = 0; i < 500 000; i++_
+
+}
+int main(void)
+{
+  GPIO_Handle_t GpioLed;
+  GpioLEed.GPIOX = GPIOB
+  Gpio..pinNumber = GPIO_PIN_7;
+  GPIO.PinMode = Out;
+  Spee= // FAST --doesn't matter 
+  OTYPE  = PUSH_PULL;
+  PinPuPDControl = NOPU_PD; // no internal pull up or pull down register 
+  since we are using push pull config.
+  GPIO_PErClockControl(GPIOB, Enable);
+  GPIO_Init(&GPioLed);
+  
+  while(1)
+  
+  {
+    GPIO_Toggle(B, PIN7);
+	delay();
+  
+  }
+
+}
+12 MS -- 
+
+Open Drain -- 
+OTYPE -- TYPE_OD - 
+PinPUControl -- NoPUPD.
+When Pin PUll up is activated -- LED is toggling 
+but the Vdd will supply a very low current - 
+you need to use external resistor(320 ohms) Vcc - 5V - 
+don't use 40K ohms resistor in pull up.
+#############
+
+
+WAP - to togglethe on board led when the on board button is pressed.
+
+
+LED - PB7, 
+
+button- PC 13
+
+when you press pC13 is pull to ground 
+when you release PC13 is Vdd.
+
+
+001led_button.c -> exclude from build -- apply
+002led_button.c 
+
+GPIOBtn;
+external pull up resistor is already available so 
+need of internal pull up resistor. 
+
+SPeed - FAST 
+
+if(!gpio_readFromInputPin(GPIOC, 13);
+
+   delay();  //hardware debouncing compensation.
+   ToggleOUtputPind()
+}
+
+Push buttons - the far ends are connected. 
+
+A B C D -- ends are connected.
+
+B C -- far ends are connected
+
+A B - near ends are not connected.
+
+when you press the button the near end gets connected.
+
+
+tinkercad.com -- for simulate the electronic circuit.
+
+one end to ground 
+
+another end to PB12 
+when the press the button, the button will be grounded.
+Take a resistor -- 
+between T1 
+Vcc to resistor -- 22K external pull up resistor - 
+
+LED - current limiting resistor - 470 ohms 
+goes to the board PA14.
+
+PA15
+PA14
+PA13
+PB4
+PB3 --
+
+######################
+
+Interrupt capability -- 
+
+IT_FT 4
+RT    5
+RFT   6
+##############
+
+MCU peripheral side - 
+
+GPIOx_PINO  ->EXTI0   --> Processor side (23) --> Processor core
+
+GPIOx_PIN1   -->EXTI1  
+
+EXTI_5_9 = 23 (NVIC IRQ )
+
+EXTI_10_15 = 40 (NVIC_IRQ)
+
+Enable/Disable of IRQs are configured in NVIC registers.
+
+SYSCFG_REgister 
+
+EXTI block does Edge detection - FT, RT 
+
+Enable/Disable of interrupt delivery to the processor.
+
+Interrupt configuration 
+
+1. Pin must be in input configuration
+2. Configure the edge trigger - RT, FT, RFT 
+3. Enable interrupt delivery from periperhal to 
+the processor ( on peripheral side)
+i.e. EXTI line.
+
+4.IRQ number on which the procesor accepts the 
+5. Configure the IRQ priority for the identified IRQ number 
+processor side.
+6. Enable interrupt reception on that IRQ number - processor side.
+7. Implement IRQ number
+
+if ( mode == IT_FT)
+//1. configure the FTSR 
+EXTI->FTSR |= ( 1<< pinNumber);
+EXTI->RTSR &= ~(1 <<pinNumber);
+
+
+elseif( mde == RTSR)
+
+elseif IT_RFT -- . both Rising and falling.
+
+GPIO port selection in SYSCFG_EXTICR 
+
+Enale the exit interrupt delivery using IMR i.e. Interrupt mode register.
+
+
+#define EXTI  (EXTI_BASE_ADDR)
+
+
+typedef struct 
+{
+
+   IMR,
+   EMR,
+   RTSR,
+   FTSR,
+  
+}EXTI_RegDef_t;
+
+
+#define GPIO_BASEADDR_TO_CODE(x) 
+
+(x==GPIOA)?0 : \ 
+(x ==GPIOB)?1 : \
+(x ==GPIOC)?2  : \
+
+//peripheral side 
+Configure the GPIO port selection in SYSCFG_EXTICR
+temp1 = pinnumber /4
+temp2 = pinnumber % 4;
+uin8_t portcode = GPIOBASEADDR_TO_CODE(pGPIOHandle->pGPIOx);
+SYSCFG_PCLK_EN();
+SYSCFG->EXTICR[temp1] = (portcode << temp2 *4)
+
+
+//eable the exti interrupt.
+EXTI->IMR |= 1 << pinNumber;
+
+
+typedef structure
+{
+
+
+sysCfg_RegDef_t;
+
+###############################
+
+IRQ_Config --> Processor side 
+
+IRQ_EXTI0   6
+EXTI1       7
+EX9_5  -- 23  // vector table of reference manual.
+################
+
+GPIO_IRQConfig
+
+processor specific - 
+
+Registers of the processor - 
+CortexM4 Devices - Generic user Guide
+
+Cortex-M4 peripherals -- 
+Nested Vector Interrupt controller. 
+
+NVIC --
+
+All the interrupt lines ->
+finally go and meet NVIC.
+
+INterrupt set-enable registers -- ISER 
+
+Interrupt clear-enable register - ICER 
+Interupt priority registers.
+
+NVIC_ISER0 -0 to 31 IRQ
+
+NVIC_ISER1 -- 32 to 63 ..
+
+Interrupt clear enable. 
+NVIC_ICER0 to clear the interrupts.
+
+###########################################
+
+NVIC_IPR0_NVIC -- 
+
+IRQ0_PRI -- 8 bits -- 
+
+IPR0 IRQ0 to IRQ3
+
+/4 -- 
+
+%4 - 
+
+GPIO_IRQPriorityCOnfig(uin8_t IRQPriority, uint8_t priority)
+{
+ //first lets find out hte IPR register 
+ uint8_t iprx = IRQNumber/4;
+ iprx_section  = IRQNumber % 4; 
+ *(NVIC_PR_BASE_ADDR + iprx * 4) |= IRQPirority << ( 8 *iprx_section_;
+ 
+}
+
+lower 4 bits are not implemented in each priority 
+field. 
+
+###
+Interrupt handling -->
+
+What happens when interrupt triggers.
+
+On Processor side - PR - Pending register .
+
+Two pending registers - EXTI and Processor side. 
+###########
+
+Implement the ISR function
+Store the address of your ISR at the vector address location 
+corresponding to the IRQ number for which you have written 
+the ISR.
+
+
+void GPIO_IRQHandling(uint8_t PinNumber)
+{
+   // clear the exti pr register   
+    if(EXTI->RR &( 1 <<  Pinnumber)
+{
+     EXTI->PR |= (1 << PinNumber);
+  }	
+}
+
+void EXTIO_IRQHanlder()
+{
+   GPIO_IRQHandling(pinNumber);
+}
+###
+
+Connect an external button to PD5 pin and toggle the 
+led whenever interrupt is trigger by the button press.
+
+Interrupt should be trigger during falling edge of button 
+press.
+
+LED
+PD12 - Output - Push Pull mode -- 
+
+button -- PD5 
+
+MOde INTERRUPT_FT:
+
+PIN_PU;
+
+//IRQ configurations --
+GPIO_IRQPiroritoyConfig(IRQ_NO_EXTI9_5, 15);
+GPIO_IRQInterruptCOnfig(IRQ_NO_EXTI9_5, ENABLE);
+
+
+Enabel Peripheral clock -- always..
+
+due to debouncing multiple times you will get interrupt.
+void EXTI9_5IRQHandler(void)
+{
+  delay(200);//200 ms delay..
+  GPIO_IRQHandling(GPIO_PIN_NO_5);
+  GPIO_ToggleOutputPin(GPIOD, PIND12);
+
+}
+
+Debug ->
+
+//optype -- only if the mode is output type.
+or 
+
+#include <string.h>
+memset(&GPIOLed,0, sizeof(GPIOLED);
+memset(&GPIOBtn,0, sizeof(GPIOBtn);
+
+
+due to debouncing it is not responding nicely.
+
+############
+
+Check NVIC registers -->
+
+priorityCOnfig ->
+
+IRQPriority is of 8 bits -
+
+uint32_t IRQPriority -> 
+
+#########
+
+uint32_t *p;
+
+p+5 == will become p + 5 *4 
+
+remove multiply by 4 in Nvic -- settings.
+
+##########################################
+
+AF not tested - when we do coding like I2C or SPI .
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

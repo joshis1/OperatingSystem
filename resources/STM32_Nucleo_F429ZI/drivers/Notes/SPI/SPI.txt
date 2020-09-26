@@ -1,0 +1,1060 @@
+Serial peripheral interface - 
+
+protocol -- one master and a few slave devices.
+
+
+Slave - Sesnor, EEPOROM, Bluettoth, SDCARD, Display. 
+
+SCLK - Serial Clock 
+
+MOSI - MAster out slave in 
+
+MISO - Master in slave out .
+
+gpio1 -- slave control - SS 
+
+one master device and one or more slave devices. 
+
+#################################################
+
+4 IO pins -  with external device - 
+
+MISO - Master in slave out data - 
+transmit data in slave mode and receive data in master mode. 
+
+MOSI - Master out slave in data - transmit data in master mode and 
+receie data in slave mode. 
+
+SCLK - serial clock - 
+synchronized with the clock produced by the master. 
+
+Synchrnous serial communicaton.
+
+Master produces the clock 
+
+Debugging - master is producing the clock now.
+SS - Slave select - 
+
+SPI - Max speed = fPCLK/2 
+
+For e.g. if the clock is 50Mhz then SPI an get max speed of 25Mbps.
+Maximum distance is 10 feet.
+
+I2C - max distance 18 feet annd max speed of 3.4 Mbps .
+
+Ethernet - 1600 Feet and Max speed 10G. 
+
+RS-232 - 50-100 feet and Max speed - 20Kbps.
+USB3.0 - 9 feet, 5G speed.
+SPI is a short distance  protocol. 
+
+SPI uses TTL signals whereas CAN uses differential signals so that 
+more distance can be covered.
+
+Master - SCLK, MOSI, MISO, GPIO
+
+Slave -  SCLK, MOSI, MISO, SS 
+
+Master selects slave ..
+MOSI and MISO will be in HiZ state only after 
+the slave select the MOSI and MISO will come to 
+data operation mode. 
+
+CLK must be send - MOSI , MISO.
+
+##Minimal SPI bus configuration.
+
+just 2 wires - one for the clk signal and other for 
+synchronous data transfer. 
+
+SCLK, MOSI -- >
+
+SLave only receives the data and there is only one slave.
+
+Slave internally grounds the slave select to ground.
+
+##############
+SPI hardware: Behind the scenes - 
+
+Shift registers ----> Shift registers.
+
+SPI is based on shift registers. 
+
+Master SPI peripheral has Shift registers.
+
+Slave SPI peripheral also has shift registers.
+
+SPI - synchrnous so clock is required. 
+
+whenever master sends data, the master receives data 
+through MISO line. THis is inevitable. 
+Because after shifting the data in slave the data is moved 
+out of slave to master. 
+
+####
+Customizig bus - 
+
+Full duplex - SPI is full duplex. 
+
+In this configuration, the shift registers of the master 
+and slave are linked using two uni-directional lines 
+between the MOSI and MISO pins. During SPI communicaton, 
+data is shifted synchrnously on the SCK clock edges 
+provided by the master. The master transmits the 
+data to be send to the slave via the MOSI line and 
+receives data from the slave via the MISO line. 
+
+check the width of the shift register.
+
+By default, the SPI is in full duplex.
+
+Half duplex communicaton. 
+
+In this configuration, one single corss connection line is 
+used to link the shift registers of the master and 
+slave together. During this communicaton, the data is 
+synchrnously shifted between the shift registers on the 
+SCK clock edge in the transfer direction selected 
+reciprocally by both master and slave. 
+In half duplex mode, there is only data line.  
+
+reciprocally - program the code so that if the master 
+is in transmit the data then the slave is in recieving state.
+
+When you make SPI half duplex then the other pin is freed.
+
+Some micro-controllers don't support half duplex mode 
+for SPI.
+
+Simplex Communication -- 
+
+Transmit only or Receive only.
+
+Like remove the mISO line and use only MOSI pin,
+clk, slave select 
+
+SPI_Init(SPI_Handle_t *pSPI_Handle); 
+
+Control registers - 
+CR1
+>>>>>>> 
+
+CR2
+>>>>>>>
+
+DR -- Data register to place user data.
+
+SPI_SR - status registers --  events.
+Error event,
+Rx buffer full event.
+
+BRO, BR1,BR2 -- Baud Rate - SPI_CR1
+
+if(deviceMode == SPI_DEVICE_MASTER)
+{
+
+}
+else
+{
+
+
+}
+
+if(SPI_BUS_CONFIG_FD)
+{
+
+}
+
+SPI_BUS_CONFIG_FD
+SPI_BUS_CONFIG_HD
+SIMPLEX_TXONLY
+SIMPLEX_RXONLY 
+
+SPI_CLK_SPEED -- SPI CR1 --
+
+BR - Baud Rate - 
+
+Bits 5:3 -- 000 Pclk/2 
+         -- 001 pcks/4
+		 -- 002 pckl/8
+		 
+		 
+		 
+		 
+#define SPI_SCLK_SPEED_DIV2    0
+#define SPI_SCLK_SPEED_DIV4     1
+
+
+#define SPI_DFF_8BITS 0
+#define SPI_DFF_16BITS 1
+
+#define SPI_CPOL_HIGH  1
+#define SPI_CPOL_LOW   0
+
+#define SPI_cPHA_HIGH 1
+-- low 
+
+#define SPI_SSM_EN  1
+#ddefine SPI_SSM_DI  0 //by default
+
+#######################################
+
+
+SPI_CR1 - 2nd bit - MSTR1  - 
+0 - slave configuration 
+1- Master configuraton .
+
+if the peripheral is not producing serial clock then 
+check the master configuration.
+If master then the serial clock will be produced.
+If in slave mode then the serial clock will not be 
+produced.
+
+14th bit field -- BIDI_CE
+BID_MODE -- 15th bit - 0 -- 2 line uni-directional mode - Full duplex
+1 - 1 line bi-directinal data mode selected.
+
+Bit 14th BIDOE-- don't care if Bit 15 is full duplex.
+
+For simplex tx only -- disconnect MISO line. 
+
+For simplex rx only -- disconnect MOSI line -- 
+
+IN SPI , the clk is produced only when the data is produced in 
+MOSI  Force the master to produce the clock. 
+Make -- to force it.
+Bit 10 - Rx Only -- receive only 
+###
+
+DFF - SPI_CR1 --
+
+0 - 8 bit data frame format 
+1 - 16 bit data frame format.
+###
+
+SPI_CR1  
+CPOL 0 // by default.
+CPH1 0 // by default
+
+Bit 0 -- SSM -- by default - software mangement is disabled 
+--- 1 -- SSM - enbled
+
+#########################
+
+SPI_Init -- 
+SPI_CR1 --
+
+uint32_t tempreg =0;
+
+tempreg |=   SPIDEVICEMODe <<2;
+if -- Full duplex -
+{
+  bidimode mode should be cleared.
+  tempreg &= ~( 1<<15);
+  
+  
+}
+else if HD -- 
+tempReg |= 1 <<15;
+else if ( SP_RX_ONLY)
+{
+   BIDI mode should be cleared 
+   RxOly bit must be set.
+     tempreg &= ~( 1<<15);
+	 tempReg |= 1 <<10;
+}
+
+clkspeed <<3;
+
+DFF << 11;
+CPOL << 1;
+
+CPHA << 0;
+###########################
+
+pSPIHandle->pSPIRx->CR1 = tempReg;
+
+###########
+/**bit definition macros **/
+#define SPI_CR1_CPHA  (0)
+#define 
+
+Use only CR1, CR2 and SR.
+
+###########
+
+### SPI_SendData -- 
+start -- 
+
+len = 0 ? -- yes exit from the function 
+
+No -- > Wait until the Tx buffer is empty.
+Otherwise you will corrupt the data i.e already there in Tx buffer.
+
+Use SR -- TXE-- 1 - Transmit buffer empty -- 
+
+DFF -- > if DFF - 0 -- 1 byte of data and increment the buffer address.
+len --;
+
+if DFF =1 i.e. 16 bits -- LOAD DR with 2 byte of data and increment 
+the buffer address. 
+len--; len--;
+
+SPI_DR -- 
+
+Data recieved or to be transmitted. 
+
+DR[15:0] - 
+before reading this check RXNE flag -- 
+RX buffer empty - 0
+Rx buffer not empty - 1
+
+
+
+uint8_t SPI_GetFlagStatus(SPI_RegDeft , uint32_t flagName)
+{
+ if( SR & FlagName)
+ {
+   return SET;
+ }
+  return reset;
+
+}
+
+#define SPI_TXE_FLAG 1 <<  SPI_SR_TXE
+###
+SendData //blocking call. Polling based - 
+while( len > 0)
+{
+  // wait until TXE is set 
+  while(SPI_GetFlagStatus(pSPIx, SPI_TXE_FLAG)  == FLAG_REET);
+  
+  
+ // Check the DFF bit in CR1 
+ 
+ if( pSPIx->CR1 & ( 1 << SPI_CR1_DFF)_
+ {
+   //16 bit DFF 
+   pS->dR = *(uint16_t *) pTxBuffer;
+   len--;
+   len--;
+   (uint16_t*)pTxBuffer++;
+ }
+ else
+ {
+    //8 bit DFF.
+	  pS->dR = *(pTxBuffer;
+	  len--;
+	  pTxBuffer++;
+ }
+ 
+}
+}
+//Interrupt flavour of SPI SendData.
+
+##
+Testing -- 
+
+006spiTx_testing.c --
+
+main 
+##
+Exercies - Hello World -- and use the below configuration -- 
+SPI2 - master mode 
+SCLK - max possible 
+DFF 0 and DFF = 1
+
+SPI2 - Master - 
+
+MOSI, 
+
+no MISO
+
+-- SCLK - yes 
+
+NSS -- not required.. not controlling any slaves. 
+
+Find out the GPIO pins over which SPI2 can communicate. 
+
+Data sheet --Alternate function mapping -- 
+
+SPI2 - 
+PB9 - SPI2_NSS AF5
+
+PB10 - SP2_SCLK 
+
+PB14 - SPI2 MISO - AF5
+PB15 - SPI2_MOSI - AF5
+
+// PB15 _ SPI2_MOSI
+// PB14 - SPI2_MISO 
+// pB13 - SPI2_SCLK 
+// PB12 -- SPI2_NSS 
+
+############################
+
+SPI_GPIOInits();
+
+
+void SPI_GPIOInits(void)
+{
+  // ENable GPIO B - peripheral clock .
+  
+   GPIO_handle_t SPIPins;
+   SPIPins.pGPIO = GPIOB;
+   SPIPIns.GPIO_PinCOnfig.GPIOPinmode  = GPIO_MODE_ALTFN;
+   .GPIOPINSCOnfig.GPIOPinALtFUNCMODE = 5;
+   PinOpType = gpio_pushpull;// SPI type is push pull
+   .GPIO_PInPuPControl = NO_PU_PD;
+   .GPIOPinNumber = 13;
+   GPIO_Init(&SPIPins;
+   //
+   MOSI,
+   
+   // MISO.
+}
+
+SPI2_Inits();
+
+void SPI2_Inits()
+{
+  // SPI Peripheral Clock Enable.
+  SPI2handle;
+  SPI2;
+  SPIBusCOnfig = FD;
+  SPIDeviceMode = MASTER;
+  SCLKSpeed = SPI_SSCLK-SPEED_DIV2; // clk of 8 mHz.
+  DFF = SPI_DF_8_BITS;
+  CPOL = 0;
+  CPHA = 0;
+  SPI_SSM = // enable or disable. 
+  SSM = 1; // enable since we don't have any slave in this example.  
+ 
+}
+
+
+
+int main()
+{
+ char   user_data[]= "hello world";
+  GPIO_Inits();
+  SPI2_Inits();
+  
+  //SPI CR - SPIE - SPI Enable -- Enable the SPI2 peripheral.
+
+  SPI_SendData(SPI2, user_data, strlen(user_data));
+  
+  
+  while(1)
+  {
+  
+  }
+
+}
+
+Testing using logical analyazer -- 
+USB logic analyzer -- 
+
+PB13 - SCLK 
+PB15 - MOSI 
+
+GND - Expansion headers. 
+
+Logic analyzer - CH0- PB13- SCLK 
+
+CH1 - PB15 - MOSI 
+
+GND - GND 
+
+Use - USB 3.0 - PC -- high speed - 
+##################
+
+testing -- 
+
+Salae -- Remeove analyzer - 
+16 MB/S  - sleect - 
+
+Duration - 4 
+not seeing any data -- 
+
+SPI2_Inits -->
+
+
+SPI testing
+###
+
+Exercise - real SPI slave -- 
+
+Adruino UNO board -- 
+
+NO MISO - configure  - 
+
+Master first sends the number of bytes the slave is going to 
+receive.
+
+Adruino UNO.
+
+ST-Board --> Adruino board --> USB --PC Adruino Serial monitor.
+
+
+Adruino pin 10 -- Slave select 
+pin 12 - MISO 
+13 - SCLK 
+MOSI - 11 - 
+
+Connect Ground pin of STM to Adruino.
+
+Power your Adruino board - SPI slave sketch download.
+
+001SPISlaveRxString.ino -- 
+
+007spi_txOnly_Adruino.c --
+
+SSM -Disabled. - user hardware slave management.
+
+NSS Pin management - 
+
+Master - slave select pin -- 
+
+NSS --of Master --> Slave -- (SS)
+
+SPE=1 - makes NSS o/p to 0.
+
+SPE=0, NSS o/p to 1.
+
+>> SSOE = 1 -- Slave select ouptut enable - 
+
+NSS output enable - SSM = 0, SSOE=1 -- MCU is set as master.
+
+driver.h -
+
+void SPI_SSOECOnfig()
+{
+  CR2 -- CR2_SSOE
+
+}
+
+//SSOE ==1 -- SPI ENable -- 
+
+making SSOE 1 does NSS output enable 
+-- the nss pin is automatically managed by the hardware.
+i.e. when SPE=1, NSS will be pulled to low 
+and NSS will be high when SPE=0.
+
+Button Code --
+
+############################################
+
+Enable NSS -- 
+
+-- DIV8 -- 
+
+SSM_DI 
+
+//SSI is not required.
+
+NSS managment - hardware select management 
+
+NSS - slave select pin - 
+###
+
+Slave SS should be pulled low -- 
+
+SSM = 0 -- SPE = 1, NSS will be pulled to low automatically.
+
+##########
+when SSM =0, SPE=0, NSS- -0/p = 1
+
+In order to enable the NSS output, SSOE bit must be enable.
+
+Slave Select output enable -SSOE. 
+SSM=0, SSOE=1 -- One Master - MCU as a master.
+
+void SPI_SSOEConfig(SPIRegDef_t *pSPIx, uint8_t EnorDI)
+{
+
+   CR2SSOE --enable.
+}
+
+################
+
+BSY flag -- will be high - 
+status register -- 
+
+BSY - Bit 7 -- 0  SPI not busy - 
+
+1 - SPI is busy in communication or Tx buffer is empty.
+
+//let's confirm SPI is not busy .
+
+while(SPI_GetFlagStatus(SPI2, SPI_BUSY_FLAG));
+
+###############################
+
+Slave doesn't know how many bytes it's going to receive.
+
+SPI_SendData(SPI2, 00 , 1);
+
+
+#################
+
+Adruino -- download the sketch --
+
+MSB is first transmitted. 
+
+Give Pull up in the GPIO.
+
+since slave is connected. 
+
+##############################
+SPI Receive 
+
+start --> len = 0 ? 0 Exit from the function 
+
+
+Wait until the Rx buffer is non empty.
+
+if DFF = 0? == 16 bit , read dr for 2 bytes of data. 
+incmrent the rx buffer. 
+
+0 -- 8 bit -- read DR - 1 byte of data and increment the 
+rx buffer address. 
+
+len -- ;
+
+###### SPI Master - STM and SPI slave - Adruino -- 
+command and response based communication.
+
+master sends a command to the slave and slave responds 
+as per the command implmentation. 
+
+1. Use SPI full duplex mode 
+2. ST board will be in SPI master mode and Adruino will be 
+configured for SPI slave mode. 
+3. Use DFF = 0 
+4. User hardware slave management - SSM = 0 
+5. SCLK speed = 2Mhz 
+
+PB14 -- 12 _ ADruino -- mISO 
+PB13 -- 13  SCLK -Adrunio - SCLK
+PB15 -- 11 - MOSI -- 
+PB12 -- SS - Adruniion - 10 pin. 
+
+Adrunio 
+
+11- MOSI 
+13 - SCLK 
+12 - MISO 
+
+10 - SS
+###################
+
+Master --> sends a command  -- Slave 
+
+Slave response --> ACK or NACK byte -- 
+ACK - 0xF5
+NACK - 0xA5 
+
+###
+
+if ACK -- 1 more command arguments -- 
+
+
+slave response for data read command. 
+
+IF NACK -- display error message.
+
+###
+
+Command Code, arg1, arg2
+
+1) CMD_LED_CTRL <pin no>  <value>
+
+digitial pin 0 to 9.
+
+pin 9 - 470 ohms - resistor.
+
+slave action - control the digital pin on or off. 
+
+slave returns nothing.
+
+CMD_SENSOR_READ <analog pin number>
+
+A0 to A5 
+
+slave action -- should read the analog value of the supplied pin 
+
+slave returns - 1byte 
+
+CMD_LED_READ <pin no>
+
+CMD_PRINT -- adruino slave -  
+
+CMD_ID_READ -- 10 bytes of board id string. --> good one.
+
+
+Start - Enter main -- all inits. 
+
+Wait till button is pressed. 
+Execute CMD_LED_CTRL,
+Wait till button is pressed. 
+CMD_SENSOR_READ 
+--
+CMD_LED_READ.
+
+####################
+
+008spi_cmd_handling.c 
+
+--> 
+
+configure the MISO lines - 
+
+LED_CTRL  -x50
+COMMAND_SENSOR -
+
+#define LED_PIN 9 
+
+uint8_t commandCode = COMmand_ledctrl;
+uint8_t args[2];
+
+SPI_SendData(spi2, &commandCode, 1);
+
+// do dummy read -- to clear off th RXNE,
+
+SPI_ReceiveData(-- dummyRead);
+//send some dummy bits ( 1 byte) to fetch the respons from the slave.
+SPI_SendData(spi2, 0xff,1);
+
+
+// read the ck byte recvied.
+SPI_ReceiveData(SPI2, &ackbyte,1);
+
+if(SPI_VerifyRepsonse(ackbyte)) //ack
+{
+   //send arguments -- 
+   arg[0] = pinNo;
+   arg[1] = LED_ON;
+   SPI_SendData(SP2, &arg, 2);
+   
+}
+
+CMDSENSOR READ -- 
+commandCode = SENSOR_REad;
+##########
+
+Every send will have a dummy read. 
+
+dummy write -- 
+read the data -- 
+
+A0 -- to gnd -- 
+
+analog read will be 0 .
+
+analog read is from 0 to 255. 
+255 means 5 v. 
+
+//insert some delay so that salve can ready with the data.
+
+##
+170 means 3.3v
+###
+
+###########
+printf statements -- 
+ARM semihosting-- 
+-specs=rdimon.specs -lc -lrdimon 
+
+settings - linker --> miscellaneous --> 
+
+monitor debug -- startup -- 
+Run commands - monitor arm semihosting enable
+
+main.c --
+Initialize_monitor_handles();
+sysmemc. -- exclude from the build.
+
+semihosting only works in debug mode. 
+
+MCU settings --> floating point hardware - no unit.
+
+floating point ABI - SOft. 
+
+##############################################
+
+
+
+
+if(ackByte = 0xF5)
+{
+ // return 1; // ack
+}
+
+
+-specs=rdimon.specs -lc -lrdimon
+
+monitor arm semihosting enable
+extern void initialise_monitor_handles();
+
+
+
+SPI interrupts
+
+interrupts can be generated by the following events.
+
+1) Transmit Tx buffer ready to be loaded.
+2) Data received in Rx buffer.
+3) Master mode fault
+4) Overrun error. 
+
+Interrupts can be enabled and disabled separately.
+
+###################################
+
+SPI interrupt requests -
+
+Transmit Tx buffer ready to be loaded -- TXE - TXEIE 
+Data received in Rx buffer - RXNE -- RXNEIE 
+Master mode fault event -- MODF  -- ERRIE
+Overrun error - OVR  - ERRIE
+CRC error -- CRCERR   -- ERRIE
+TI frame format error - FRE --ERRIE 
+
+#####################
+
+
+SPI_1 
+
+SPI_2 -->>> NVIC --> Processor core 
+
+SPI_3 
+
+##########
+
+Complete the SPI IRQ number definition macros..
+
+Reference manual - vector table definition ..
+
+SPI IRQ configuration APIS implementation 
+
+SPI_SendData -->
+
+SPI_SendDataIT(SPI_Handle_t *pSPIx, pTxBuffer, len)
+SPI_ReceiveDataIT(SPI_Handle_t *pSPIx, pTxBuffer, len)
+
+SPI_SendDataIt()
+{
+  //save the tx buffer address and len information in 
+  some global variable.
+  
+  // Mark the SPI state as busy in transmission so that 
+  no other code can take over same SPI Pheripeal until 
+  transmission is over.
+  
+  --Enable the TxEIIE control bit to get interrupt 
+  whenever TXE flag is set in SR 
+  
+  - Data transmisison will be handled by the ISR code - 
+  
+  
+  Handle Struct -- 
+  
+  *pTxBUffer - app Tx buffer application
+  *pRxBuffer - app rx buffer 
+  TxLEN 
+  RxLEN 
+  TxState
+  RxState.
+  
+ #define SPI_READY 0
+ SPI_BUSY_IN_RX   1
+ SPI_BUSY_IN_TX   2
+
+
+
+pTxBUffer = pTxBUffer;
+Txlen = len;
+TxState = SPI_BUSY_IN_TX;
+
+pSPIHandle->pSPIx->CR2 | 1 << 7;
+##
+
+uint8_state = pHandle->Txstate;
+
+if(state != SPI_BUSY_IN_TX)
+{
+
+
+}
+
+### SPI RecieviDataIT
+
+####
+
+SPI_IRQHandling(SPI_Handle_t *pHandle)
+{
+ //Undersand which event caused interrupt to trigger - ISR
+ if interrupt is due to RXNE Flag -- handle rxne event.
+ 
+ if interrupt is due to setting of TXE flage -- 
+ then handle TXE flag 
+ 
+ if itnerrup is due to setting of error flag then 
+ handle the error.
+
+}
+
+Handle TxEInterrupt -- 
+
+8 bit or 16 bit mode?
+
+Write one byte to SPI _DR - len--;
+
+16-bit 
+write 2 byte to SPI data - DR - len-=2;
+
+##############
+///
+uint8_t temp1, temp2;
+
+temp1 = pHandle->pSPIx->SR & ( 1 << TXE))
+if(temp1 == 1)
+{
+
+
+}
+temp2 = pHandle->psIXx->CR2 & ( TXEIE);
+
+if( temp1 && temp2 )
+{
+   //handle TXE 
+   spi_txe_interrupt_handle();
+}
+temp1 = RXNE 
+temp2 = CR@ - RXNEIE 
+
+--spi_rxne_interrupt_handle()
+
+//check for 
+
+-- overrrun flag -- 
+whenever overrun flag has happened - 
+when the master 
+RXNE - firmware delays -- 
+
+a data will be lost -- 
+overrun flag -- lost 1 byte of data since you haven't 
+received data. 
+// clearing the over bit is done by a read access to the 
+SPI DR register followed by the a read access to the SPI 
+SR register.
+
+//check for ovr flag --
+
+ERRIE is enabled 
+
+spi_ovr_err_interrupt_handle();
+
+##########################################
+
+#include <stddef.h>
+SPI_SendData --
+
+if(pSPIHandle->TxLen =0
+{
+  //close the spi transmision and inform the application that 
+  CR2 == TEIE- disable. TXEIE//prevents interrupts from TXE flag.
+  pTxBuffer = NULL;
+  len= 0;
+  state = SPI_READY;
+  SPI_ApplicationEventCallback(pSPIHandle, SPI_EVENT_TX_COMPLT);
+}
+
+#define SPI_EVENT_TX_COMPLT    1
+#define  SPI_EVENT_RX_COMPLT   2
+#define  SPI_EVENT_OVR_ERR     3
+
+###
+####
+
+clear the ovr flag then inform the application.
+read the SPI_DR followed by SPI_SR.
+
+uint8_t temp;
+if(pSPIHandle->TxState != SPI_BUSY_IN_TX)
+temp = pSPIHandle->pSPIx->DR;
+->SR:
+
+SPI_ApplicationEventCallback()
+
+
+void SPI_ClearOVRFlag(SPI_RegDef *pSPIx);
+void SPI_CloseTransmission(SPI_Handle_t *pSPIHandle);
+SPI_CLoseReception(SPI_handle_t *pSPIHandle);
+
+###########SPI debugging ##############
+Cross check these things  - 
+
+Master mode bit must be enabled.
+SPI periheral enable bit must be enabled.
+SPI peripheral clock must be enabled.
+
+#########
+
+Master cannot able to produce clock and data.
+
+Reason 1-  non-proper configuration of I/O lines for 
+alternate functionality.
+
+Debug tip - recheck the gpio configuration registers to 
+see what values they have.
+
+###
+
+Configuration overriding -- 
+
+dump out all the required register contents before you 
+begin the transmission.
+
+>> Case 2: Master is send data but slave is not receiving data.
+
+Not pulling down the slave select pin to ground before sending 
+data to the slave.
+
+GPIOs are not properly configured for Alternate functionality.
+
+Probe the AF registers..
+
+peripheral IRQ number in the NVIC.
+
+SPI interrupts are not getting interrupt.
+
+Not enablign the TXE or RXNE interrupt. 
+
+NOt enabling the peripheral IRQ number in the NVIC.
+
+Probe the NVIC interrupt mask register to see whether the bit 
+position corresponding to the IRQ number is set or not.
+
+Analyzer is producing right data but slave is getting different data.
+
+Using Long wires in high frequency communication.
+
+-- Signal delays - may interpret the data differently.
+
+Debug -- shorter wires or reduce the SPI serial frequency to 
+500KHZ to check things well. 
+
+Use logic analyzer to debug the issue. 
+
+###
+
+
+
+
+
+
+
+
+
