@@ -33,7 +33,6 @@ void delay(uint32_t delay_val);
 
 SPI_Handle_t spi2;
 uint8_t ReadByte;
-uint8_t RcvBuff[100];
 
 void gpio_spi_inits()
 {
@@ -113,8 +112,6 @@ uint8_t RxContFlag = 0;
 
 int main()
 {
-	char user_data[] = "Hello World";
-	uint32_t len = 0;
 	initialise_monitor_handles();
 	gpio_spi_inits();  //AF functions enabled
 	printf("gpio spi init done!\r\n");
@@ -125,6 +122,7 @@ int main()
 	SPI_SSOEControl(SPI2, ENABLE); //enable Hardware based Slave Select from Master MCU.
 	printf("SPI_SSOEControl done!\r\n");
 
+	uint8_t commandCode = COMMAND_SENSOR_READ;
 
 
 	while(1)
@@ -132,8 +130,9 @@ int main()
 		if(GPIO_ReadFromInputPin(GPIOC, 13))
 		{
 			delay(250 * 1000);
+			SPI_IRQInterruptConfig(IRQ_SPI2, ENABLE);
 			SPI_PeriControl(SPI2, ENABLE); // Very important this makes the SPI enable bit to 1.
-			SPI_SendData(SPI2, (uint8_t *)user_data, len);  //data send here.
+			SPI_SendData(SPI2, &commandCode, 1);
 			RxContFlag = 1;
 			while(RxContFlag == 1)
 			{
@@ -161,35 +160,10 @@ void SPI2_IRQHandler()
 
 void SPI_ApplicationEventCallback(SPI_Handle_t *pSPIHandle, uint8_t event)
 {
-	static uint8_t  rcv_start = 0;
-	static uint8_t  i = 0;
 
 	if(event == SPI_EVENT_RX_COMPLETE)
 	{
-		if(ReadByte == 0XF1)
-		{
-			rcv_start = 1;
-		}
-		else
-		{
-			if(rcv_start)
-			{
-				if(ReadByte == '\r')
-				{
-					RxContFlag = 0;
-					rcv_start = 0;
-					RcvBuff[i++] = ReadByte;
-					i = 0;
-				}
-				else
-				{
-					RcvBuff[i++] = ReadByte;
-				}
-
-			}
-
-		}
-
+        printf("Received something\r\n");
 	}
 }
 

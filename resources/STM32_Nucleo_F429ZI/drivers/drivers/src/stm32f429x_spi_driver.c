@@ -306,7 +306,7 @@ void SPI_IRQHandling(SPI_Handle_t *pSPIHandle)
 	status_register_val = pSPIHandle->pSPIx->SPI_SR & ( 0x1 << SPI_SR_TXE);
 	control2_register_val = pSPIHandle->pSPIx->SPI_CR2 & ( 0x1  << SPI_CR2_TXEIE);
 
-	if( status_register_val & control2_register_val)
+	if( status_register_val && control2_register_val)
 	{
 		spi_txe_interrupt_handle(pSPIHandle);
 	}
@@ -314,14 +314,14 @@ void SPI_IRQHandling(SPI_Handle_t *pSPIHandle)
 	status_register_val = pSPIHandle->pSPIx->SPI_SR & ( 0x1 << SPI_SR_RXNE);
 	control2_register_val = pSPIHandle->pSPIx->SPI_CR2 & ( 0x1  << SPI_CR2_RXNEIE);
 
-	if( status_register_val & control2_register_val)
+	if( status_register_val && control2_register_val)
 	{
 		spi_rxne_interrupt_handle(pSPIHandle);
 	}
 
 	status_register_val = pSPIHandle->pSPIx->SPI_SR & ( 0x1 << SPI_SR_OVR);
 	control2_register_val = pSPIHandle->pSPIx->SPI_CR2 & ( 0x1  << SPI_CR2_ERRIE);
-	if( status_register_val & control2_register_val)
+	if( status_register_val && control2_register_val)
 	{
 		spi_ovr_err_interrupt_handle(pSPIHandle);
 	}
@@ -414,7 +414,9 @@ void SPI_CloseReception(SPI_Handle_t *pSPIHandle)
 	pSPIHandle->rxState = SPI_READY;
 }
 
+#if 0
 __attribute__((weak)) void SPI_ApplicationEventCallback(SPI_Handle_t *pSPIHandle, uint8_t event)
 {
 	// weak callback - overridden by the user application
 }
+#endif
