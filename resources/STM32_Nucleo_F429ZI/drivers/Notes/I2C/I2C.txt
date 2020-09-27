@@ -1,0 +1,170 @@
+Inter Integrated Circuit - I2C Protocol.
+
+I2C -- 
+
+serial data communication between Integrated circuits.
+
+I2C protocol details -- 
+how data should be sent, how data should be received
+how hand shaking should happen between sender and receiver,
+error handling are complex than SPI. 
+In other words SPI is simple protocol compared to I2C.
+
+SPI - specificiation 
+
+I2C - NXP - 
+
+
+For SPI there is no dedicated spec but TI and motorola have 
+their own spec.
+
+I2C protocol - multi master capable.
+SPI has no guidelines to achieve this, but depends on 
+MCU designers. 
+
+STM SPI peripherals can be used in multi master configurations 
+but arbitration should be handled by software code.
+
+ACK - I2C hardware automatically ACKs every byte received.
+SPI does not support any automatic ACKing.
+
+I2C needs just 2 pins for the communication.
+SPI consumes more pins when more slaves are involved.
+
+I2c - just 2 pins -- 
+SCL and SDA 
+
++Vcc - pulled to VCC using pull up resistor to SDA and SCL.
+
+Addressing -- 
+
+I2C master talks to slaves based on slave address - 
+whereas in SPI dedicatd pin is used to select the slave.
+
+Communication - 
+I2C is half duplex whereas SPI is full duplex.
+
+For I2C the max speed is 4Mhz in ultra speed plus.
+For STM microcontrollers the max speed is just 400 KHZ.
+For SPI max speed is its Fpclk/2. That means if the peripheral
+clock is 20Mhz, then speed can be 10Mhz.
+
+In i2c slave can make master wait by holding the clock down
+if it is busy, thanks to clock stretching feature of I2C.
+But in SPI, slave has no control over clock, programmers 
+may use their own trick to overcome this situation.
+
+Data rate -- 
+number of bits transferred from sender to receiver in 1 sec 
+is very much lesser in I2c compare to SPI.
+
+I2C - low data rate - gathering data from sensors.
+
+periphear clock of 40Mhz, then in I2c -- 400Kpbs you can achieve max.
+
+SPI is 50 times faster than I2C.
+
+###
+I2C bus terminology --
+
+transmitter - device which sends data to the bus
+receiver - device which receives data from the bus
+master - the device which initiates a transfer generates clock 
+signals and terminates a transfer.
+Slave - the device addressed by a master
+Multi-master -more than one master can attempt to control the bus 
+at the same time without corupting the message.
+
+Arbitration - procedure/technique to ensure that, if more than one master 
+simultaneoulsy tries to control the bus, only one is allowed 
+to do so and the winning message is not corrupted.
+
+Synchronization - procedure to synchronize the clock signals of 
+two or more devices.
+
+
+Data transfer is initiated by the master.
+###
+
+I2C - SDA and SCL signals -
+
+Both SDA and SCL are bi-directional lines connected to a positive 
+supply voltage via pull up resistor. When the bus is free, 
+both lines are held at high.
+
+The output stages of device ocnnected to the bus must have an 
+open drain or open collector configuration.
+
+The bus capacitance limites the number of interfaces connected to 
+the bus.
+
+###
+
+I2C Pin configuration -- 
+
+Whenever you face problems in I2C, probe the 
+SDA and SCL line after i2c initilization.
+It must be held at high ( 3.3 V or 1.8 V
+depending up on IO voltage levels of your board).
+
+###
+I2C modes 
+###
+
+Standard mode -- upto to 100Kbps
+Fast mode -  upto to 400kbps
+Faster mode + - upto 1 Mbps 
+High speed mode - 3.4 Mbps -- not supported by STM32F4x.
+
+#####################
+
+Standard mode and fast mode - 
+
+Standard mode - max - 100kbps 
+-- when first i2c spec was released.
+
+standard mode device however are not upward compatible;
+they cant communicate with devices of fast mode or above.
+
+##
+Features of fast mode -- 
+upto 400Kbps 
+-- 0 to 100kbps in I2c 
+-- 
+
+configuring the i2c mode is very important.
+
+### Basics of I2C protocol 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
