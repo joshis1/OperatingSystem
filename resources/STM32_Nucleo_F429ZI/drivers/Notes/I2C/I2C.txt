@@ -421,6 +421,168 @@ CCR and CR2 --
 FREQ and CCR -- 
 
 
+I2C serial clock - SCL control settings.
+
+I2C peripheral, CR2 and CCR registers are used 
+to control the I2C serial clock settings 
+and other i2c timings like setup time and hold time.
+
+CR2 and CCR registers - 
+
+
+CR2 -- 
+FRQ[5:0] - APB2 - Peripheral clock frequency.
+
+APB1 -- prescaler - 16Mhz -- CR2_FREQ = 16 Mhz.
+
+
+CCR --  
+
+
+Standard mdoe, generate a 100 Khz SCL frequency
+APB1 Clock = 16 Mhz.
+
+
+I2C mode selection - standard mode or fast mode.
+
+FREQ field -- 16 Mhz. 
+
+Calculate and program CCR value of CCR field. 
+
+
+SM =
+
+SCLCK = 100 Khz 
+
+time period == 10 micro seconds.
+
+50 % deuty cycle   us 
+
+5 * 10 ^ -6 = CCR * 62.5 * 10^-9 
+
+CCR = 80 = 0x50
+
+
+##
+
+200 kHZ SCL freq -- 
+
+FM mode - 
+select the duty cycle - fast mode. 
+
+FOR SM - 50 % duty cycle.
+
+Fast mode -- 
+Tlow = 2 T- high
+
+Tlow = 1.8 T- high
+
+Program the Freq field of CR2 with the value of PCK2
+
+T high + T low = 3 * CCR * TPCLK1 
+
+CCR == 26
+
+If duty = 1, 
+
+T high + T low = 25 * CCR * TPCLK1
+#################
+
+I2C -- 
+recommended value of Thigh and Tlow -- 
+Specification Table 10 -- 
+
+Tlow - min 4.7 -- standard mode.
+
+Thight = min  4.0 -- standard mode
+
+###
+Fast mode - 1.3 micro seconds 
+--- 0.6 micro seconds.
+
+#########################
+
+5 * 10 ^-3  * 10 * -3 
+
+= 5 * 10^ -6 
+
+1/16 = 62.5 * 10 ^-3 * 10^-6 = 62.5 * 10^-9
+
+######################################
+
+I2C_Init() 
+--->
+Clock Stretching --
+
+means that holding the clock to 0 
+or ground level.
+
+The moment clock is held at low, 
+then the whole I2C interface pauses 
+until clock is given up to its normal 
+operation level.
+
+Use of clock stretching -- 
+
+master or slave -- slow down the 
+communication by stretching SCL to low,
+which prevent the clock to rise high 
+again and the i2c communication 
+stops for a while.
+
+I2C slave is not able to co-operate with 
+the clock speed given by the master 
+and needs to slow down a little. 
+
+if slave needs time , then it takes 
+the advantage of clock stretchign,
+and by holding clock at low, it momentary 
+pauses the i2c operation.
+
+###
+
+The slave is not ready for more data, 
+so it buys time by holding the clock 
+low. The master will wait for the clock 
+line to be released before proceeding to 
+the next frame.
+
+###
+
+Enable the clock stretching feature.
+
+Possiblility of clock stretching required.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
