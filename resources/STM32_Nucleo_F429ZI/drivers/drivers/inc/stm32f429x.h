@@ -336,6 +336,16 @@ typedef struct
 #define IRQ_SPI2            (36)
 #define IRQ_SPI3            (51)
 
+#define IRQ_I2C1_EV            (31)
+#define IRQ_I2C1_ER            (32)
+
+#define IRQ_I2C2_EV            (33)
+#define IRQ_I2C2_ER            (34)
+
+#define IRQ_I2C3_EV            (72)
+#define IRQ_I2C3_ER            (73)
+
+
 /** SPI Handling **/
 
 /**Table 129. SPI register map **/
@@ -360,5 +370,22 @@ typedef struct
 #define SPI6   ((SPI_RegDef_t *)SPI6_BASEADDR)
 
 
+typedef struct
+{
+	_VO uint32_t I2C_CR1;    //     - address offset   0x00
+	_VO uint32_t I2C_CR2;   // -  address offset   0x04
+	_VO uint32_t I2C_OAR1;     //- address offset   0x08
+	_VO uint32_t I2C_OAR2;    //- address offset   0x0C
+	_VO uint32_t I2C_DR;      //- address offset   0x10
+	_VO uint32_t I2C_SR1;      //- address offset   0x14
+	_VO uint32_t I2C_SR2;      //- address offset   0x18
+	_VO uint32_t I2C_CCR;      //- address offset   0x1C
+	_VO uint32_t I2C_TRISE;      //- address offset   0x20
+	_VO uint32_t I2C_FLTR;      //- address offset   0x24
+}I2C_RegDef_t;
+
+#define I2C1   ((I2C_RegDef_t *)I2C1_BASEADDR)
+#define I2C2   ((I2C_RegDef_t *)I2C2_BASEADDR)
+#define I2C3   ((I2C_RegDef_t *)I2C3_BASEADDR)
 
 #endif /* STM32F429X_H_ */

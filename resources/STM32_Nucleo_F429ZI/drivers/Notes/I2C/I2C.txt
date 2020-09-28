@@ -1,3 +1,4 @@
+
 Inter Integrated Circuit - I2C Protocol.
 
 I2C -- 
@@ -135,6 +136,299 @@ upto 400Kbps
 configuring the i2c mode is very important.
 
 ### Basics of I2C protocol 
+
+
+Data is always initiated by the master.
+
+Master first producing the start condition - 
+
+Start condition - S -- 
+
+Address phase - 7 bits + R/W(low active).
+
+R/W = 0 means write i.e. transmission.
+1 = read .
+
+ACK  
+
+D7--D0 --
+ACK 
+
+P - Stop bit.
+
+Every byte put on the SDA line must be 8 bits long.
+Each byte must be followed by an acknowledge bit.
+Data is transferred with the MSB first.
+
+When slave receives 1 byte which is data the 
+slave is going to send the ACK.
+
+#####
+R/W- --
+1- means Read , indicates request for data. - READ.
+
+ACK is given by the master. 
+
+Stop condition - releases the bus.
+Other master can initiate the communication.
+
+START and STOP conditions -- 
+
+Transactions begin with a START (s) 
+and are terminated by a STOP (P).
+
+A high to low transition on the SDA line while 
+SCL is high defines a START condition.
+
+A low to high transition on the SDA line 
+while sCL is high defines a stop condition.
+
+During ACK, the SDA is pulled low - 
+--
+Master - repeated Start -- 
+basically to read the data.
+#########################
+
+START and STOP conditions are always generated 
+by the master.
+The bus is considered to be busy after the start 
+condition.
+
+The bus is considered to be free again a certain 
+time after the STOP condition.
+
+When the bus is free another master ( if present)
+can get the chance to claim the bus.
+
+The bus stays busy if a repeated START (Sr) 
+is generated instead of a STOP condition. 
+
+Most of the MCU's i2c peripheral support both 
+master and slave mode. You need not to configure
+the mode because when the peripheral generates 
+the start condition it automatically becomes 
+the master and when it generates the stop condition
+it goes back to slave mode.
+
+#########
+
+I2C Address  phase - 
+
+SDA 
+SCL 
+##
+ACK - 
+The transmitter releases the SDA line during 
+the acknowledge clock pulse so the receiver 
+can pull the SDA line low and it remains stable 
+low during the high period at this clock pulse.
+
+The ACK takes place after every byte 
+The ACK bit allows the receiver to signal the 
+transmitter that the byte was successfuly 
+received and another byte may be sent. 
+
+The master generates all clock pulses, including 
+the acknowledge ninth clock pulse.
+
+SCL 1 and SDA 0 -- ACK 
+
+SCL 1 and SDA 1 -- NACK 
+
+## Data validity -- 
+
+The data on the SDA line must be stable 
+during the HIGH period of the clock. The 
+HIGH or LOW state at the data line can only 
+change when the clock signal on the SCL line 
+is low. One clock pulse is 
+generated for each data bit  
+transferred. This is not 
+applicable for start and stop 
+transition. 
+
+Repeated start without stop.
+
+MCU -- EEPROM  ( slave)
+
+Write followed by READ.
+
+or 
+Read followed by Write -- 
+
+-->> Start -- write 
+-- > repeat start - read 
+-=--> finally stop.
+
+#############
+I2C peripherals of your MCU --
+
+APB1 - I2C1, I2C2, I2C3 -- 
+
+SDA -- noise filter -- data control
+
+SCL -- noise filter == clock control..
+
+Only one data register --> data shift register.
+
+
+write to data register --
+
+gets copied to data shift register.
+Half duplex so only one data register.
+
+when the data received. -- it goes to 
+data shift register when 1 byte is received.
+
+the data is moved from shift register to the 
+data register. The data register is then read.
+
+## Master mode or slave.
+
+In slave mode -- 
+the slave address in own address register.
+
+Clock Control register is controlled by 
+CCR, CR1 and CR2 -- register - 
+status registers -- SR1 and SR2 ..
+
+Control logic --> DMA and Interrupts.
+
+#############
+
+I2C driver development - 
+
+11th May 2019
+
+i2c_driver.c 
+i2c_driver.h 
+
+Driver API requirements and user 
+configurable items.
+I2C Driver -- 
+
+I2C initialization
+I2C master Tx 
+I2C master Rx 
+
+I2C slave Tx
+I2C Slave Rx 
+I2C Error Interrupt handling 
+I2C Event Inerrupt handling.
+
+Configurable items for user application.
+
+I2C SCL speed
+
+I2C Device Address 
+
+I2C ACK Control .
+-- automatic ACK enable or disable.
+
+I2c FMDutyCycle.
+-- if speed is more than 100kbps 
+then it is fast mode. 
+What should be the duty cycle of the 
+clock when the speed is more than
+100kbps that is fast mode.
+
+create stm32f4xx_i2c_driver.c 
+and stm32f4xx_i2c_driver.h 
+
+- I2C periperhal register def struct
+-- I2C base address macros
+-- I2c peripheral definition macros.
+-- macros to enable and disable 
+i2c peripherla clock.
+-- bit position definitions of i2c 
+peripheral.
+
+I2C_Config_t 
+
+uint32_t I2c_sclSpeed;
+uint8_t I2c_deviceAddress;
+uint8_t I2C_ACKControl;
+uint16_t  I2C_FMDutyCycle;
+
+struct
+{
+  I2C_RegDef_t 
+  I2C_Config_t 
+
+}Handle;
+
+options for I2c_SCL_Speed 
+
+@I2C_SCL_SPEED
+
+#define I2c_SCL_SPEED_Standard_MODE    100000
+#define I2c_SCL_SPEED_FAST_MODE_4k     400000
+#define I2c_SCL_SPEED_FAST_MODE_2k     200000
+
+@I2cDeviceAddress 
+
+@ACK_Control 
+
+#define I2c_ACK_ENALBE   1
+#define I2c_ACK DISABLE   0
+
+@DutyCycle -- of the serial clock in fast mode.
+
+#define I2c_FM_DUTY_2             (0)
+#define I2c_FM_DUTYE_16_9         (1)
+
+API prototypes -- 
+
+void I2C_PeriClockControl
+
+void I2C_Init
+void I2c_DeInit()
+
+Data send and receive..
+
+I2C_InterruptConfig
+I2c_IRQPriorityCOnfig.
+
+I2c_Peripherlal Control.
+I2C_GetFlagStatus
+
+
+void I2c_ApplicationEventCallback(
+
+##3
+i2cInit -- steps --
+
+1) Configure the mode - standard or fast.
+2) Configure the speed of the serial clock - SCL 
+3) Confiure the device address - Applicable when device is 
+slave.
+4) Enable the ACking.
+5) Configure the rise time for I2c Pins ..
+
+time required from ground to Vcc - slew rate.
+
+All these configuraiton must be done when the 
+peripheral is disabled in the control register.
+
+void I2c_Init(I2cReg_De_t )
+{
+
+}
+
+Configure the speed of the Serial clock.
+
+CCR and CR2 -- 
+FREQ and CCR -- 
+
+
+
+
+
+
+
+
+
+
 
 
 
