@@ -659,6 +659,31 @@ and duty = 1
 
 #####################################
 
+Transfer sequence diagram for master transmitter .
+
+S -- Start -- 
+EV5 -- SB=1 Start bit = 1, cleared by reading SR1 register 
+followed by writing DR register with address. 
+
+Address phase -- 1 byte - 7 bits + 1 R/W.
+
+Ack/NACK.
+
+ACK - EV6 -- ADDR =1, cleared by reading SR1 register followed by 
+reading SR2.
+
+EV8_1 -- TxE =1, shift register empty, data register empty, write 
+Data1 in DR.
+EV8: TXE=1, shift register not empty, data register empty, cleared by 
+writing DR register.
+
+-EV8_2 - TXE=1, BTF=1, Porgram stop request, TxE and BTF are cleared by 
+hardware by the stop condition.
+
+BTF - byte transfer finished.
+
+
+
 
 
 
