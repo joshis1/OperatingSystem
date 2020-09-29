@@ -152,3 +152,35 @@ uint8_t I2C_GetFlagStatus(I2C_RegDef_t *pI2Cx, uint8_t flag)
 
 	return 0;
 }
+
+/**CCR value **/
+/**
+ *  Page - 873 - Reference Manual
+ *
+ * if Duty = 0 and Fast Mode
+ * T high = CCR * T pclk1
+ * T low =  2 * CCR * T pclk1
+ *
+ * T high + T low = 3 CCR * T pclk1
+ * T pclk is APB1 - peripheral
+ * Tpclk we are configuring is 1/16Mhz since we are using HSI.
+ * Tpclk = 62.5 * 10^-9
+ * Let's say we want Clk to be 100Khz.
+ * 1/100Khz is T high + T low
+ * 5 *10^-6 = 3 * CCR * 62.5 * 10 ^ -9
+ * 0.02666 * 10^3 = CCR
+ * 26 = CCR
+ * or in hex = 0x1A
+ *
+ * **************************************************
+ *  If Standard Mode
+ *  T high = CCR * T pclk1
+ *  T low = CCR * T pclk1
+ * T high + T low = 2 CCR * T pclk
+ * we want Clk to 100Khz
+ * 5 *10- ^ -6 = 2 CCR * 62.5 * 10 ^ -9
+ * 0.04 *10 ^-6 = CCR * 10 ^ -9
+ * 40 = CCR
+ * or in hex = 0x28
+ *
+ */
