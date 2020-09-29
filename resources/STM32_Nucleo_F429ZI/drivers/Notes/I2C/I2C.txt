@@ -553,9 +553,111 @@ Enable the clock stretching feature.
 
 Possiblility of clock stretching required.
 
+I2C_Init(
+
+uint32_t tempReg = 0;
+
+tempReg |= pI2CHandle-> ACKControl << 10;  // CR1
+p2Ic2CHandle->CR1 = tempReg;
+
+tempReg = 0; 
+
+// CR2_FREQ
+tempReg == RCC_GETValuPck1Value/1000000U; i.e. 16.
+p2Ic2CHandle-CR2 = tempReg & 0x3F;
+
+tempReg = I2DeviceAddress << 1;
+->OAR1 = tempReg;
+tempReg |= ( 1 << 14);
+// CCR calculations.
+
+uint16_t ccr_value = 0;
+tempReg = 0;
+if SCL_Speed <= I2C_SM
+{
+   CCR = 16/2 * I2CSCLSPEED;
+   ccr_value = (RCC_GetPCLK1Value() / ( 2 * pI2CHandle->I2C_Config.I2C_SCLSpeed ) );
+tempReg |= ccrValue & 0xFFF;   
+}
+else
+{
+   //fastMode;
+   tempReg |= 0x1 << 15;
+   tempReg | = DutyCycle << 14;
+   if( duty == 0)
+   cir = fpclk/(3 *fscl);
+   
+   else 
+   
+   cir = fpclk/(25 * fscl);
+   
+   
+}
+
+CCR = tempReg;
+
+// Trise Register -- 
 
 
 
+CCR = Fpclk/(2 *Fscl);
+
+
+
+
+
+
+CR2 -- Freq[5:0] - 
+
+
+uint16_t AHB_Prescala[8] = {2,4,8,16}
+
+uint32_t RCC_GetPCK1Value()
+{
+   Bits 3:2 - 
+   
+   SWS - system clock switch -- 
+   uint8_t clk_Src -- 
+   
+   clksrc = RCC->CFGR >> 2 & 0x3;
+   if(clksrc == 0)
+   SystemClk = 16000 000;
+   if(clksrc == 1)
+   systemcklk = 8000 0000;
+   
+   if( clksrc == 2)
+   {
+     systemclk = RCC_GetPLLOutputClok();
+   }
+   
+   temp = RCC->CFGR  >> 4  &  0XF;
+   if( temp < 8)
+   {
+     ahb = 1;
+   }
+   ahb = AHB_PreScalar[temp -8 ];
+  
+
+}
+
+
+// ack control bit // CR1
+// Freq field of CR2
+/// device own address - oAR1 
+
+//CCR value - 
+
+SM 
+
+and 
+
+FM 
+-- duty = 0 
+
+
+and duty = 1
+
+#####################################
 
 
 

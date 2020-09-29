@@ -83,7 +83,7 @@
  * I2C - CCR
  *
  */
-#define I2C_CCR                            (0) /**[11:0] **/
+#define I2C_CCR_BIT                        (0) /**[11:0] **/
 #define I2C_DUTY                           (14) /**[11:0] **/
 #define I2C_F_S                            (15)
 
@@ -113,8 +113,8 @@ typedef struct
  * @I2C_SclSpeed
  */
 #define I2C_SCL_SPEED_STANDARD_MODE       (100000) /**100Kbps **/
-#define I2C_SCL_SPEED_STANDARD_MODE_4k    (400000) /**400Kbps **/
-#define I2C_SCL_SPEED_STANDARD_MODE_2k    (200000) /**200Kbps **/
+#define I2C_SCL_SPEED_FAST_MODE_4k    (400000) /**400Kbps **/
+#define I2C_SCL_SPEED_FAST_MODE_2k    (200000) /**200Kbps **/
 
 /**
  * @I2C_ACKControl
@@ -169,5 +169,7 @@ void I2C_PeriControl(I2C_RegDef_t *pI2Cx, uint8_t EnOrDi);
 uint8_t I2C_GetFlagStatus(I2C_RegDef_t *pI2Cx, uint8_t flag);
 
 __attribute__((weak)) void I2C_ApplicationEventCallback(I2C_Handle_t *pI2cHandle, uint8_t event);
+
+uint64_t RCC_GetAPB_PClkValue();
 
 #endif /* INC_STM32F429X_I2C_DRIVER_H_ */
