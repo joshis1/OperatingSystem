@@ -789,6 +789,114 @@ static void I2C_ClearADDRFlag(pI2cx)
 
 ###
 
+I2C pull up resistance, Rise time and bus capacitance 
+discussion.
+
+Pull up Resistor -- Calculation --
+
+Rp(min) = (Vcc - Vol(max))/ Iol
+
+Vol - Low level output voltage.
+
+Iol - Low level output voltage.
+
+I2C verification - Table 9.
+
+Vol1 -- 0./4 
+Iol - 3 milli amperes.
+
+Rp ( max) = tr/(0.8473 * Cb) 
+
+tr -  rise time of both SDA and SCL signals.
+
+Cb - capacitance load for each bus line.
+
+--> 
+tr -- 30% voltage and 70 % voltage. 
+
+tr is proportional to Rc constant.
+
+tr should be 1000 nano seconds  - maximum 
+threshold - standard mode.
+
+lower value of pull up resistors , decreases 
+tr (good) but they also lead higher current 
+consumption (bad).
+
+more current will flow -- more current consumption 
+for low power application..
+Calculate the resistance value.
+
+Bus capacitance. 
+
+that the voltage level on the signal line 
+can't change instantaneoulsy. 
+
+Accidental I2C bus capaciatance
+With the bigger length - more capacitance.
+
+more devices connected then it will cause more 
+capacitance.
+
+calculate the pull up resistor - 
+
+For fast-mode i2c communicaiton with the following 
+parameters.
+Cb = 150 pico Farad,
+Vcc = 3.3 V
+4 devices -- 
+
+
+capacitance means that the voltage level on the signal
+line (data or clock) can't change instantaneoulsy.
+
+Rp(min) = (3.3 - 0.4) / (3 * 10^-3)
+ = 966 ohms.
+ 
+Rp (max) = 300 * 10^-9/0.8472 * 150 * 10 ^ -12
+  = 2.3 K ohms.
+  
+966 ohms < Rp < 2.3 Kohms.
+
+#################
+
+T rise -- 
+
+I2C_TRISE --
+
+TRISE[5:0] -- 
+
+maximum SCL rise time given in the 
+I2C bus - 
+Trise/Tpclk1 - 
+
+Trise(max)/Tpclk1  
+
+or Trise[5:0] = (Trise(max) * Fpclk1) + 1
+
+Rise time max in Standard mode is 1000 ns.
+
+I2C Init -- 
+
+// Standard Mode -- 
+tempreg = RCC_GETPCLk1Value()/ 1000 * 1000 + 1;
+
+1 microseconds.
+1/1000 * 1000 
+//fastmode -- 
+
+()RCC_GETPCLk1Value * 300)/1000 * 1000 + 1;
+
+
+ITRISE = tempREg & 0x3F
+
+
+ 
+
+
+
+
+
 
 
 
