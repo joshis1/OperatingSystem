@@ -168,6 +168,8 @@ void I2C_PeriControl(I2C_RegDef_t *pI2Cx, uint8_t EnOrDi);
 
 uint8_t I2C_GetFlagStatus(I2C_RegDef_t *pI2Cx, uint8_t flag);
 
+void I2C_MasterDataSend(I2C_Handle_t *pI2CHandle, uint8_t *pTxBuffer, uint32_t len, uint8_t slaveAddr);
+
 __attribute__((weak)) void I2C_ApplicationEventCallback(I2C_Handle_t *pI2cHandle, uint8_t event);
 
 uint64_t RCC_GetAPB_PClkValue();

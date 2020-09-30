@@ -683,7 +683,111 @@ hardware by the stop condition.
 BTF - byte transfer finished.
 
 
+void I2C_MasterDataSend(I2Chandle_t , uint8_t *pTxbuffer, uin32_t len, uint8_t slaveAddr)
+{
+ //1. Generate the Start condition
+ //2. Confirm that start generation is completed by 
+ // checking the SB flag in the SR1 
+ // Note: Until SB is cleared SCL will be stretched 
+ (pull to low)
+ 
+ //3. Send the address of the slave with r/nw bit 
+ set to w(0) (total 8 bits)
+ 
+ //4. Confirm that address phase is completed by checking 
+ the ADDR flag in the SR1.
+ // 5. Clear the ADDR flag according to its software 
+ sequence
+ // until ADDr is cleard SCL will be streteched 
+ (pulled to low)
+ //6. Send the data until len becomes 0.
+ //7. When len becomes zero wait for TXE=1 and BTF=1
+ before generating the STOP condition 
+ //NOTE TXE=1 , BTF=1, means that both SR and 
+ DR and empty and next transmission should begin 
+ when BTF=1  SCL will be stretched ( pulled ot low)
+ //8. Generate the STOP condition and master need 
+ not to wait for the completion of stop condition.
+ // Note. generating stop, automatically clears the BTF.
+ 
+}
 
+/**I2C related status flag definitions **/
+SR1 - SB 
+-- BTF 
+#define I2C_TXE_FLAG ( 1 << I2C_SR1_TXE)
+#define I2C_RNXE_FLAG ( 1 << I2C_SR_RXNE)
+
+Timeout or Tlow error - SCL remained low for 25 ms - 
+timeout.
+Master cummulative extend Time low is 10 milliseconds.
+
+--> When set in master mode, stop condition sent by 
+hardware.
+
+
+I2C_GenerateStartCondition(pI2CHandle->pI2cx);
+while(!I2C_GetFlagStatus(pI2CHandle->pI2cx, I2C_FLAG_SB);
+
+I2C_ExecuteAddressPhase
+
+
+
+
+I2C_GenerateStartCondition(I2C_RegDef_t *pI2C)
+{
+   CR1 -- bit 8 
+   
+   pI2C-CR1 |=  0x1 << 8;
+}
+
+I2C_ExecuteAddressPhase(I2cxx, SlavAddress);
+//confirm the address phase is completed by checking 
+the AddR flag in the SR1.
+while(!I2C_GetFlagStatus(pI2xc, I2c_FLAG_ADDR);
+
+I2C_ClearADDRFlag();
+
+Send the data until len becomes 0.
+
+while( len >0)
+{  
+  while(! TXE);
+  pI2cx->DR = *pTxBuffer;
+  pTxBuffer++;
+  len--;
+}
+//7. when len = 0, wait for Txe=1 and BTF=1 
+before generating the STOP condition.
+TXE=1, BTF=1 , means that both SR and DR are empty 
+and next transmission shoujld begin when 
+BTF=1 SCL will be stretched ( pulled to low)
+
+While(  TXE);
+while BTF);
+
+I2C_GenerateStopCondition(I2C_RegDef_t )
+{
+   CR1 |= 0x1 << 9;
+}
+
+
+static void I2C_ExecuteAddressPhase(pI2c, uint8_t slaveAddre)
+{
+  //7 bit slave address moved by 1.
+  SlaveAddr = SlaveAddr << 1;
+  slavAddr &= ~(1);  //bit 0 means -- write.
+  pI2cx->Dr = SlaveAddr;
+  
+}
+
+static void I2C_ClearADDRFlag(pI2cx)
+{
+   uint32_t dummyRead = pIc2x->SR1;
+   dummyRead = pI2cx->SR2;
+}
+
+###
 
 
 
