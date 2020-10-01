@@ -58,8 +58,8 @@ void I2C_Init(I2C_Handle_t *pI2CHandle)
 	uint16_t ccrValue;
 
 	/** CR1 **/
-	tempReg |= pI2CHandle->i2c_pinConfig.I2C_ACKControl << I2C_CR1_ACK;
-    pI2CHandle->pI2Cx->I2C_CR1 = tempReg;
+	tempReg = pI2CHandle->i2c_pinConfig.I2C_ACKControl << I2C_CR1_ACK;
+    pI2CHandle->pI2Cx->I2C_CR1 |= tempReg;
 
     /** CR2 - Freq **/
     tempReg = 0;
@@ -100,6 +100,26 @@ void I2C_Init(I2C_Handle_t *pI2CHandle)
     }
 
     pI2CHandle->pI2Cx->I2C_CCR = tempReg;
+
+    //Trise - settings
+
+    tempReg = 0;
+
+    /** For max Trise value - check I2C specifications -
+     * Table 10. Characteristics of the SDA and SCL bus
+     * lines for Standard, Fast, and Fast-mode Plus I2C-bus devices **/
+    if( pI2CHandle->i2c_pinConfig.I2C_SclSpeed == I2C_SCL_SPEED_STANDARD_MODE)
+    {
+    	//Standard Mode -- 100Kbps -- 1000 nano seconds.
+    	tempReg =  (RCC_GetAPB_PClkValue() / (1000 * 1000)) + 1;
+    }
+    else
+    {
+    	//fast Mode - 300 nano seconds
+    	tempReg =  ((RCC_GetAPB_PClkValue() * 300)/(1000 * 1000 * 1000)) + 1;
+    }
+
+    pI2CHandle->pI2Cx->I2C_TRISE = tempReg & 0x3F; // [5:0] 6 bits
 
 }
 

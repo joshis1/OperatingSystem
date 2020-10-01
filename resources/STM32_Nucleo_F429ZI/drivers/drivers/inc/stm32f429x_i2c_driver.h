@@ -87,20 +87,14 @@
 #define I2C_DUTY                           (14) /**[11:0] **/
 #define I2C_F_S                            (15)
 
-/**********************************************************
- *
- * I2C - TRISE
- *
- */
-#define I2C_TRISE                        (0) /**[5:0] **/
 
 
 typedef struct
 {
 	uint32_t  I2C_SclSpeed; /*@I2C_SclSpeed **/
-	uint8_t   I2C_DeviceAddress; /**Provided by the user when in slave mode **/
+	uint16_t   I2C_DeviceAddress; /**Provided by the user when in slave mode **/
 	uint8_t   I2C_ACKControl; /*@I2C_ACKControl **/
-	uint16_t  I2C_FMDutyCycle; /*@I2C_FMDutyCycle **/
+	uint8_t  I2C_FMDutyCycle; /*@I2C_FMDutyCycle **/
 }I2C_Config_t;
 
 typedef struct

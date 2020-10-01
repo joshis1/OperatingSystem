@@ -885,14 +885,102 @@ tempreg = RCC_GETPCLk1Value()/ 1000 * 1000 + 1;
 1/1000 * 1000 
 //fastmode -- 
 
+
 ()RCC_GETPCLk1Value * 300)/1000 * 1000 + 1;
 
 
 ITRISE = tempREg & 0x3F
 
 
+ ################
  
+ Use I2C master and I2c slave - Arduino  communication.
+ 
+ 
+ Use I2C SCL = 100 Khz. - standard mode. 
+ User internal pull up resistor for SCL and SDA.
+ 
+ 1) Adruino board
+ 2) ST board.
+ 3) Some jumper wires.
+ -- 
+ 
+ ST board --> I2C Arduino board --> USB 
+ 
+ I2C1 -- 
+ 
+ SDA (PB6) --- A4(Arduino)
+ SCL (PB9) --- A5 (Arduino)
+ 
+ GND to GND 
+ 
+ ###
+ 
+ Arduino -- 001I2CSlaveRxString.ino 
+ 
+ GPIO pins over which I2C1 can communicate.
+ 
+ #################
+ 
+ 0101i2c_master_tx_testing.c
+ 
+int main()
 
+
+I2C1_GPIOInit(void)
+{
+  GPIOB
+  MODE_ALTFN;
+  GPIO_OP_TYPE_OD;
+  PinPudControl = Pin_PU;
+  GPIO_PinAltFuMode = 4;
+  PinSeed = FAST;
+  
+  SCL -- Pin_6;
+  GPIO_INit(&I2cPins);
+  Pin9
+  
+}
+
+I2C_Handle_t i2c;
+
+I2c_Inits(void)
+{
+i2Handle.pI2cx = I2C1;
+ ACKENABLE;
+ DeviceAddres = 0x61; //// 3.1.12 - don't use reserved address
+DutyCycle = FM_DUTY_2;
+I2C_SCL_SPEED = SPEED_SM;
+
+I2Cinit();
+
+}
+ 
+ 
+ uint8_t i2c_data[]= "SJ I2C master tx works!\n";
+ 
+ slave address of Arduino -- 
+ Tools - Serial monitor -- 0x068
+
+
+GPIO_ButtonInit();
+I2C1_GPIOInits();
+
+i2cPeriColockControl(pI2c, ENABLE);
+I2C1_Inits();
+I2C_PeripheralControl(I2C1, ENABLE);
+//wait for button press - 
+
+I2C_MasterSendData(&I2Chandle, some_data, strlen(someData), 0x68);
+
+For every byte an ack is received. 
+-- 
+
+PB-9 - Data sheet - normal GPIO.
+-- User Manual of the board - 
+User Manual -- PB-9- Audio relatd.
+
+-- SWIM - Single wire interface module.
 
 
 
