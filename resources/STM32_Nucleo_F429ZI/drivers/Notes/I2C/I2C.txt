@@ -982,6 +982,163 @@ User Manual -- PB-9- Audio relatd.
 
 -- SWIM - Single wire interface module.
 
+###
+Master receiving data from Slave.
+
+S- start condition -- master device.
+
+EV5 -- SB=1, cleared by reading SR1 
+register followed by writing DR register.
+
+R/w - bit 0. 
+
+Slave -- ACK -- 
+###
+Address phase is succesful - EV6 - ADDR =1,
+clock will be stretched to low. 
+
+Whenever master sends NACK, Slave stops sending the 
+data.
+
+RxNE=1, cleared by reading DR register.
+
+master - start condition -- 
+
+EV5: SB=1, cleared by reading the SR1, 
+followed by writing DR register.
+
+EV6 -- ADDR=1, cleared by reading SR1 register 
+followed by reading SR2. I
+
+Ev7 - RXNE=1 cleared by DR register.
+EV7_1 - 
+
+When len =2, 
+ACK=0,  -- NACK will be sent .
+STOP =1 
+read DR -  i.e. read the last byte.
+
+Don't send ACK at second last of data. 
+
+EV5 - SB=1, cleared by reading SR1 register followed 
+by writing DR register.
+
+master - Address phase -- 
+send 7 bits address +  1( read bit).
+
+Slave sends the ACK - 1. 
+
+EV6: Addr =1, cleared by reading SR1 register followed 
+by SR2. 
+
+Data1 -- reception - shift register of master will be 
+filled.
+A -- Acknowledge sent by the master 
+
+EV7 - RxNE =1, cleared by reading DR register.
+
+Data2 -- read the data byte. 
+
+master sends the ACK. 
+
+Last data byte -- 
+Master didn't send ACK but it sends NACK -- 
+Master doesn't want more data.
+
+NACK - Indication to the slave to stop sending the data.
+
+P - Stop bit 
+EV7 - reads the last byte.
+
+Flags - pays attention has the capacity to make the 
+clock stretch .
+When the clock stretch - master and slave in the waiting
+byte.
+
+ACK - 1 - indication that send more data.
+
+Read the data from the DR only when RxNe is 1.
+
+##########
+
+Receiving 1 byte -- 
+Ack = 0,
+Addr=1, Stop =1,
+
+NACK --
+
+Addr = 0==> data will be send now.
+
+Don't clear ADDR make ACK = 0, STOP =1 
+then make ADDR = 0. 
+Wait until RxNE=1 and then read.
+
+############
+
+when len = 2, ACK=0, STOP=1, read DR -- 
+Reset the ACK bit -- 
+and the correct place is detected by the len field.
+
+I2C_MasterReceiveData(I2C_Handle , *pRxBuffer, len, slaveAddr)
+{
+  1/ Generate the start condition 
+  2// Confirm that the start generation is  completed 
+by checking the SB fla in the sR1 
+// note - until SB is cleared SCL will be stretched. 
+//pulled to low.
+3// Send the address of the savle with r/nw bit set to 
+R(1) total 8 bits
+//4 .. wait until address phase is completed by 
+checking the ADDR flag in the SR1. 
+//procedure to read only 1 byte from slave.
+
+if (len = 1)
+{
+   //Disabling ACKing
+   //Clear the addr flag 
+   // wait until RXNE becomes 1 
+   // generate STOP condition 
+   
+   // read data in to buffer 
+   return.
+  }
+  
+  if( len  > 1) 
+  {
+    //clear the ADDR flag 
+	
+	// read the data until len becomes zero
+	for( len; i >0; i --)
+	{
+	    if( i == 2) // if last 2 bytes are remaining 
+		{
+		   //clear the ACk bit 
+		   // generate the stop condition
+		}
+		read the data from data register in to buffer.
+		//increment the buffer address 
+		
+   }
+	re-enabling the ACking.
+	
+	
+	
+	
+	}
+  
+  }
+
+}  
+
+
+
+
+}
+
+
+
+
+
 
 
 
