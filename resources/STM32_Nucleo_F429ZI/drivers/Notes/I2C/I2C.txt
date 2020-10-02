@@ -1131,9 +1131,36 @@ if (len = 1)
 }  
 
 
-
-
 }
+
+I2C Master adn I2c Slave 
+
+Use I2C SCL = 100 KHZ standard mode
+User internal pull resistors for SDA and SCL lines.
+
+Sketch - I2cSlaveTxString.ino
+
+Procedure to read the data from Arduino slave.
+
+0x51 - to read the length of the data from the slave.
+
+0x52 -- to read the complete data from the slave.
+
+I2C transactions to read the 1 byte ..
+
+Master -- 0x51 -- write operation to slave. 
+
+ACK bit is not setting - 10 th bit .
+
+ACK - 
+
+PE= 0, you cannot make ACK=1,
+
+I2C_PeripheralControl 
+
+I2C_ManageAck(I2C1, I2C_ACK_ENABLE);
+
+
 
 
 

@@ -1,15 +1,17 @@
 /*
- * 008i2cTx_Arduino_Testing.c
+ * 009i2cRx_Arduino_Testing.c
  *
- *  Created on: 1/10/2020
+ *  Created on: 3/10/2020
  *      Author: sjoshi
  */
+
 
 
 #include "stm32f429x.h"
 #include "stm32f429x_gpio_driver.h"
 #include "stm32f429x_i2c_driver.h"
 #include <string.h>  // for memset and strlen
+#include <stdlib.h>
 
 /**
  *  PB8 - I2C1_SCL  ---   A5 (Arduino)
@@ -18,7 +20,8 @@
 
 I2C_Handle_t i2c_handle;
 
-uint8_t testBuffer[] = "SJ testing I2C works!";
+
+extern void initialise_monitor_handles();
 
 void delay(uint32_t delay_val)
 {
@@ -81,20 +84,31 @@ void i2c_inits()
 
 int main()
 {
+	initialise_monitor_handles();
 	gpio_button_init();
 	gpio_i2c_inits();  //AF functions enabled
 	I2C_PeriClockControl(I2C1, ENABLE);
 	i2c_inits();
 	I2C_PeriControl(i2c_handle.pI2Cx, ENABLE); //Enable I2C peripheral
-	I2C_ManageAcking(i2c_handle.pI2Cx, ENABLE);
-
+	I2C_ManageAcking(i2c_handle.pI2Cx, ENABLE); //Enable Auto Acknowledge
+    uint8_t cmd_len_read_code = 0x51;
+    uint8_t cmd_data_read_code = 0x52;
+    uint8_t read_len_byte = 0;
 
 	while(1)
 	{
 		if(GPIO_ReadFromInputPin(GPIOC, 13))
 		{
 			delay(250 * 1000);
-		    I2C_MasterDataSend(&i2c_handle, testBuffer, sizeof(testBuffer),0x68);
+		    I2C_MasterDataSend(&i2c_handle, &cmd_len_read_code, sizeof(cmd_len_read_code),0x68);
+		    // now Read 1 byte - Read len
+		    I2C_MasterDataReceive(&i2c_handle, &read_len_byte,1,0x68);
+		    uint8_t *pBuffer = malloc(sizeof(read_len_byte));
+
+		    I2C_MasterDataSend(&i2c_handle, &cmd_data_read_code, sizeof(cmd_data_read_code),0x68);
+		    I2C_MasterDataReceive(&i2c_handle, pBuffer,read_len_byte,0x68);
+		    printf("Read message from Slave is %s\r\n", pBuffer);
+		    free(pBuffer);
 		}
 	}
 

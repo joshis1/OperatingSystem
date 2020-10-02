@@ -167,6 +167,8 @@ void I2C_MasterDataSend(I2C_Handle_t *pI2CHandle, uint8_t *pTxBuffer, uint32_t l
 
 void I2C_MasterDataReceive(I2C_Handle_t *pI2CHandle, uint8_t *pRxBuffer, uint32_t len, uint8_t slaveAddr);
 
+void I2C_ManageAcking(I2C_RegDef_t *pI2Cx, uint8_t EnorDi);
+
 __attribute__((weak)) void I2C_ApplicationEventCallback(I2C_Handle_t *pI2cHandle, uint8_t event);
 
 uint64_t RCC_GetAPB_PClkValue();

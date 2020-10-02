@@ -16,7 +16,6 @@ static void I2C_ExecuteWriteAddressPhase(I2C_RegDef_t *pI2Cx, uint8_t slaveAddr)
 static void I2C_ExecuteReadAddressPhase(I2C_RegDef_t *pI2Cx, uint8_t slaveAddr);
 static void I2C_ClearAddrFlag(I2C_RegDef_t *pI2Cx);
 static void I2C_GenerateStopCondition(I2C_RegDef_t *pI2Cx);
-static void I2C_ManageAcking(I2C_RegDef_t *pI2Cx, uint8_t EnorDi);
 
 void I2C_PeriClockControl(I2C_RegDef_t *pI2Cx, uint8_t EnOrDi)
 {
@@ -460,7 +459,7 @@ static void I2C_GenerateStopCondition(I2C_RegDef_t *pI2Cx)
 	pI2Cx->I2C_CR1 |= 0x1 << I2C_CR1_STOP;
 }
 
-static void I2C_ManageAcking(I2C_RegDef_t *pI2Cx, uint8_t EnorDi)
+void I2C_ManageAcking(I2C_RegDef_t *pI2Cx, uint8_t EnorDi)
 {
 	if( EnorDi == ENABLE)
 	{
