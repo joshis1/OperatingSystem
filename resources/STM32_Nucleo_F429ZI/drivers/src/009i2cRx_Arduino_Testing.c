@@ -100,13 +100,16 @@ int main()
 		if(GPIO_ReadFromInputPin(GPIOC, 13))
 		{
 			delay(250 * 1000);
-		    I2C_MasterDataSend(&i2c_handle, &cmd_len_read_code, sizeof(cmd_len_read_code),0x68);
+		    I2C_MasterDataSend(&i2c_handle, &cmd_len_read_code, sizeof(cmd_len_read_code),0x68, ENABLE);
 		    // now Read 1 byte - Read len
-		    I2C_MasterDataReceive(&i2c_handle, &read_len_byte,1,0x68);
-		    uint8_t *pBuffer = malloc(sizeof(read_len_byte));
+		    I2C_MasterDataReceive(&i2c_handle, &read_len_byte,1,0x68 , ENABLE);
+		    uint8_t *pBuffer = malloc(sizeof(uint8_t)* (read_len_byte + 1 ));
 
-		    I2C_MasterDataSend(&i2c_handle, &cmd_data_read_code, sizeof(cmd_data_read_code),0x68);
-		    I2C_MasterDataReceive(&i2c_handle, pBuffer,read_len_byte,0x68);
+		    I2C_MasterDataSend(&i2c_handle, &cmd_data_read_code, sizeof(cmd_data_read_code),0x68, ENABLE);
+		    I2C_MasterDataReceive(&i2c_handle, pBuffer,read_len_byte,0x68, DISABLE);
+		    uint8_t lastIndex = sizeof(uint8_t) * (read_len_byte + 1);
+
+		    pBuffer[lastIndex] = '\0';
 		    printf("Read message from Slave is %s\r\n", pBuffer);
 		    free(pBuffer);
 		}

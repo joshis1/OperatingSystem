@@ -318,46 +318,49 @@ uint64_t RCC_GetAPB_PClkValue()
 }
 
 
-void I2C_MasterDataSend(I2C_Handle_t *pI2CHandle, uint8_t *pTxBuffer, uint32_t len, uint8_t slaveAddr)
+void I2C_MasterDataSend(I2C_Handle_t *pI2CHandle, uint8_t *pTxBuffer, uint32_t len, uint8_t slaveAddr, uint8_t repeated_start)
 {
-	  //1. Generate the start condition
-	  I2C_GenerateStartCondition(pI2CHandle->pI2Cx);
+	//1. Generate the start condition
+	I2C_GenerateStartCondition(pI2CHandle->pI2Cx);
 
-	  //2. Confirm that start generation is completed by checking the SB Flag in the SR1,
-	  // Note: Until SB is cleared SCL will be stretched (pull to low)
-	  while(!I2C_GetFlagStatus(pI2CHandle->pI2Cx, I2C_SR1_SB));
+	//2. Confirm that start generation is completed by checking the SB Flag in the SR1,
+	// Note: Until SB is cleared SCL will be stretched (pull to low)
+	while(!I2C_GetFlagStatus(pI2CHandle->pI2Cx, I2C_SR1_SB));
 
-	  //3. Send the address of the slave with r/nw bit set to w(0) - total 8 bits.
-	  I2C_ExecuteWriteAddressPhase(pI2CHandle->pI2Cx, slaveAddr);
+	//3. Send the address of the slave with r/nw bit set to w(0) - total 8 bits.
+	I2C_ExecuteWriteAddressPhase(pI2CHandle->pI2Cx, slaveAddr);
 
-	  //4. Confirm that address phase is completed by checking the ADDR flag in the SR1.
-	  while(!I2C_GetFlagStatus(pI2CHandle->pI2Cx, I2C_SR1_ADDR));
+	//4. Confirm that address phase is completed by checking the ADDR flag in the SR1.
+	while(!I2C_GetFlagStatus(pI2CHandle->pI2Cx, I2C_SR1_ADDR));
 
-	  //5. Clear the Addr flag according to its software sequence
-	  // until Addr is cleared SCL will be stretched - pulled to low.
-      I2C_ClearAddrFlag(pI2CHandle->pI2Cx);
+	//5. Clear the Addr flag according to its software sequence
+	// until Addr is cleared SCL will be stretched - pulled to low.
+	I2C_ClearAddrFlag(pI2CHandle->pI2Cx);
 
-      //6. Send the data until len becomes 0.
-      while(len > 0)
-      {
-    	  while(!I2C_GetFlagStatus(pI2CHandle->pI2Cx, I2C_SR1_TXE));
-    	  pI2CHandle->pI2Cx->I2C_DR = *pTxBuffer;
-    	  pTxBuffer++;
-    	  len--;
-      }
+	//6. Send the data until len becomes 0.
+	while(len > 0)
+	{
+		while(!I2C_GetFlagStatus(pI2CHandle->pI2Cx, I2C_SR1_TXE));
+		pI2CHandle->pI2Cx->I2C_DR = *pTxBuffer;
+		pTxBuffer++;
+		len--;
+	}
 
-      //7. when len becomes zero wait for TXE=1 and BTF ( byte transfer complete)  =  1 before generating the stop condition.
-      // Note TXE=1 and BTF=1 means that both SR and DR are empty and next transmission should begin when BTF = 1 and SCL will be
-      // stretched ( pulled to low)
-      while(!I2C_GetFlagStatus(pI2CHandle->pI2Cx, I2C_SR1_TXE));
-      while(!I2C_GetFlagStatus(pI2CHandle->pI2Cx, I2C_SR1_BTF));
+	//7. when len becomes zero wait for TXE=1 and BTF ( byte transfer complete)  =  1 before generating the stop condition.
+	// Note TXE=1 and BTF=1 means that both SR and DR are empty and next transmission should begin when BTF = 1 and SCL will be
+	// stretched ( pulled to low)
+	while(!I2C_GetFlagStatus(pI2CHandle->pI2Cx, I2C_SR1_TXE));
+	while(!I2C_GetFlagStatus(pI2CHandle->pI2Cx, I2C_SR1_BTF));
 
-      //8. Generate the STOP condition and master need not to wait for the completion of stop condition
-      // Note - generating stop, automatically clears the BTF.
-      I2C_GenerateStopCondition(pI2CHandle->pI2Cx);
+	//8. Generate the STOP condition and master need not to wait for the completion of stop condition
+	// Note - generating stop, automatically clears the BTF.
+	if( repeated_start == DISABLE)
+	{
+		I2C_GenerateStopCondition(pI2CHandle->pI2Cx);
+	}
 }
 
-void I2C_MasterDataReceive(I2C_Handle_t *pI2CHandle, uint8_t *pRxBuffer, uint32_t len, uint8_t slaveAddr)
+void I2C_MasterDataReceive(I2C_Handle_t *pI2CHandle, uint8_t *pRxBuffer, uint32_t len, uint8_t slaveAddr, uint8_t repeated_start)
 {
 
 	//1. Generate the start condition
@@ -387,7 +390,10 @@ void I2C_MasterDataReceive(I2C_Handle_t *pI2CHandle, uint8_t *pRxBuffer, uint32_
 		while(!I2C_GetFlagStatus(pI2CHandle->pI2Cx, I2C_SR1_RXNE));
 
 		//4. Generate STOP condition
-		I2C_GenerateStopCondition(pI2CHandle->pI2Cx);
+		if(repeated_start == DISABLE)
+		{
+			I2C_GenerateStopCondition(pI2CHandle->pI2Cx);
+		}
 
 		//5. Read data in to buffer
 		*pRxBuffer = pI2CHandle->pI2Cx->I2C_DR;
@@ -410,7 +416,10 @@ void I2C_MasterDataReceive(I2C_Handle_t *pI2CHandle, uint8_t *pRxBuffer, uint32_
 				I2C_ManageAcking(pI2CHandle->pI2Cx, DISABLE);
 
 				//generate the stop condition
-				I2C_GenerateStopCondition(pI2CHandle->pI2Cx);
+				if(repeated_start == DISABLE)
+				{
+					I2C_GenerateStopCondition(pI2CHandle->pI2Cx);
+				}
 			}
 			//read the data from data register into buffer.
 			*pRxBuffer = pI2CHandle->pI2Cx->I2C_DR;

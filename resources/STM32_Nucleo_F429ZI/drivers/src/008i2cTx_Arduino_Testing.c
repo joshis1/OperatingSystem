@@ -94,7 +94,7 @@ int main()
 		if(GPIO_ReadFromInputPin(GPIOC, 13))
 		{
 			delay(250 * 1000);
-		    I2C_MasterDataSend(&i2c_handle, testBuffer, sizeof(testBuffer),0x68);
+		    I2C_MasterDataSend(&i2c_handle, testBuffer, sizeof(testBuffer),0x68 , DISABLE);
 		}
 	}
 
