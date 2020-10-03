@@ -1251,7 +1251,7 @@ I2C_BuSY_IN_TX
 i2c_driver.h -->
 
 uint8_t I2C_MasterSednDataIt
-uint8_t I2C_MasterReceviceDataIT 
+uint8_t I2C_MsasterReceviceDataIT 
 
 --
 
