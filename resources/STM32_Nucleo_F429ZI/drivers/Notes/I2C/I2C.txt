@@ -1158,7 +1158,115 @@ PE= 0, you cannot make ACK=1,
 
 I2C_PeripheralControl 
 
-I2C_ManageAck(I2C1, I2C_ACK_ENABLE);
+I2C_ManageAck(I2C1, I2C_ACK_ENABLE
+
+############################################
+
+I2C interrupts and IRQ numbers
+
+############################################
+
+non-blocking -- 
+
+I2C IRQs and Interrupt mapping.
+
+Start bit sent -  Event flag - 
+
+SB
+ADDR 
+ADD10
+STOPF
+BTF 
+
+## ITEVFN 
+###################
+RxNE 
+TxE    -- ITEVFEN and ITBUFFEN 
+
+###
+BERR, ARLO, AF, OVR, PECERR, TIMEOUT, SMBALERT --
+
+ITERREN 
+
+####################################################
+
+EV_IRQ_LINE -- IRQn - 31 - NVIC - Events.
+
+ER_IRQ_LINE -- 32 - NVIC - Error 
+
+###
+Event and Error -- 
+
+I2C1 - 31 , 32
+
+I2C2 - 33, 34
+
+Bus ERROR -- detects  and SDA risign or falling 
+edge which SCL is high. 
+
+Arbitration loss error - 
+multi master configuration.
+
+ACK failure error - no ACK is returned for the byte sent.
+
+Overrrun -- 
+the data register has not been read yet and the 
+new received byte is lost. 
+
+overrun error will not happen in I2c if 
+the clock stretching is enabled. 
+
+Under-run error - when a new byte should be sent 
+and the data register has not been writen yet and 
+the same byte is sent twice.
+
+time out error - stretching of clock more than the 
+recommended time. 
+
+On Bus error, the application might restart the 
+I2C.
+
+###
+
+BTF flag in TX and preventing underru.
+
+##
+I2C_MasterSendDataIT API 
+I2C_MasterReceiveDataIT API -
+
+*pTxBuffer;
+*pRxBuffer;
+TxLen;
+RxLen;
+TxRxState;
+DevAddr; //slave address
+RxSize   // RxSize
+repeated_start; //repeated start informations
+
+I2C is half duplex. 
+#I2C_READY
+i2C_BUsy_IN_RX 
+I2C_BuSY_IN_TX 
+
+i2c_driver.h -->
+
+uint8_t I2C_MasterSednDataIt
+uint8_t I2C_MasterReceviceDataIT 
+
+--
+
+Adding I2C IRQ number macros -- 
+
+I2C_IRQInterruptConfig()
+
+I2C_InterruptPrirorityCOnfig()
+
+
+
+
+
+
+
 
 
 

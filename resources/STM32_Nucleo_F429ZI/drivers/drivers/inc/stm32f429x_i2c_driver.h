@@ -101,6 +101,14 @@ typedef struct
 {
 	I2C_RegDef_t *pI2Cx;
 	I2C_Config_t i2c_pinConfig;
+	uint8_t *pTxBuffer;
+	uint8_t *pRxBuffer;
+	uint32_t txLen;
+	uint32_t rxLen;
+	uint8_t txRxState;
+	uint8_t devAddress;
+	uint32_t rxSize;
+	uint8_t repeated_start;
 }I2C_Handle_t;
 
 /**
@@ -142,6 +150,14 @@ typedef struct
 	                           RCC->RCC_APB1RSTR &= ~(0x1 << 21); \
                             }while(0)
 
+
+/***
+ * I2C States
+ */
+#define I2C_READY        (0)
+#define I2C_BUSY_IN_RX   (1)
+#define I2C_BUSY_IN_TX   (2)
+
 /**
  * API Prototypes
  */
@@ -172,5 +188,12 @@ void I2C_ManageAcking(I2C_RegDef_t *pI2Cx, uint8_t EnorDi);
 __attribute__((weak)) void I2C_ApplicationEventCallback(I2C_Handle_t *pI2cHandle, uint8_t event);
 
 uint64_t RCC_GetAPB_PClkValue();
+
+void I2C_MasterDataSendIT(I2C_Handle_t *pI2CHandle, uint8_t *pTxBuffer, uint32_t len, uint8_t slaveAddr, uint8_t repeated_start);
+
+
+void I2C_MasterDataReceiveIT(I2C_Handle_t *pI2CHandle, uint8_t *pRxBuffer, uint32_t len, uint8_t slaveAddr, uint8_t repeated_start);
+
+
 
 #endif /* INC_STM32F429X_I2C_DRIVER_H_ */
