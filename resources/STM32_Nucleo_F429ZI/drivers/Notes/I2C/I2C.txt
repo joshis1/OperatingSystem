@@ -1262,6 +1262,236 @@ I2C_IRQInterruptConfig()
 I2C_InterruptPrirorityCOnfig()
 
 
+I2C_MasterSendDataIT(
+
+ISR1 - Events -- 
+I2C_EV_IRQHandling
+
+
+ISR2 - I2C_ER_IRQHandling
+################
+
+void I2C_EV_IRQHandling(I2C_Handle_t *pI2Chandle);
+{
+  I2C_SR1 -- decode and find out why interrupt is triggered.
+  // SB event
+  
+  //Interrupt handling for both master and slave mode of a device.
+  uint32_t temp1, temp2, temp3;
+  temp1 = p2Ic2CHandle->CR2 & ( 1 << I2C_CR2_ITEVTEN);
+  temp2 = ->CR2 & ( ITBUFEN);
+  
+  temp3 = p2Ic2CHandle->SR1 &  ( 1 << I2C_SR1_SB);
+  
+  if( temp1 && temp3)
+  {
+    //SB flag is set 
+	//interrupt is generated because of SB event.
+	//SB event is generated only for master mode.
+	ExecuteAddressPhase.
+	if( p2Ic2CHandle-TxRxState == TxState)
+	{
+	   ExecuteAddressPhaseWrite();
+	}
+	else
+	{
+	   ExecuteAddressPhaseRead();
+	}
+	
+  }
+  
+ temp3 =  SR1 &  ( 1  << ADDR)
+ 
+ if( temp1 and temp3)
+ {
+    //ADDR flag
+	// clear according to the logic .
+	I2C_ClearADDRFlag();
+ }
+ 
+ temp3 = BTF;
+ 
+ if( temp1 && temp3{
+  //BTF flag is set
+  //Byte transfer finished.
+  SR - empty and DR empty --  TXE=1  -- during transmission.
+  SR- Full and DR FUll - RXNE=1  - during reception.
+  if BUSY_IN_TX == TxRxState
+  -- make sure TxE is also set.
+  if( SR1 &  1 << I2C_SR1_TXE)
+  {
+     //BTF, TXE=1
+	 if9 TxLEN == 0)
+	 {
+	 //1. Generate the stop condition 
+	 //if repeated start is disable
+	 I2C_GenerateStopCondition(PI2cx);
+	 
+	 //2. reset all the member elements of the handle structure.
+	 I2C_CloseSendData();
+	 
+	 //3. notify the application about transmission complete.
+	  I2_ApplicationEventCallback(Handle, I2C_EV_TX_COMPLETE);
+	  }
+  }
+  else if( BUSY_IN_RX)
+  {
+  
+  }
+ 
+ }
+ 
+ temp3 = STOPF 
+ 
+ if( temp1 and temp3)
+ {
+   //only execute in Slave mode. - 
+   
+   stop condition detected.
+   //clear the STOPF --read SR1 and then write to CR1.
+   CR1 | = 0x0000;  //just dummy write.
+   //Notify the appliction - that stop is generated is detected.
+   I2_ApplicationEventCallback( I2C_EV_STOP);
+ 
+ }
+ 
+ //TxE interrupt will happen if both bits are enable.
+ 
+ TXE 
+ 
+ if( temp1 and temp2 and temp3)
+ {
+ if( MSL == Master mode)
+     //TxE flage is set.
+	 DR is empty -- 
+	 // We have to data tranmission 
+	 if( TxRxState == BuYS_IN_TX)
+	 {
+	   if( lEN > 0)
+	   {
+	      // load the daat into DR 
+		  
+		  decrement the Txlen
+		  
+		  increment the TxBuffer;
+	   
+	   }
+	 
+	 }
+
+ 
+ }
+ 
+ I2C_ClearADDRFlag(I2Chandle pHandle)
+ {
+    if(masterMode)  //Check SR2 register
+	{
+	   if( BUSY_IN_RX)
+	   {
+	      rxSize == 1 
+		  Disable the ACK.
+		  Clear the Addr flag .
+	   
+	   }
+	
+	}
+	else
+	{
+	  //clear the flag.
+	
+	}
+	
+ 
+ }
+ 
+ RxNE flag -
+ i2C_BUsy_IN_RX
+ 
+{
+    if(rxSize == 1)
+	{
+	       Read DR ;
+		   len --;
+	
+	}
+    if( rxSize > 1)
+	{
+	
+	if( len == 2)
+	{
+	   ACK_DISABLE
+	
+	}
+	
+	*pBuff = DR;
+	pRxBuffer++;
+	Rxlen --;
+	
+	
+	if( len == 0)
+	{
+	    close the I2C data reception and notify the application.
+		// generate th stop condition 
+		// close the i2c rx 
+		// Notify the applicaiton
+	}
+
+
+}
+
+
+
+}
+
+I2C_CloseSendData 
+{
+
+ // diable ITBUFFN 
+ ITEVEN 
+ 
+ I2CReady;
+ NULL;
+ TxLen = 0;
+
+}
+
+CloseReceiveData()
+{
+  //disable interrupts ITBUFFEN Control bit
+  disale ITEVFEN control bit 
+ txrxState = ready 
+ buffer - NUll;
+ rxLen = -;
+ rxZIze = 0;
+ enable Acking.
+  
+}
+
+
+void I2C_ER_IRQHandkling(I2C_Handle_t *pI2Chandle);
+{
+
+//bus error flag,
+clear the bus error 
+and implement o noifyt BERR:
+
+
+}
+
+#########Testing
+
+I2C IRQ COnfiguraont 
+I2C+IRQPriorityCOnfig(== enable);
+Error, Enable 
+
+
+
+0x51 - 
+
+i2cSendDataIT -- while !=ReADY 
+ != 
+I2CMasterReceiveDataIT  -- Handle, 
+!=I2CReady;
 
 
 
