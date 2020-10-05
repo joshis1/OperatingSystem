@@ -545,3 +545,220 @@ uint8_t I2C_MasterDataReceiveIT(I2C_Handle_t *pI2CHandle, uint8_t *pRxBuffer, ui
 
 }
 
+static void startBitInterruptHandle(I2C_Handle_t *pI2CHandle)
+{
+	// Start bit is generated
+	if( pI2CHandle->txRxState  == I2C_BUSY_IN_TX)
+	{
+		I2C_ExecuteWriteAddressPhase(pI2CHandle->pI2Cx, pI2CHandle->devAddress);
+	}
+
+	if( pI2CHandle->txRxState  == I2C_BUSY_IN_RX)
+	{
+		I2C_ExecuteReadAddressPhase(pI2CHandle->pI2Cx, pI2CHandle->devAddress);
+
+	}
+}
+
+void I2C_CloseSendData(I2C_Handle_t *pI2CHandle)
+{
+	//Disable buffer enable interrupt
+	pI2CHandle->pI2Cx->I2C_CR2 &= ~(0x1 << I2C_CR2_ITBUFEN);
+	//Disable further interrupt event
+	pI2CHandle->pI2Cx->I2C_CR2 &= ~(0x1 << I2C_CR2_ITEVTEN);
+
+	pI2CHandle->txRxState = I2C_READY;
+	pI2CHandle->pTxBuffer = NULL;
+	pI2CHandle->txLen = 0;
+
+}
+
+static void btfBitInterruptHandle(I2C_Handle_t *pI2CHandle)
+{
+    if(pI2CHandle->txRxState  == I2C_BUSY_IN_TX)
+    {
+    	//Check whether TxE is set or not
+    	if( pI2CHandle->pI2Cx->I2C_SR1 & (0x1 << I2C_SR1_TXE))
+    	{
+            //BTF and TxE
+    		if( pI2CHandle->txLen == 0) //everything sent out
+    		{
+    			if(pI2CHandle->repeated_start  == 0)
+    			{
+    				//generate stop condition
+    				I2C_GenerateStopCondition(pI2CHandle->pI2Cx);
+    			}
+    			I2C_CloseSendData(pI2CHandle);
+    			I2C_ApplicationEventCallback(pI2CHandle, I2C_EVENT_TX_COMPLETE);
+    		}
+    	}
+    }
+
+    else if(pI2CHandle->txRxState  == I2C_BUSY_IN_RX)
+    {
+    	//do nothing
+    }
+
+}
+
+static void stopFlagInterruptHandle(I2C_Handle_t *pI2CHandle)
+{
+   //clear the stop flag by reading the SR1
+   // followed by writing to CR1.
+
+   uint8_t dummy_read = pI2CHandle->pI2Cx->I2C_SR1;
+   pI2CHandle->pI2Cx->I2C_CR1 |= 0x00;
+
+   (void)dummy_read; // un-used
+
+   I2C_ApplicationEventCallback(pI2CHandle, I2C_EVENT_STOP);
+
+}
+
+static void txeFlagSendData(I2C_Handle_t *pI2CHandle)
+{
+	if(pI2CHandle->txLen > 0)
+	{
+		pI2CHandle->pI2Cx->I2C_DR = *(pI2CHandle->pTxBuffer);
+		pI2CHandle->txLen--;
+		pI2CHandle->pTxBuffer++;
+	}
+}
+
+
+static void rxeFlagReceiveData(I2C_Handle_t *pI2CHandle)
+{
+	if(pI2CHandle->rxSize == 1)
+	{
+		*(pI2CHandle->pRxBuffer) = pI2CHandle->pI2Cx->I2C_DR;
+		pI2CHandle->rxLen--;
+	}
+	else if( pI2CHandle->rxSize > 1)
+	{
+		if( pI2CHandle->rxLen == 2)
+		{
+			I2C_ManageAcking(pI2CHandle->pI2Cx, DISABLE);
+		}
+		//read DR
+		*(pI2CHandle->pRxBuffer) = pI2CHandle->pI2Cx->I2C_DR;
+		pI2CHandle->pRxBuffer++;
+		pI2CHandle->rxLen--;
+	}
+
+   if(pI2CHandle->rxLen == 0)
+   {
+	   //close the I2C data reception
+	   if(pI2CHandle->repeated_start  == 0)
+	   {
+		   //generate stop condition
+		   I2C_GenerateStopCondition(pI2CHandle->pI2Cx);
+	   }
+	   I2C_CloseReceiveData(pI2CHandle);
+	   I2C_ApplicationEventCallback(pI2CHandle,I2C_EVENT_RX_COMPLETE);
+   }
+
+}
+
+static void txeFlaginterruptHandle(I2C_Handle_t *pI2CHandle)
+{
+   //check for device mode
+   if(pI2CHandle->pI2Cx->I2C_SR2 & (0x1 << I2C_SR2_MSL))
+   {
+	   //Master mode
+	   if(pI2CHandle->txRxState  == I2C_BUSY_IN_TX)
+	   {
+		   txeFlagSendData(pI2CHandle);
+	   }
+   }
+   else
+   {
+	   //slave mode
+	   if(pI2CHandle->pI2Cx->I2C_SR2 & (0x1 << I2C_SR2_TRA))
+	   {
+		   I2C_ApplicationEventCallback(pI2CHandle, I2C_SLAVE_EVENT_DATA_REQUEST);
+	   }
+   }
+}
+
+static void rxeFlaginterruptHandle(I2C_Handle_t *pI2CHandle)
+{
+	if(pI2CHandle->pI2Cx->I2C_SR2 & (0x1 << I2C_SR2_MSL))
+	{
+		if(pI2CHandle->txRxState == I2C_BUSY_IN_RX)
+		{
+			 rxeFlagReceiveData(pI2CHandle);
+		}
+	}
+	else
+	{
+		if(pI2CHandle->pI2Cx->I2C_SR2 & (0x1 << I2C_SR2_TRA))
+		{
+			I2C_ApplicationEventCallback(pI2CHandle, I2C_SLAVE_EVENT_DATA_RECEIVE);
+		}
+
+	}
+}
+
+void I2C_EV_IRQHandling(I2C_Handle_t *pI2CHandle)
+{
+	uint8_t isEventInterruptEnable = 0;
+	uint8_t isBufferInterruptEnable = 0;
+
+	isEventInterruptEnable = pI2CHandle->pI2Cx->I2C_CR2 & (0x1 << I2C_CR2_ITEVTEN);
+	isBufferInterruptEnable = pI2CHandle->pI2Cx->I2C_CR2 & (0x1 << I2C_CR2_ITBUFEN);
+
+	uint8_t status_reg_check = 0;
+
+	//Start bit check
+
+	status_reg_check =  pI2CHandle->pI2Cx->I2C_SR1 & ( 0x1 << I2C_SR1_SB);
+
+	if( status_reg_check && isEventInterruptEnable)
+	{
+		startBitInterruptHandle(pI2CHandle);
+	}
+
+	status_reg_check =  pI2CHandle->pI2Cx->I2C_SR1 & ( 0x1 << I2C_SR1_ADDR);
+
+	if( status_reg_check && isEventInterruptEnable)
+	{
+		//Addr flag
+		I2C_ClearAddrFlag(pI2CHandle->pI2Cx);
+	}
+
+	status_reg_check =  pI2CHandle->pI2Cx->I2C_SR1 & ( 0x1 << I2C_SR1_BTF);
+
+	if( status_reg_check && isEventInterruptEnable)
+	{
+         btfBitInterruptHandle(pI2CHandle);
+	}
+
+	//Check stop flag - applicable only in Slave Mode
+
+	status_reg_check = pI2CHandle->pI2Cx->I2C_SR1 & ( 0x1 << I2C_SR1_STOPF);
+
+	if( status_reg_check && isEventInterruptEnable)
+	{
+        // clear the stop FLag
+		stopFlagInterruptHandle(pI2CHandle);
+	}
+
+	status_reg_check = pI2CHandle->pI2Cx->I2C_SR1 & ( 0x1 << I2C_SR1_TXE);
+
+	if( status_reg_check && isBufferInterruptEnable && isEventInterruptEnable)
+	{
+		txeFlaginterruptHandle(pI2CHandle);
+	}
+
+	status_reg_check = pI2CHandle->pI2Cx->I2C_SR1 & ( 0x1 << I2C_SR1_RXNE);
+
+	if( status_reg_check && isBufferInterruptEnable && isEventInterruptEnable)
+	{
+		rxeFlaginterruptHandle(pI2CHandle);
+	}
+
+
+
+
+}
+
