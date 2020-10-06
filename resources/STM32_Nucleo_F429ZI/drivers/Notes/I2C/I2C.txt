@@ -1493,6 +1493,108 @@ i2cSendDataIT -- while !=ReADY
 I2CMasterReceiveDataIT  -- Handle, 
 !=I2CReady;
 
+#############################################################
+
+I2C -- Slave -- 
+
+####################################################
+
+I2C master and I2C Slave.
+
+Master -- START, STOP, Read and Write.
+
+Slave -- 
+
+Role of Slave -- receive data or receive 
+request to send data.
+
+Master- READ --> Receive data.
+
+Slave has to service two events -  
+
+Request for data --- Read from master
+Receive data.    --- Write from master.
+
+STM32 I2C in slave mode -- 
+
+Send and Receive data.
+
+void I2C_SlaveSendData(i2cRegDef *pI2c, uint8_t data);
+// we send byte by byte.
+
+uint8_t I2C_SlaveReceiveData(i2cRegDef );
+
+##############
+
+SlaveSendData 
+{
+  DR = data;
+
+}
+
+ReceiveData
+{
+   return DR;
+}
+
+### Transfer Sequence diagram for slave transmitter.
+
+Slave EV1 -- ADDR =1 , Matched - slave..
+For master -- address sent event. 
+Clearded by reading sR1 and SR2.
+
+EV3-1 -- TxE=1, shift register is empty, data register empty
+write Data 1 in DR.
+>>Request for data.
+
+EV3 -- TxE=1, shift register not empty , data register empty 
+cleared by writing DR.
+
+TxE=1 , if master ACKs successfully.
+
+EV3-2 -- last byte -- NACK -- AF = 1, AF is cleared by 
+writing 0 in AF bit of SR1 register.
+
+#########################################
+
+
+Transfer sequence diagram for slave receiver.
+
+EV1 -- ADDR=1, cleared by reading SR1 followed by reading SR2.
+EV2 -- RxNE =1 cleared by reading DR register.
+
+EV4 -- STOPF =1 , cleared by reading SR1 register folowed 
+by writing to CR1 register. 
+
+#####
+
+if ACK failure -- END of Tx
+STOP generation - END Of Rx
+Request for data - Txe - send byte 
+RXNE -- Receive 1 byte.
+
+TxE event -- 
+
+master and slave..
+
+else
+{ 
+   //slave -- reqeuest for data - TXE.
+   if( device in transmitter mode -- SR2 -- TRA - 1 data bytes transmitted
+   I2C_ApplicationCallback(pI2CHandle-, i2c_EV_Data_REQ);
+}
+
+TRA bit is influenced by read/write bit.
+
+RXNE -- 
+else 
+{
+   //TRA bit -- I2_EV_DATA_RECV 
+   
+}
+
+STOP generation -- 
+
 
 
 
