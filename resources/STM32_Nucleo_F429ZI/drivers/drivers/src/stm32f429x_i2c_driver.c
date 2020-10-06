@@ -14,7 +14,7 @@ uint8_t apb2_prescaler_vals[] = {2,4,8,16};
 static void I2C_GenerateStartCondition(I2C_RegDef_t *pI2Cx);
 static void I2C_ExecuteWriteAddressPhase(I2C_RegDef_t *pI2Cx, uint8_t slaveAddr);
 static void I2C_ExecuteReadAddressPhase(I2C_RegDef_t *pI2Cx, uint8_t slaveAddr);
-static void I2C_ClearAddrFlag(I2C_RegDef_t *pI2Cx);
+static void I2C_ClearAddrFlag(I2C_Handle_t *pI2CHandle);
 static void I2C_GenerateStopCondition(I2C_RegDef_t *pI2Cx);
 
 void I2C_PeriClockControl(I2C_RegDef_t *pI2Cx, uint8_t EnOrDi)
@@ -335,7 +335,7 @@ void I2C_MasterDataSend(I2C_Handle_t *pI2CHandle, uint8_t *pTxBuffer, uint32_t l
 
 	//5. Clear the Addr flag according to its software sequence
 	// until Addr is cleared SCL will be stretched - pulled to low.
-	I2C_ClearAddrFlag(pI2CHandle->pI2Cx);
+	I2C_ClearAddrFlag(pI2CHandle);
 
 	//6. Send the data until len becomes 0.
 	while(len > 0)
@@ -384,7 +384,7 @@ void I2C_MasterDataReceive(I2C_Handle_t *pI2CHandle, uint8_t *pRxBuffer, uint32_
 		I2C_ManageAcking(pI2CHandle->pI2Cx, DISABLE);
 
 		//2. Clear the addr flag
-		I2C_ClearAddrFlag(pI2CHandle->pI2Cx);
+		I2C_ClearAddrFlag(pI2CHandle);
 
 		//3. Wait until RXNE becomes 1
 		while(!I2C_GetFlagStatus(pI2CHandle->pI2Cx, I2C_SR1_RXNE));
@@ -402,7 +402,7 @@ void I2C_MasterDataReceive(I2C_Handle_t *pI2CHandle, uint8_t *pRxBuffer, uint32_
 	if( len > 1)
 	{
 		//1. Clear the ADDR flag
-		I2C_ClearAddrFlag(pI2CHandle->pI2Cx);
+		I2C_ClearAddrFlag(pI2CHandle);
 
 		//2. Read the data until len becomes zero.
 		for(uint32_t index = len; index > 0; index--)
@@ -456,11 +456,41 @@ static void I2C_ExecuteReadAddressPhase(I2C_RegDef_t *pI2Cx, uint8_t slaveAddr)
 	pI2Cx->I2C_DR = slaveAddr;
 }
 
-static void I2C_ClearAddrFlag(I2C_RegDef_t *pI2Cx)
+static void I2C_ClearAddrFlag(I2C_Handle_t *pI2CHandle)
 {
-	uint32_t dummyRead = pI2Cx->I2C_SR1;
-	dummyRead = pI2Cx->I2C_SR2;
-	(void)dummyRead;
+	uint32_t dummyRead;
+	if(pI2CHandle->pI2Cx->I2C_SR2 & (0x1 << I2C_SR2_MSL))
+	{
+		//Master Mode
+
+		if(pI2CHandle->txRxState == I2C_BUSY_IN_RX)
+		{
+			if(pI2CHandle->rxSize == 1)
+			{
+				I2C_ManageAcking(pI2CHandle->pI2Cx, DISABLE);
+				dummyRead= pI2CHandle->pI2Cx->I2C_SR1;
+				dummyRead = pI2CHandle->pI2Cx->I2C_SR2;
+				(void)dummyRead;
+
+			}
+
+		}
+		else
+		{
+			dummyRead= pI2CHandle->pI2Cx->I2C_SR1;
+			dummyRead = pI2CHandle->pI2Cx->I2C_SR2;
+			(void)dummyRead;
+
+		}
+
+	}
+	else
+	{
+		dummyRead= pI2CHandle->pI2Cx->I2C_SR1;
+		dummyRead = pI2CHandle->pI2Cx->I2C_SR2;
+		(void)dummyRead;
+	}
+
 }
 
 static void I2C_GenerateStopCondition(I2C_RegDef_t *pI2Cx)
@@ -572,6 +602,26 @@ void I2C_CloseSendData(I2C_Handle_t *pI2CHandle)
 	pI2CHandle->txLen = 0;
 
 }
+
+void I2C_CloseReceiveData(I2C_Handle_t *pI2CHandle)
+{
+	//Disable buffer enable interrupt
+	pI2CHandle->pI2Cx->I2C_CR2 &= ~(0x1 << I2C_CR2_ITBUFEN);
+	//Disable further interrupt event
+	pI2CHandle->pI2Cx->I2C_CR2 &= ~(0x1 << I2C_CR2_ITEVTEN);
+
+	pI2CHandle->txRxState = I2C_READY;
+	pI2CHandle->pRxBuffer = NULL;
+	pI2CHandle->rxLen = 0;
+	pI2CHandle->rxSize = 0;
+
+    if(pI2CHandle->i2c_pinConfig.I2C_ACKControl == ENABLE)
+    {
+    	I2C_ManageAcking(pI2CHandle->pI2Cx, ENABLE);
+    }
+
+}
+
 
 static void btfBitInterruptHandle(I2C_Handle_t *pI2CHandle)
 {
@@ -723,7 +773,7 @@ void I2C_EV_IRQHandling(I2C_Handle_t *pI2CHandle)
 	if( status_reg_check && isEventInterruptEnable)
 	{
 		//Addr flag
-		I2C_ClearAddrFlag(pI2CHandle->pI2Cx);
+		I2C_ClearAddrFlag(pI2CHandle);
 	}
 
 	status_reg_check =  pI2CHandle->pI2Cx->I2C_SR1 & ( 0x1 << I2C_SR1_BTF);
@@ -757,8 +807,44 @@ void I2C_EV_IRQHandling(I2C_Handle_t *pI2CHandle)
 		rxeFlaginterruptHandle(pI2CHandle);
 	}
 
-
-
-
 }
 
+void I2C_Error_IRQHandling(I2C_Handle_t *pI2CHandle)
+{
+	uint8_t isErrorInterruptEnable = 0;
+
+	isErrorInterruptEnable = pI2CHandle->pI2Cx->I2C_CR2  & (0x1 << I2C_CR2_ITERREN);
+
+	if(isErrorInterruptEnable & (pI2CHandle->pI2Cx->I2C_SR1 &  (0x1 << I2C_SR1_BERR)))
+	{
+		//Clear Bus Error
+		pI2CHandle->pI2Cx->I2C_SR1 &= ~(0x1 << I2C_SR1_BERR);
+		//Bus Error
+		I2C_ApplicationEventCallback(pI2CHandle, I2C_EVENT_BUS_ERROR);
+	}
+
+	if(isErrorInterruptEnable & (pI2CHandle->pI2Cx->I2C_SR1 & (0x1 << I2C_SR1_AF)))
+	{
+		//Clear ACK Error
+		pI2CHandle->pI2Cx->I2C_SR1 &= ~(0x1 << I2C_SR1_AF);
+		//ACK Error
+		I2C_ApplicationEventCallback(pI2CHandle, I2C_EVENT_ACK_ERROR);
+	}
+
+	if(isErrorInterruptEnable &  (pI2CHandle->pI2Cx->I2C_SR1 & (0x1 << I2C_SR1_OVR)))
+	{
+		//Clear Overrun/underrun Error
+		pI2CHandle->pI2Cx->I2C_SR1 &= ~(0x1 << I2C_SR1_OVR);
+		//Overrun error
+		I2C_ApplicationEventCallback(pI2CHandle, I2C_EVENT_OVERRUN_ERROR);
+	}
+
+	if(isErrorInterruptEnable & (pI2CHandle->pI2Cx->I2C_SR1 & (0x1 << I2C_SR1_TIMEOUT)))
+	{
+		//Clear Timeout Error
+		pI2CHandle->pI2Cx->I2C_SR1 &= ~(0x1 << I2C_SR1_TIMEOUT);
+		//timeout error
+		I2C_ApplicationEventCallback(pI2CHandle, I2C_EVENT_TIMEOUT_ERROR);
+	}
+
+}

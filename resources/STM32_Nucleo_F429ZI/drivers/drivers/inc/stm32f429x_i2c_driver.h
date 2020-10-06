@@ -166,6 +166,10 @@ typedef struct
 #define I2C_SLAVE_EVENT_DATA_REQUEST (2)
 #define I2C_SLAVE_EVENT_DATA_RECEIVE (3)
 #define I2C_EVENT_RX_COMPLETE        (4)
+#define I2C_EVENT_BUS_ERROR          (5)
+#define I2C_EVENT_ACK_ERROR          (6)
+#define I2C_EVENT_OVERRUN_ERROR      (7)
+#define I2C_EVENT_TIMEOUT_ERROR      (8)
 
 /**
  * API Prototypes
@@ -204,5 +208,7 @@ uint8_t I2C_MasterDataSendIT(I2C_Handle_t *pI2CHandle, uint8_t *pTxBuffer, uint3
 uint8_t I2C_MasterDataReceiveIT(I2C_Handle_t *pI2CHandle, uint8_t *pRxBuffer, uint32_t len, uint8_t slaveAddr, uint8_t repeated_start);
 
 void I2C_EV_IRQHandling(I2C_Handle_t *pI2CHandle);
+
+void I2C_Error_IRQHandling(I2C_Handle_t *pI2CHandle);
 
 #endif /* INC_STM32F429X_I2C_DRIVER_H_ */
