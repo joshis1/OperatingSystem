@@ -751,13 +751,13 @@ static void rxeFlaginterruptHandle(I2C_Handle_t *pI2CHandle)
 
 void I2C_EV_IRQHandling(I2C_Handle_t *pI2CHandle)
 {
-	uint8_t isEventInterruptEnable = 0;
-	uint8_t isBufferInterruptEnable = 0;
+	volatile uint16_t isEventInterruptEnable = 0;
+	volatile uint16_t isBufferInterruptEnable = 0;
 
 	isEventInterruptEnable = pI2CHandle->pI2Cx->I2C_CR2 & (0x1 << I2C_CR2_ITEVTEN);
 	isBufferInterruptEnable = pI2CHandle->pI2Cx->I2C_CR2 & (0x1 << I2C_CR2_ITBUFEN);
 
-	uint8_t status_reg_check = 0;
+	uint16_t status_reg_check = 0;
 
 	//Start bit check
 

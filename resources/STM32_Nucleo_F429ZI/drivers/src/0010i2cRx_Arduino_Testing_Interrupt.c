@@ -108,10 +108,12 @@ int main()
 		    while(I2C_MasterDataSendIT(&i2c_handle, &cmd_len_read_code, sizeof(cmd_len_read_code),0x68, ENABLE) != I2C_READY);
 		    // now Read 1 byte - Read len
 		    while(I2C_MasterDataReceiveIT(&i2c_handle, &read_len_byte,1,0x68 , ENABLE) != I2C_READY);
+		    while(received_data == 0); // wait here.
 		    uint8_t *pBuffer = malloc(sizeof(uint8_t)* (read_len_byte + 1 ));
-
+		    received_data = 0;
 		    while(I2C_MasterDataSendIT(&i2c_handle, &cmd_data_read_code, sizeof(cmd_data_read_code),0x68, ENABLE) != I2C_READY);
 		    while(I2C_MasterDataReceiveIT(&i2c_handle, pBuffer,read_len_byte,0x68, DISABLE) != I2C_READY);
+
 		    uint8_t lastIndex = sizeof(uint8_t) * (read_len_byte + 1);
 
 		    while(received_data == 0); // wait here.
