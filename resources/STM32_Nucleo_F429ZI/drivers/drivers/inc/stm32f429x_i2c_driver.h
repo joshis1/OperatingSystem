@@ -211,4 +211,7 @@ void I2C_EV_IRQHandling(I2C_Handle_t *pI2CHandle);
 
 void I2C_Error_IRQHandling(I2C_Handle_t *pI2CHandle);
 
+void I2C_SlaveDataSend(I2C_RegDef_t *pI2Cx, uint8_t data);
+uint8_t I2C_SlaveDataReceive(I2C_RegDef_t *pI2Cx);
+
 #endif /* INC_STM32F429X_I2C_DRIVER_H_ */

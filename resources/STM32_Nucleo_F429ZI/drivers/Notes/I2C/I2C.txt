@@ -1595,6 +1595,99 @@ else
 
 STOP generation -- 
 
+####
+
+Exercise -- I2C Master - Arduino and I2C Slave (STM32) 
+
+Master should read and display data from  STM32 Slave 
+Connected. 
+
+--First Master has to get the length of the data from the 
+slave to read subsequent data from the slave.
+
+Use I2C SCL == 100 KHZ -- Standard Mode.
+Use internal pull up resistors for SDA and SCL lines.
+
+Communication initialted by Arduino.
+
+00312CMasterRxString.ino - 
+
+0012I2C_SlaveTx_String -->
+
+Slave Application is always in Slave Mode.
+
+SLAVE_ADDR 0x68 
+
+uint8_t Tx_Buff[32] = "STM32 Slave Mode testing..";
+
+TxDeviceAddress = 0x68;
+
+I2C_SlaveEnableDisableCallbackEvents(I2C1, ENABLE);
+
+I2C_SlaveEnableDisableCallbackEvents(00
+{
+   CR2 |= ITEVENT;
+   CR2 |= ITBUFF:
+   ITERREN;
+
+}
+
+PeripheralControl;
+
+ManageACK()
+;
+
+while(1);
+
+cnt = 0;
+
+void I2C_ApplicationEventCallback(I2C_Handle *p , 
+
+if( REQ)
+
+{
+  slave send data.
+  if( commandCode == 0x51)
+  {
+     //send length information to the master
+	 I2C_SlaveSendData( pI2x, streln(tx_buffer);
+  }
+  if( commandCode = 0x52)
+  {
+     //send the contents of Tx Buff 
+	 I2C_slaveSendData(pi2xcx, Tx_buff[cnt++]);
+  }
+
+}
+
+if( DATA_RECV)
+{
+  //slave read data 
+  commandCOde = i2C-SlaveReceiveData();
+
+}
+
+if( AF )
+{
+  //NACK -- master doesn't need more data.
+  //completion of lsave Txe.
+  
+  commandCode = 0xff; //invalidate 
+  cnt = 0;
+}
+
+if(STOP)
+{
+   //slave reception -- master has ended the 
+   I2Communincation with slave.
+
+}
+
+}
+
+0x51 - len 
+
+0x52 -- read the data.
 
 
 

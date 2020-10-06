@@ -661,6 +661,7 @@ static void stopFlagInterruptHandle(I2C_Handle_t *pI2CHandle)
 
    (void)dummy_read; // un-used
 
+   //used for I2C Slave.
    I2C_ApplicationEventCallback(pI2CHandle, I2C_EVENT_STOP);
 
 }
@@ -741,7 +742,8 @@ static void rxeFlaginterruptHandle(I2C_Handle_t *pI2CHandle)
 	}
 	else
 	{
-		if(pI2CHandle->pI2Cx->I2C_SR2 & (0x1 << I2C_SR2_TRA))
+		//Device in Receiver Mode
+		if(!(pI2CHandle->pI2Cx->I2C_SR2 & (0x1 << I2C_SR2_TRA)))
 		{
 			I2C_ApplicationEventCallback(pI2CHandle, I2C_SLAVE_EVENT_DATA_RECEIVE);
 		}
@@ -847,4 +849,15 @@ void I2C_Error_IRQHandling(I2C_Handle_t *pI2CHandle)
 		I2C_ApplicationEventCallback(pI2CHandle, I2C_EVENT_TIMEOUT_ERROR);
 	}
 
+}
+
+
+void I2C_SlaveDataSend(I2C_RegDef_t *pI2Cx, uint8_t data)
+{
+	  pI2Cx->I2C_DR  = data;
+}
+
+uint8_t I2C_SlaveDataReceive(I2C_RegDef_t *pI2Cx)
+{
+	return (uint8_t)pI2Cx->I2C_DR;
 }
