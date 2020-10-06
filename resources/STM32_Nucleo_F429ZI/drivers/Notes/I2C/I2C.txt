@@ -1683,12 +1683,27 @@ if(STOP)
 
 }
 
+003I2C_MasterSlaveRxString.ino - sketch download.
+
 }
 
 0x51 - len 
 
 0x52 -- read the data.
 
+//check program the device own address - tempReg = 0;
+
+string2.c - > large amount of data -- 400 bytes.
+
+4 bytes of length information from the slave.
+
+0x51 -- slave -- 4 bytes of information.
+
+length bytes of data.
+
+0x52 - read the data.
+
+014i2cx -- 003RxStringlen. 
 
 
 
