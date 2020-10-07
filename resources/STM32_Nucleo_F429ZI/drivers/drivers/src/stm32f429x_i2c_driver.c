@@ -861,3 +861,21 @@ uint8_t I2C_SlaveDataReceive(I2C_RegDef_t *pI2Cx)
 {
 	return (uint8_t)pI2Cx->I2C_DR;
 }
+
+void I2C_SlaveEnableDisableCallbackEvents(I2C_RegDef_t *pI2Cx,  uint8_t EnorDi)
+{
+
+	if(EnorDi == ENABLE)
+	{
+		pI2Cx->I2C_CR2 |= (0x1 << I2C_CR2_ITERREN);
+		pI2Cx->I2C_CR2 |= (0x1 << I2C_CR2_ITEVTEN);
+		pI2Cx->I2C_CR2 |= (0x1 << I2C_CR2_ITBUFEN);
+	}
+	else
+	{
+		pI2Cx->I2C_CR2 &= ~(0x1 << I2C_CR2_ITERREN);
+		pI2Cx->I2C_CR2 &= ~(0x1 << I2C_CR2_ITEVTEN);
+		pI2Cx->I2C_CR2 &= ~(0x1 << I2C_CR2_ITBUFEN);
+	}
+
+}
