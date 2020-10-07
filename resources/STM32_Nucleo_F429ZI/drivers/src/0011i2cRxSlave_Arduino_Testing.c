@@ -89,7 +89,7 @@ int main()
 
 void I2C1_EV_IRQHandler()
 {
-	I2C_EV_IRQHandling(&i2c_handle);
+	I2C_Event_IRQHandling(&i2c_handle);
 }
 
 void I2C1_ER_IRQHandler()

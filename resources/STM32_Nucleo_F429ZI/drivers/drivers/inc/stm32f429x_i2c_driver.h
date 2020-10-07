@@ -207,7 +207,7 @@ uint8_t I2C_MasterDataSendIT(I2C_Handle_t *pI2CHandle, uint8_t *pTxBuffer, uint3
 
 uint8_t I2C_MasterDataReceiveIT(I2C_Handle_t *pI2CHandle, uint8_t *pRxBuffer, uint32_t len, uint8_t slaveAddr, uint8_t repeated_start);
 
-void I2C_EV_IRQHandling(I2C_Handle_t *pI2CHandle);
+void I2C_Event_IRQHandling(I2C_Handle_t *pI2CHandle);
 
 void I2C_Error_IRQHandling(I2C_Handle_t *pI2CHandle);
 

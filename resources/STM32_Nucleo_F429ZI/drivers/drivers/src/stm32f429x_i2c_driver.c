@@ -751,7 +751,7 @@ static void rxeFlaginterruptHandle(I2C_Handle_t *pI2CHandle)
 	}
 }
 
-void I2C_EV_IRQHandling(I2C_Handle_t *pI2CHandle)
+void I2C_Event_IRQHandling(I2C_Handle_t *pI2CHandle)
 {
 	volatile uint16_t isEventInterruptEnable = 0;
 	volatile uint16_t isBufferInterruptEnable = 0;
