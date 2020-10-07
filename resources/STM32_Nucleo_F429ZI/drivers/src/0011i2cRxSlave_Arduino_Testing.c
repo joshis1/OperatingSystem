@@ -6,6 +6,10 @@
  */
 
 
+/** You cannot put break points here since Arduino Master cannot do
+ * Clock stretch -- i.e. lowering the clock - wait state
+ */
+
 #include "stm32f429x.h"
 #include "stm32f429x_gpio_driver.h"
 #include "stm32f429x_i2c_driver.h"
