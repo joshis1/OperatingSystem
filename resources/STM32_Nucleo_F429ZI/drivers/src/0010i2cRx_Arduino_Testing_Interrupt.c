@@ -171,24 +171,24 @@ void I2C_ApplicationEventCallback(I2C_Handle_t *pI2CHandle, uint8_t event)
 	if(event ==  I2C_EVENT_BUS_ERROR)
 	{
 		printf("Got Bus Error");
-		while(1);
+		//while(1);
 	}
 
 	if(event == I2C_EVENT_ACK_ERROR)
 	{
 		printf("Got ACK error\r\n");
-		while(1);
+		//Basically NACK.
 	}
 
 	if(event == I2C_EVENT_OVERRUN_ERROR)
 	{
 		printf("Got ACK error\r\n");
-		while(1);
+		//while(1);
 	}
 
 	if(event == I2C_EVENT_TIMEOUT_ERROR)
 	{
 		printf("Got Time Out error\r\n");
-		while(1);
+		//while(1);
 	}
 }
