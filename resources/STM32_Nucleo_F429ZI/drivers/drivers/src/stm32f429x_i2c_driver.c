@@ -657,7 +657,7 @@ static void stopFlagInterruptHandle(I2C_Handle_t *pI2CHandle)
    // followed by writing to CR1.
 
    uint8_t dummy_read = pI2CHandle->pI2Cx->I2C_SR1;
-   pI2CHandle->pI2Cx->I2C_CR1 |= 0x00;
+   pI2CHandle->pI2Cx->I2C_CR1 |= 0x0000;
 
    (void)dummy_read; // un-used
 
@@ -813,7 +813,7 @@ void I2C_EV_IRQHandling(I2C_Handle_t *pI2CHandle)
 
 void I2C_Error_IRQHandling(I2C_Handle_t *pI2CHandle)
 {
-	uint8_t isErrorInterruptEnable = 0;
+	uint16_t isErrorInterruptEnable = 0;
 
 	isErrorInterruptEnable = pI2CHandle->pI2Cx->I2C_CR2  & (0x1 << I2C_CR2_ITERREN);
 

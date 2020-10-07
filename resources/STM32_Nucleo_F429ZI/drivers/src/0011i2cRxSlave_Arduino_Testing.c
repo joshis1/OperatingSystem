@@ -90,7 +90,7 @@ void I2C1_EV_IRQHandler()
 
 void I2C1_ER_IRQHandler()
 {
-	I2C1_ER_IRQHandler(&i2c_handle);
+	I2C_Error_IRQHandling(&i2c_handle);
 }
 
 void I2C_ApplicationEventCallback(I2C_Handle_t *pI2CHandle, uint8_t event)
