@@ -1705,7 +1705,44 @@ length bytes of data.
 
 014i2cx -- 003RxStringlen. 
 
+############
 
+Common Problems in I2C and Debugging Tips - 
+
+Mandatory tip - 
+
+probing the voltage of SDA and SCL line .
+
+voltage must be 3.3V --
+
+
+Strong reason for not having 3.3. V --
+
+Not activating the pull up resistors if you are 
+using the inernal pull up resistor of an IO line.
+
+Problem - ACK failure -- 
+Probing the signals on logic analyzer. 
+
+no ACK means NACK - Ack Failure -- 
+
+Possible ways of NACK
+Generating the address phase with wrong slave address.
+
+Verify the debug slave address.
+
+Not enabling the ACking feature in the I2C control 
+register. 
+
+-- master is not producing the clock -- 
+
+First check whether peripheral clock is enabled 
+and set atleast 2mhz to produce standard mode 
+i2c serial clock frequency.
+
+GPIOs used for SCL and SDA are configured properly or 
+
+not.
 
 
 

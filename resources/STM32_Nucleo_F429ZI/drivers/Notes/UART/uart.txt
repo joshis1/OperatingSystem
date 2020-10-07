@@ -1,0 +1,246 @@
+UART -- 
+
+Universal asynchronouse receiver transmitter.
+
+
+USART -- 
+Universal Synchronous receiver transmitter. 
+
+
+USART supports both asynchronouse and synchronous mode.
+
+Most moder micro-controller comes with USART.
+
+USART - RS-232, RS-434.
+
+Sync transmission- the clock is sent separately from 
+the data stream and no start/stop bit are used.
+
+BaudRate generator -- 
+Tx and Rx shift register -- 
+Tranmist and receive control blocks 
+Tranmist/Receive buffers.
+FIFO - buffer memory.- STM32 MCU doesn't support.
+
+Asynchronous mode -- clock will not be sent along 
+with the data, instead we use synchronous bits like 
+start and stop bits.
+
+UART - BIDI - Tx and Rx 
+
+if not tranmissiting then Tx will be held high.
+
+Rx - continously samples this line to detec the
+start bit of a frame.
+
+For hwardware flow control - CTS - clear to send .
+
+
+if CTS is pulled to low then the transmission will 
+be high.
+
+RTS -- Request to send -- it needs a data. 
+
+RTS -- CTS of another device
+CTS - RTS of another device.
+
+Tx -- connected to Rx of another device.
+
+Rx -- connected to Tx of another device.
+
+
+###############################################
+UART - frame format -- 
+
+9 bit word lenght , 1 stop bit.
+
+Start bit -- BitO to Bit 8(parity bit) ( lsb to msb) .
+Stop bit - always high.
+
+##########
+
+Baud Rate -- how fast the data is sent over a serial 
+line.
+bps - 
+
+1/9600 = 104 micro seconds -- 
+
+bit 0 - 104 micro seconds.
+
+Both transmitting and receiving devices should 
+operate at the same rate.
+
+9600 bps - common -- 
+
+higher the baud rate - faster the data is send 
+or received.
+
+Baud Rate - peripheral clock frequency.
+
+BaudRate calculation and configruiaotn for STM2
+#############
+
+Synchronisaton bits -- 
+Start bit and Stop bit 
+
+1 start bit 
+number of stop bits can be configured 1 stop bit and
+1.5 stop bits and 2 stop bits.
+1.5 stop and 1 and half bit duration.
+
+if baud rate is high then add more stop bits.
+
+USART_CR2 - STOP[1:0] -- 
+
+Start bit goes from high to low. 
+
+Stop bit idle state i.e. high.
+
+#################
+
+Adding parity bits is a simplest method of error 
+detection -, Parity is the number of ones appearing 
+in athe binary form of a number -- 
+
+Even parity and odd parity -- 
+
+Parity -- bit - 
+###################
+Even parity results in even number of 1s 
+Odd parity results in odd number of 1s.
+
+
+#############
+
+UART functional block diagram - 
+
+USART -- 
+
+Asynchronous -- 
+
+Tx, Rx, -->
+
+
+nRTS
+       --> Hardware flow control.
+nCTS 
+
+########################
+
+SCLK -- 
+
+DR - TDR - transmit data register
+
+RDR -- receive data register.
+
+Baud Rate generation -  USART_BRR - Mantissa 
+and Fraction.
+
+UART - Peripheral Clock -- 
+
+USART hardware is connected -- 
+
+APB2 -- Max84Mhz. 
+
+USART 1 and USART 6 - 
+
+Internal oscialltor - 16 Mhz -- 
+
+USART3, 4, 5 -- ABP1 bus -- max -- 42 Mhz.
+
+>>>>>>>>><<<<<<<<<<<<<<<<<<<<<
+
+16Mhz -- used by baud rate generation -- 
+
+UART transmitter -->
+
+Transmit shift register -- parallel data is converted
+into serial data.
+
+TDR -> Transmit shift register. 
+
+TDR --> CPU or DMA.
+
+once it gets the stop bit from the last sent then 
+it sends the data in the shift register.
+
+##
+
+Steps to do data transmission.
+
+1) Program the M bit in USART_CR1 to define the word length
+
+2) Program the number of stop bits in USART_CR2 register.
+
+3) Select the desired baud rate using the USART_BRR register.
+
+4) Set the TE bit in the USART CR1 to enable the transmit block.
+-- Enable the USART by writing the UE bit in USART_CR1.
+
+--if Txe Flag is set -- write the data byte to send.
+
+-- After writing the last data into the USART _DR wait until 
+TC = 1 i.e transmission complete.
+
+
+
+##Heart the Receive is Receive shift regiser 
+
+serial to parallel word. 
+
+RDR -- 
+
+###
+
+Steps to do Data reception -- 
+
+Program the M bit in USART_CR1 to define the word length
+pgoram the number of stop bits 
+select the baud rate
+Enable the uSART 
+-- Set the RE bit in the USART CR1 regiser.
+
+when a character is received, RXNE is set --
+
+the data has been received.
+
+>>Interrupt on RxNE bit is set 
+
+How does RX engine of the UART peripheral detects the start bit of the incoming frame ?
+
+By using oversampling technique.
+
+There are 2 oversampling options given in the STM MCU 1) Oversampling by 8 2) over sampling by 16 When over sampling by 8 is used, 
+it samples the RX line 8 times the UART Peripheral clock frequency 
+and when the over sampling by 16 is used it samples the RX line 16 times the periphral clock frequency to find out the start bit .
+ For more details : refer reference manual of STM32F407xx MCU
+
+
+Serial in Parallel out shift register -- 
+
+i/p serial but observing the data in parallel.
+
+110 -- 3 bit shift register -- 
+
+how many flip flops - 3 flip flops -- 
+
+-- D flip flop -- 
+
+I/ip and clk -- 
+
+https://www.youtube.com/watch?v=vRBnZMJA0LY
+
+PISO --  Parallel in serial out shift regisers.
+
+Basically give data in parallel and get the data out at 
+each clk cycle.
+Basically shift registers are nothing but D-Flip Flops.
+
+UART Tx -- Parallel in Serial Out.
+
+UART Rx -- Serial in Parallel out.
+
+C
+
+
+
