@@ -25,6 +25,13 @@ typedef struct
 {
 	USART_RegDef_t *pUSARTx;
 	USART_Config_t usart_Config;
+	uint8_t txState;
+	uint8_t rxState;
+	uint32_t txlen;
+	uint32_t rxlen;
+	uint8_t *pTxBuffer;
+	uint8_t *pRxBuffer;
+
 }USART_Handle_t;
 
 
@@ -127,6 +134,12 @@ typedef struct
 #define USART_SR_TXE     (7) //Transmit Data register Empty
 #define USART_SR_LBD     (8) //Line Break Detection Flag
 #define USART_SR_CTS     (9) //CTS Flag
+
+
+/***USART States **/
+#define USART_BUSY_IN_TX (0)
+#define USART_BUSY_IN_RX (1)
+#define USART_READY (2)
 
 void USART_PeriClockControl(USART_RegDef_t *pUsart, uint8_t EnOrDi);
 
