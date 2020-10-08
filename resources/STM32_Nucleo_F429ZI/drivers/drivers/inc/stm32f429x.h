@@ -388,4 +388,33 @@ typedef struct
 #define I2C2   ((I2C_RegDef_t *)I2C2_BASEADDR)
 #define I2C3   ((I2C_RegDef_t *)I2C3_BASEADDR)
 
+/************USART ******************************/
+
+typedef struct
+{
+	_VO uint32_t USART_SR;    //     - address offset   0x00
+	_VO uint32_t USART_DR;   // -  address offset   0x04
+	_VO uint32_t USART_BRR;     //- address offset   0x08
+	_VO uint32_t USART_CR1;    //- address offset   0x0C
+	_VO uint32_t USART_CR2;      //- address offset   0x10
+	_VO uint32_t USART_CR3;      //- address offset   0x14
+	_VO uint32_t USART_GTPR;      //- address offset   0x18
+}USART_RegDef_t;
+
+
+#define USART1   ((USART_RegDef_t *)USART1_BASEADDR)
+#define USART2   ((USART_RegDef_t *)USART2_BASEADDR)
+#define USART3   ((USART_RegDef_t *)USART3_BASEADDR)
+#define USART6   ((USART_RegDef_t *)USART6_BASEADDR)
+
+#define USART1_PCLK_EN() (RCC->RCC_APB2ENR |= (1U <<4))
+#define USART2_PCLK_EN() (RCC->RCC_APB1ENR |= (1U <<17))
+#define USART3_PCLK_EN() (RCC->RCC_APB1ENR |= (1U <<18))
+#define USART6_PCLK_EN() (RCC->RCC_APB2ENR |= (1U <<5))
+
+#define USART1_PCLK_DI() (RCC->RCC_APB2ENR &= ~(1U <<4))
+#define USART2_PCLK_DI() (RCC->RCC_APB1ENR &= ~(1U <<17))
+#define USART3_PCLK_DI() (RCC->RCC_APB1ENR &= ~(1U <<18))
+#define USART6_PCLK_DI() (RCC->RCC_APB2ENR &= ~(1U <<5))
+
 #endif /* STM32F429X_H_ */

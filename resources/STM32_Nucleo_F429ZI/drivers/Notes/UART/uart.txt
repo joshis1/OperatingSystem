@@ -240,7 +240,55 @@ UART Tx -- Parallel in Serial Out.
 
 UART Rx -- Serial in Parallel out.
 
-C
+#####################
+
+USART 1 and USART 6 - APB2 
+
+USART2, USART3 -- APB1 bus .
+
+usart_driver.h and usart_driver.c 
+
+Driver API requirement and user configurable items.
+-- USART_Mode -  tranmit, receive, transmit and receive.
+-- USART_Baud --
+
+--> number of stop bits 
+--> word len - 8 bits or 9 bits
+--> parity control - no parity, even parity or odd parity.
+-> hardware flow control --
+
+###
+
+Configurable items - USART -- 
+
+USART driver -- USART initialization/peripheral clock control.
+----------- USART Tx
+-- USART Rx 
+
+-- USART interrupt config and handling 
+
+-- other usart management API..
+
+uint_t usart_mode;
+uint32_t usart_baud;
+uin8 -- usart_no_of_stop_bits;
+uint8  -- usart_wordLenght;
+ui8 -- parity control;
+8_t  usart_hwFlowControl;
+
+##
+typedef struct
+{
+    usart_regDeft 
+	usart_config_t  usart_config;
+}
+
+1) Create the USART drver headr file --
+
+2) USart reg def ; device def, clock enable, disable.
+3)  USART register bit definiton macros in MCU 
+4) Add usat configuration structure and USART handle 
+structure in usart header file.
 
 
 
