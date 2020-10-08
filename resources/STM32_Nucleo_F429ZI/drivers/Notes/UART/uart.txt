@@ -378,3 +378,106 @@ structure in usart header file.
 
 USART_SendData( -- 
 
+oversampling -- receiver - 
+Rx line --
+Sampling line - 16 or 8 times the baud rate. 
+
+16 samples to understand 1 bit .
+
+If you select oversampling by 8 (OVER8 = 1), then you can 
+achieve max baud rate up to Fpck/8, but in this case 
+the maximum receiver tolerance to clock deviation is 
+reduced.
+
+If you select oversampling by 16 (oVEr8=0), then you can 
+max baudrate up to Fpclk/16, In this case the maximum 
+receiver tolerance to clock deviation is increased.
+
+
+Thumb Rule.
+USART in noisy enviornemnt - oversampling by 16,
+
+if enviornment is noise free then use oversampling by 8.
+
+####
+
+UART BaudRate Calculation.
+
+Tx/Rx baud = Fclk/8 * USARDIV  -- if OVER8 = 1
+
+Tx/Rx baud = Fclk/16 *USARTDIV if OVER8 = 0
+
+The baud rate for the receiver and transmitter (Rx and Tx)
+are both set to the same value as programmed in the Mantissa 
+and Fraction values of USARTDIV.
+
+Tx/Rx baud = Fck/( 8 * (2 - over8) * usartdiv)
+
+
+9600 bps -- desired 
+
+Fclk = 16 Mhz, over8= 9 -- oversampling by 16.
+
+USARTDIV = 16M/(8 * 2 * 9600)
+ = 104.17
+ 
+ USART_BRR --  
+ 
+ 104.1875 
+ 
+ convert this value into hex and then program the 
+ USART_BRR register to achieve desired baud rate .
+ 
+ Mantissa - is the main -- 11 bits
+ 
+Fraction - part -- 4 bits
+
+0.1875 * 16  = 3 -- fraction bits of USART BRR 
+
+mutliply by 16 since we have used oversampling of 16.
+
+DIV_Manitssa = 104 = 0x68 -- Mantissa section.
+
+USARDIV=0x683  -- 
+
+16Mhz, oVER8 =1, bps - 115200 bps 
+
+UART DIV = 16M/ (1152000 *8) = 17.361 
+
+DIV_Fraction = 0.361 * 8 = 2.88 = 3
+
+DIV_MANTISA = 0x11
+
+USARTDIV = 0x113 
+
+0x11 - Mantisa
+0x3 - in fraction part.
+
+#########
+
+USART_DIV = Fpck/8 *BR 
+
+4.71 
+
+Fpck * 100 / 8 * BR == 
+
+25 *F/ 2 * BR = 471.
+
+INTeger part = x/100 = 4 
+
+fraction part = 471 - 400 
+F = 71 
+
+F = 71 * 8 = 568 + 50 = 618/100 = 6
+
+####
+
+USART_SetBaudRate( --RegDef, baudRate);
+
+stm32F47xxRcc_driver.c 
+driver.h 
+
+
+
+
+

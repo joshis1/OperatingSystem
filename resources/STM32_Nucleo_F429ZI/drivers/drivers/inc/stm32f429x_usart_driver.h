@@ -157,4 +157,6 @@ uint8_t USART_ReceiveDataIT(USART_Handle_t *pUSARTHandle, uint8_t *pRxBuffer, ui
 
 uint8_t USART_GetFlagStatus(USART_RegDef_t *pUsart, uint8_t flag);
 
+void USART_SetBaudRate(USART_RegDef_t *pUsart, uint32_t baudRate);
+
 #endif /* INC_STM32F429X_USART_DRIVER_H_ */
