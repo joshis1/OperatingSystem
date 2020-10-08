@@ -345,6 +345,11 @@ typedef struct
 #define IRQ_I2C3_EV            (72)
 #define IRQ_I2C3_ER            (73)
 
+#define IRQ_USART1             (37)
+#define IRQ_USART2             (38)
+#define IRQ_USART3             (39)
+#define IRQ_USART6             (71)
+
 
 /** SPI Handling **/
 

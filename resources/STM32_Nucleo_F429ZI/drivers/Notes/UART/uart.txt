@@ -283,6 +283,91 @@ typedef struct
 	usart_config_t  usart_config;
 }
 
+USART_SendData -- RegDeft 
+
+REceive Data -- RegDeft
+IT( HANDLE.
+
+uint8_t USART_GetFlagStatus()
+
+USART_MODE_ONLY RX  (0
+USART_MODE_ONLY_TX 1
+USART_MODE_TXRX   2
+
+
+#define USART_STD_BAUD_1200 1200
+_2400  2400
+
+_9600 9600
++19200  19200
+_38400  38400
+_57600  57600
+_115200 115200
+_230400 230400
+_460800 460800
+_921600  921600
+
+Fractional baud rate generation - 
+
+fpck = 16 Mhz -- 
+
+Oversampling by 1 6 - 
+
+USART_PARITY_EN_ODD 
+_EN_EVEN
+_DISABLE 
+
+Word leenght 
+WORD_LEN_8_BIts 0
+WORLD_BIT_9_BITs 1
+
+STOPBITS_1 0
+_0_5 1 
+_2 2
+
+
+HW_FLOW_CONTROL_NONE
+HW_FLOW_CONTROL_CTS
+_RTS
+_CTS_RTS 
+
+###
+
+CR1 -- 2 and 3 -- TxE and RxE --
+
+BRR - Baud Rate - 
+
+Mantissa and Fraction part - 
+
+Bit 15:4 -- Div 
+
+Parity CE -- bit 10 
+PCE 
+
+PS - Parity Selection -- 0 - Even parity ; 1 - Odd parity 
+
+CR1 - word length - Bit 12 - 0 - 1 start bit - 8 data bits 
+------1 - Start bit - 9 data bits 
+
+number of stop bits - CR2 --  00 -1 stop bits 
+0.5 stop bits 
+2 stop bits 
+1.5 stop bits 
+
+Higher the baud rate then use more stop bits.
+USe 2 stop bits. 
+
+1 stop bit if less than 1  mbps
+9600 baud then use 0.5 stop bits. 
+
+Hardware Flow Control - CR3 -- Bit 8 and Bit 9.
+
+
+
+
+
+
+
 1) Create the USART drver headr file --
 
 2) USart reg def ; device def, clock enable, disable.
@@ -291,4 +376,5 @@ typedef struct
 structure in usart header file.
 
 
+USART_SendData( -- 
 
