@@ -55,11 +55,11 @@ void USART_Init(USART_Handle_t *pUSARTHandle)
 {
 	uint32_t tempReg = 0;
 
-	if(pUSARTHandle->usart_Config.usart_mode  == USART_MODE_ONLY_RX)
+	if(pUSARTHandle->usart_Config.usart_mode  == USART_MODE_ONLY_TX)
 	{
 		tempReg = (0x1 << USART_CR1_TE);
 	}
-	else if(pUSARTHandle->usart_Config.usart_mode  == USART_MODE_ONLY_TX)
+	else if(pUSARTHandle->usart_Config.usart_mode  == USART_MODE_ONLY_RX)
 	{
 		tempReg = (0x1 << USART_CR1_RE);
 	}

@@ -478,6 +478,59 @@ stm32F47xxRcc_driver.c
 driver.h 
 
 
+####
+
+UART from STM32 board to Arduino board 
+
+Baud Rate  - 115200
+1 Stop bits, 8 bits , no parity 
+
+usart_tx.c -- 
+
+USART2_GPIOInit();
+---> Tx and Rx --
+
+AF -- PA2 -- USART2 Tx, AF7 
+-- PA3 -- UART2Rx, AF7
+##
+
+Tx ---> 0 (Rx) -- Arduino -- digital pin .
+
+Rx -- > 1 ( Tx) -- Arduino -- digital pin 
+
+Gnd Points. 
+
+001UARTRxString.ino -- 
+
+USART2_GPIOInit(); -- > 
+
+O/p type - push pull 
+
+PIN - PU -- internal pull up .
+
+USART2_Init(); -- Init.. 
+
+USART2, 
+BAUD_115200;
+HW_NONE;
+MODE_TX;
+USaRT=STOP_BITS_1
+8_BITS;
+DISABLE_PARITY 
+
+
+USART_PeripheralControl( -- Enable)
+
+
+on button Press -- 
+USART_SEndData(00 
+
+while(1);
+
+return 0;
+
+
+In USART we send LSB first unlike SPI and I2C.
 
 
 
