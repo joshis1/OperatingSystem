@@ -6,7 +6,7 @@ void setup() {
   // Define the LED pin as Output
   pinMode (13, OUTPUT);
   
- // Serial.println("Arduino Case Converter program running");
+  //Serial.println("Arduino Case Converter program running");
  // Serial.println("-------------------------------------");
   
     

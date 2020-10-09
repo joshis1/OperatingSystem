@@ -10,7 +10,10 @@
 #include "stm32f429x_usart_driver.h"
 #include "stm32f429x_gpio_driver.h"
 
-
+/** Arduino sketch -- 002UARTTxString **/
+/** [Important] - In this application don't open the Arduino Serial Monitor otherwise
+ *  you will not get the received bytes
+ */
 
 /**
  *  PA2 - USART2 Tx  ---   D0 - Rx - Digital Pin (Arduino)
@@ -114,7 +117,8 @@ int main()
 			cnt = cnt % 3;
 			//First lets enable the reception in interrupt mode
 			//this code enables the receive interrupt
-			while ( USART_ReceiveDataIT(&usart2_handle,(uint8_t*)rx_buf,strlen(msg[cnt])) != USART_READY );
+			//while ( USART_ReceiveDataIT(&usart2_handle,(uint8_t*)rx_buf,strlen(msg[cnt])) != USART_READY );
+			USART_ReceiveDataIT(&usart2_handle,(uint8_t*)rx_buf,strlen(msg[cnt]));
 			//Send the msg indexed by cnt in blocking mode
 			USART_SendData(&usart2_handle,(uint8_t*)msg[cnt],strlen(msg[cnt]));
 			printf("Transmitted : %s\n",msg[cnt]);
