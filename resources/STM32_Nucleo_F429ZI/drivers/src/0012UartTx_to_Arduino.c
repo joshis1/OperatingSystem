@@ -9,7 +9,10 @@
 #include "stm32f429x_usart_driver.h"
 #include "stm32f429x_gpio_driver.h"
 
-
+/*** Arduino Sketch
+ *
+ *  001UARTRxString.ino
+ */
 
 /**
  *  PA2 - USART2 Tx  ---   D0 - Rx - Digital Pin (Arduino)
