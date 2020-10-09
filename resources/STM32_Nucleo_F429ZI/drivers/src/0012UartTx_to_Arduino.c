@@ -5,9 +5,10 @@
  *      Author: sjoshi
  */
 
-
+#include <string.h>  // for memset and strlen
 #include "stm32f429x_usart_driver.h"
 #include "stm32f429x_gpio_driver.h"
+
 
 
 /**
