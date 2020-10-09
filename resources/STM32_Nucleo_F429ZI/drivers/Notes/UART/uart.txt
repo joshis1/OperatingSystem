@@ -532,5 +532,35 @@ return 0;
 
 In USART we send LSB first unlike SPI and I2C.
 
+########################
+
+USART interrupts -- 
+
+Transmit Data Register Empty - TXE 
+CTS flag -- CTS - CTSIE 
+TRansmission complete -- TC - TCIE 
+Recieved Data Ready to be READ -- RxNE
+Overrrun error detected - ORE 
+Idle line detected -- IDLE 
+Parity Error - PE 
+Break Flag - LBD 
+
+Noise Flag, overrrun error and framing error in multibuffer 
+communication.
+
+One USART interrupt -- > connected to NVIC Engine.
+
+## Exercise -- STM32 which transmits different messages to 
+the Arduino board over UART communicaiton -- 
+
+Arduino change the case and sent back the data to STM32 .
+
+002UARTTxString. 
+
+016Uart_case.c 
+
+
+
+
 
 

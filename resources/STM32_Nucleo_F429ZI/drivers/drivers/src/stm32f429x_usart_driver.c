@@ -398,3 +398,211 @@ void USART_SetBaudRate(USART_RegDef_t *pUsart, uint32_t baudRate)
   //copy the value of tempreg in to BRR register
   pUsart->USART_BRR = tempreg;
 }
+
+
+void USART_IRQHandling(USART_Handle_t *pUSARTHandle)
+{
+
+	uint32_t temp1 , temp2;
+	uint16_t *pdata;
+
+/*************************Check for TC flag ********************************************/
+
+    //Implement the code to check the state of TC bit in the SR
+	temp1 = pUSARTHandle->pUSARTx->USART_SR & ( 1 << USART_SR_TC);
+
+	 //Implement the code to check the state of TCEIE bit
+	temp2 = pUSARTHandle->pUSARTx->USART_CR1 & ( 1 << USART_CR1_TCIE);
+
+	if(temp1 && temp2 )
+	{
+		//this interrupt is because of TC
+
+		//close transmission and call application callback if TxLen is zero
+		if ( pUSARTHandle->txState == USART_BUSY_IN_TX)
+		{
+			//Check the TxLen . If it is zero then close the data transmission
+			if(! pUSARTHandle->txlen )
+			{
+				//Implement the code to clear the TC flag
+				pUSARTHandle->pUSARTx->USART_SR &= ~( 1 << USART_SR_TC);
+
+				//Implement the code to clear the TCIE control bit
+				pUSARTHandle->pUSARTx->USART_CR1 &= ~(1 << USART_CR1_TCIE);
+
+				//Reset the application state
+				pUSARTHandle->txState = USART_READY;
+
+				//Reset Buffer address to NULL
+				pUSARTHandle->pTxBuffer = NULL;
+
+				//Reset the length to zero
+				pUSARTHandle->txlen = 0;
+
+				//Call the applicaton call back with event USART_EVENT_TX_CMPLT
+				USART_ApplicationEventCallback(pUSARTHandle,USART_EVENT_TX_CMPLT);
+			}
+		}
+	}
+
+/*************************Check for TXE flag ********************************************/
+
+	//Implement the code to check the state of TXE bit in the SR
+	temp1 = pUSARTHandle->pUSARTx->USART_SR & ( 1 << USART_SR_TXE);
+
+	//Implement the code to check the state of TXEIE bit in CR1
+	temp2 = pUSARTHandle->pUSARTx->USART_CR1 & ( 1 << USART_CR1_TXEIE);
+
+
+	if(temp1 && temp2 )
+	{
+		//this interrupt is because of TXE
+
+		if(pUSARTHandle->txState == USART_BUSY_IN_TX)
+		{
+			//Keep sending data until Txlen reaches to zero
+			if(pUSARTHandle->txlen > 0)
+			{
+				//Check the USART_WordLength item for 9BIT or 8BIT in a frame
+				if(pUSARTHandle->usart_Config.usart_wordLength == USART_WORD_LEN_9_BITS)
+				{
+					//if 9BIT , load the DR with 2bytes masking the bits other than first 9 bits
+					pdata = (uint16_t*)pUSARTHandle->pTxBuffer;
+
+					//loading only first 9 bits , so we have to mask with the value 0x01FF
+					pUSARTHandle->pUSARTx->USART_DR = (*pdata & (uint16_t)0x01FF);
+
+					//check for USART_ParityControl
+					if(pUSARTHandle->usart_Config.usart_parityControl == USART_PARITY_DISABLE)
+					{
+						//No parity is used in this transfer , so, 9bits of user data will be sent
+						//Implement the code to increment pTxBuffer twice
+						pUSARTHandle->pTxBuffer++;
+						pUSARTHandle->pTxBuffer++;
+
+						//Implement the code to decrement the length
+						pUSARTHandle->txlen--;
+						pUSARTHandle->txlen--;
+					}
+					else
+					{
+						//Parity bit is used in this transfer . so , 8bits of user data will be sent
+						//The 9th bit will be replaced by parity bit by the hardware
+						pUSARTHandle->pTxBuffer++;
+
+						//Implement the code to decrement the length
+						pUSARTHandle->txlen--;
+					}
+				}
+				else
+				{
+					//This is 8bit data transfer
+					pUSARTHandle->pUSARTx->USART_DR = (*pUSARTHandle->pTxBuffer  & (uint8_t)0xFF);
+
+					//Implement the code to increment the buffer address
+					pUSARTHandle->pTxBuffer++;
+
+					//Implement the code to decrement the length
+					pUSARTHandle->txlen--;
+				}
+
+			}
+			if (pUSARTHandle->txlen == 0 )
+			{
+				//TxLen is zero
+				//Implement the code to clear the TXEIE bit (disable interrupt for TXE flag )
+				pUSARTHandle->pUSARTx->USART_CR1 &= ~( 1 << USART_CR1_TXEIE);
+			}
+		}
+	}
+
+/*************************Check for RXNE flag ********************************************/
+
+	temp1 = pUSARTHandle->pUSARTx->USART_SR & ( 1 << USART_SR_RXNE);
+	temp2 = pUSARTHandle->pUSARTx->USART_CR1 & ( 1 << USART_CR1_RXNEIE);
+
+
+	if(temp1 && temp2 )
+	{
+		//this interrupt is because of rxne
+		//this interrupt is because of txe
+		if(pUSARTHandle->rxState == USART_BUSY_IN_RX)
+		{
+			//TXE is set so send data
+			if(pUSARTHandle->rxlen > 0)
+			{
+				//Check the USART_WordLength to decide whether we are going to receive 9bit of data in a frame or 8 bit
+				if(pUSARTHandle->usart_Config.usart_wordLength == USART_WORD_LEN_9_BITS)
+				{
+					//We are going to receive 9bit data in a frame
+
+					//Now, check are we using USART_ParityControl control or not
+					if(pUSARTHandle->usart_Config.usart_parityControl == USART_PARITY_DISABLE)
+					{
+						//No parity is used. so, all 9bits will be of user data
+
+						//read only first 9 bits so mask the DR with 0x01FF
+						*((uint16_t*) pUSARTHandle->pRxBuffer) = (pUSARTHandle->pUSARTx->USART_DR  & (uint16_t)0x01FF);
+
+						//Now increment the pRxBuffer two times
+						pUSARTHandle->pRxBuffer++;
+						pUSARTHandle->pRxBuffer++;
+
+						//Implement the code to decrement the length
+						pUSARTHandle->rxlen--;
+						pUSARTHandle->rxlen--;
+					}
+					else
+					{
+						//Parity is used. so, 8bits will be of user data and 1 bit is parity
+						 *pUSARTHandle->pRxBuffer = (pUSARTHandle->pUSARTx->USART_DR  & (uint8_t)0xFF);
+
+						 //Now increment the pRxBuffer
+						 pUSARTHandle->pRxBuffer++;
+
+						 //Implement the code to decrement the length
+						 pUSARTHandle->rxlen--;
+					}
+				}
+				else
+				{
+					//We are going to receive 8bit data in a frame
+
+					//Now, check are we using USART_ParityControl control or not
+					if(pUSARTHandle->usart_Config.usart_parityControl == USART_PARITY_DISABLE)
+					{
+						//No parity is used , so all 8bits will be of user data
+
+						//read 8 bits from DR
+						 *pUSARTHandle->pRxBuffer = (uint8_t) (pUSARTHandle->pUSARTx->USART_DR  & (uint8_t)0xFF);
+					}
+
+					else
+					{
+						//Parity is used, so , 7 bits will be of user data and 1 bit is parity
+
+						//read only 7 bits , hence mask the DR with 0X7F
+						 *pUSARTHandle->pRxBuffer = (uint8_t) (pUSARTHandle->pUSARTx->USART_DR  & (uint8_t)0x7F);
+
+					}
+
+					//Now , increment the pRxBuffer
+					pUSARTHandle->pRxBuffer++;
+
+					//Implement the code to decrement the length
+					pUSARTHandle->rxlen--;
+				}
+
+
+			}//if of >0
+
+			if(! pUSARTHandle->rxlen)
+			{
+				//disable the rxne
+				pUSARTHandle->pUSARTx->USART_CR1 &= ~( 1 << USART_CR1_RXNEIE );
+				pUSARTHandle->rxState = USART_READY;
+				USART_ApplicationEventCallback(pUSARTHandle,USART_EVENT_RX_CMPLT);
+			}
+		}
+	}
+}

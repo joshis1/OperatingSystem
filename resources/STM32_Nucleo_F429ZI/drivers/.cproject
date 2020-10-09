@@ -58,12 +58,12 @@
 							</tool>
 						</toolChain>
 					</folderInfo>
-					<fileInfo id="fr.ac6.managedbuild.config.gnu.cross.exe.debug.1329797593.1762822730" name="0011i2cRxSlave_Arduino_Testing.c" rcbsApplicability="disable" resourcePath="src/0011i2cRxSlave_Arduino_Testing.c" toolsToInvoke="fr.ac6.managedbuild.tool.gnu.cross.c.compiler.1266070198.1080588547">
-						<tool id="fr.ac6.managedbuild.tool.gnu.cross.c.compiler.1266070198.1080588547" name="MCU GCC Compiler" superClass="fr.ac6.managedbuild.tool.gnu.cross.c.compiler.1266070198"/>
+					<fileInfo id="fr.ac6.managedbuild.config.gnu.cross.exe.debug.1329797593.994838475" name="0012UartTx_to_Arduino.c" rcbsApplicability="disable" resourcePath="src/0012UartTx_to_Arduino.c" toolsToInvoke="fr.ac6.managedbuild.tool.gnu.cross.c.compiler.1266070198.1638673243">
+						<tool id="fr.ac6.managedbuild.tool.gnu.cross.c.compiler.1266070198.1638673243" name="MCU GCC Compiler" superClass="fr.ac6.managedbuild.tool.gnu.cross.c.compiler.1266070198"/>
 					</fileInfo>
 					<sourceEntries>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="drivers"/>
-						<entry excluding="0011i2cRxSlave_Arduino_Testing.c|0010i2cRx_Arduino_Testing_Interrupt.c|009i2cRx_Arduino_Testing.c|008i2cTx_Arduino_Testing.c|007spi_cmd_handling_it.c|005spiTx_ArduinoTesting.c|005spiTx_AdruinoTesting.c|006spi_cmd_handling.c|004spiTx_testing.c|003led_button_interrupt.c|002led_button.c|001led_toggle.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+						<entry excluding="0012UartTx_to_Arduino.c|0011i2cRxSlave_Arduino_Testing.c|0010i2cRx_Arduino_Testing_Interrupt.c|009i2cRx_Arduino_Testing.c|008i2cTx_Arduino_Testing.c|007spi_cmd_handling_it.c|005spiTx_ArduinoTesting.c|005spiTx_AdruinoTesting.c|006spi_cmd_handling.c|004spiTx_testing.c|003led_button_interrupt.c|002led_button.c|001led_toggle.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
 						<entry excluding="sysmem.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="startup"/>
 					</sourceEntries>
 				</configuration>

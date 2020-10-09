@@ -141,7 +141,15 @@ typedef struct
 #define USART_BUSY_IN_RX (1)
 #define USART_READY (2)
 
+/**USART Events **/
+#define USART_EVENT_TX_CMPLT (0)
+#define USART_EVENT_RX_CMPLT (1)
+
+
+
 void USART_PeriClockControl(USART_RegDef_t *pUsart, uint8_t EnOrDi);
+
+void USART_PeriControl(USART_RegDef_t *pUsart, uint8_t EnOrDi);
 
 void USART_Init(USART_Handle_t *pUSARTHandle);
 
@@ -158,5 +166,9 @@ uint8_t USART_ReceiveDataIT(USART_Handle_t *pUSARTHandle, uint8_t *pRxBuffer, ui
 uint8_t USART_GetFlagStatus(USART_RegDef_t *pUsart, uint8_t flag);
 
 void USART_SetBaudRate(USART_RegDef_t *pUsart, uint32_t baudRate);
+
+void USART_IRQHandling(USART_Handle_t *pUSARTHandle);
+
+__attribute__((weak)) void USART_ApplicationEventCallback(USART_Handle_t *pUSARTHandle, uint8_t event);
 
 #endif /* INC_STM32F429X_USART_DRIVER_H_ */
