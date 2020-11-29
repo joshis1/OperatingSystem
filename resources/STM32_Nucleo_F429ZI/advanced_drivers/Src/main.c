@@ -16,24 +16,25 @@ uint8_t lower_to_upper(uint8_t data);
 
 
 UART_HandleTypeDef huart3;
+int reception_complete = 0;
 
 char *user_data = "Advanced stm32 \r\n";
+uint8_t data_buffer[1024];
+uint8_t count = 0;
+uint8_t recvd_data;
 
 uint8_t lower_to_upper(uint8_t data)
 {
 	if(data >= 'a' && data <= 'z')
 	{
 		//lower case
-	   return (data-32);
+		return (data-32);
 	}
 	return data;
 }
 
 int main()
 {
-	uint8_t recvd_data;
-	uint8_t buffer[1024];
-	uint16_t count  = 0;
 	HAL_Init();
 	SystemClockConfig();
 	USART3_Init();
@@ -43,21 +44,12 @@ int main()
 		Error_Handler();
 	}
 
-	while(1)
+	while(!reception_complete)
 	{
-		HAL_UART_Receive(&huart3, &recvd_data,1, HAL_MAX_DELAY);
-		if(recvd_data == '\r')
-		{
-			break;
-		}
-
-		buffer[count++] = lower_to_upper(recvd_data);
+		HAL_UART_Receive_IT(&huart3, &recvd_data,1);
 	}
 
-	buffer[count] = '\r';
-	//buffer[count] = '\n';
-
-	if (HAL_OK != HAL_UART_Transmit(&huart3,(uint8_t *)buffer, count, HAL_MAX_DELAY))
+	if (HAL_OK != HAL_UART_Transmit(&huart3,(uint8_t *)data_buffer, count, HAL_MAX_DELAY))
 	{
 		Error_Handler();
 	}
@@ -69,9 +61,21 @@ int main()
 
 void SystemClockConfig(void)
 {
-  //internal RC oscillator - 16 Mhz
+	//internal RC oscillator - 16 Mhz
 }
 
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+	if(recvd_data == '\r')
+	{
+		data_buffer[count++] = '\n';
+		reception_complete = 1;
+	}
+	else
+	{
+		data_buffer[count++] = lower_to_upper(recvd_data);
+	}
+}
 
 void USART3_Init(void)
 {
