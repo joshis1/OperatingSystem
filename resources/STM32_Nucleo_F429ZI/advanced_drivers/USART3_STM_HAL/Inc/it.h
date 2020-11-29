@@ -8,6 +8,6 @@
 #ifndef IT_H_
 #define IT_H_
 
-
+#include "stm32f4xx_hal.h"
 
 #endif /* IT_H_ */

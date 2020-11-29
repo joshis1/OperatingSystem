@@ -6,23 +6,62 @@
  */
 
 //#include "stm32f4xx.h"
-#include "stm32f4xx_hal.h"
 #include "main.h"
 
 void SystemClockConfig(void);
 void USART3_Init(void);
 void Error_Handler(void);
 
+uint8_t lower_to_upper(uint8_t data);
+
 
 UART_HandleTypeDef huart3;
 
+char *user_data = "Advanced stm32 \r\n";
+
+uint8_t lower_to_upper(uint8_t data)
+{
+	if(data >= 'a' && data <= 'z')
+	{
+		//lower case
+	   return (data-32);
+	}
+	return data;
+}
+
 int main()
 {
-  HAL_Init();
-  SystemClockConfig();
-  USART3_Init();
+	uint8_t recvd_data;
+	uint8_t buffer[1024];
+	uint16_t count  = 0;
+	HAL_Init();
+	SystemClockConfig();
+	USART3_Init();
 
-  return 0;
+	if (HAL_OK != HAL_UART_Transmit(&huart3,(uint8_t *)user_data, strlen(user_data), HAL_MAX_DELAY))
+	{
+		Error_Handler();
+	}
+
+	while(1)
+	{
+		HAL_UART_Receive(&huart3, &recvd_data,1, HAL_MAX_DELAY);
+		if(recvd_data == '\r')
+		{
+			break;
+		}
+
+		buffer[count++] = lower_to_upper(recvd_data);
+	}
+
+	if (HAL_OK != HAL_UART_Transmit(&huart3,(uint8_t *)buffer, count, HAL_MAX_DELAY))
+	{
+		Error_Handler();
+	}
+
+	while(1);
+
+	return 0;
 }
 
 void SystemClockConfig(void)

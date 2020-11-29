@@ -28,6 +28,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef *huart)
    GPIO_InitTypeDef gpio;
   //Enable the clock for USART3 peripheral
   __HAL_RCC_USART3_CLK_ENABLE();
+  __HAL_RCC_GPIOD_CLK_ENABLE();
   //do the pin muxing configurations
   gpio.Mode = GPIO_MODE_AF_PP;
   gpio.Pull = GPIO_PULLUP;
