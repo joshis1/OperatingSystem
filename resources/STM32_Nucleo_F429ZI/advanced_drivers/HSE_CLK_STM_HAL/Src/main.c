@@ -7,52 +7,89 @@
 
 //#include "stm32f4xx.h"
 #include "main.h"
+#include <stdio.h> //sprintf
+#include <string.h> //memset and strlen
 
 void SystemClockConfig(void);
 void USART3_Init(void);
 void Error_Handler(void);
 
-uint8_t lower_to_upper(uint8_t data);
-
-
 UART_HandleTypeDef huart3;
-int reception_complete = 0;
 
-char *user_data = "Advanced stm32 \r\n";
-uint8_t data_buffer[1024];
-uint8_t count = 0;
-uint8_t recvd_data;
-
-uint8_t lower_to_upper(uint8_t data)
-{
-	if(data >= 'a' && data <= 'z')
-	{
-		//lower case
-		return (data-32);
-	}
-	return data;
-}
+char msg[1024];
 
 int main()
 {
 	HAL_Init();
 	SystemClockConfig();
+
+	RCC_OscInitTypeDef oscillator_init;
+	RCC_ClkInitTypeDef clk_init;
+	memset(&oscillator_init,0, sizeof(oscillator_init));
+
+	oscillator_init.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+	oscillator_init.HSEState = RCC_HSE_BYPASS;
+
+	if(HAL_OK != HAL_RCC_OscConfig(&oscillator_init))
+	{
+		Error_Handler();
+	}
+
+	clk_init.SYSCLKSource = RCC_SYSCLKSOURCE_HSE;
+	clk_init.ClockType = RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
+	clk_init.AHBCLKDivider = RCC_SYSCLK_DIV2;
+	clk_init.APB1CLKDivider = RCC_HCLK_DIV2;
+	clk_init.APB2CLKDivider = RCC_HCLK_DIV2;
+
+	if( HAL_OK != HAL_RCC_ClockConfig(&clk_init,FLASH_ACR_LATENCY_0WS) )
+	{
+		Error_Handler();
+	}
+
+	 __HAL_RCC_HSI_DISABLE(); //Saves some current
+
+	 /* LETS REDO THE SYSTICK CONFIGURATION */
+
+
+	//HCLK is 4Mhz
+	// 0.25 micro seconds 1 tick
+	// we need systick for every 1 milliseconds.
+	// 4000 ticks is 1 milliseconds then.
+	HAL_SYSTICK_Config(4000);
+	HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
+
 	USART3_Init();
 
-	if (HAL_OK != HAL_UART_Transmit(&huart3,(uint8_t *)user_data, strlen(user_data), HAL_MAX_DELAY))
+	memset(msg,0,strlen(msg));
+
+	sprintf(msg,"SYSCLK: %ld \r\n", HAL_RCC_GetSysClockFreq());
+
+	if (HAL_OK != HAL_UART_Transmit(&huart3,(uint8_t *)msg, strlen(msg), HAL_MAX_DELAY))
 	{
 		Error_Handler();
 	}
 
-	while(!reception_complete)
-	{
-		HAL_UART_Receive_IT(&huart3, &recvd_data,1);
-	}
-
-	if (HAL_OK != HAL_UART_Transmit(&huart3,(uint8_t *)data_buffer, count, HAL_MAX_DELAY))
+	memset(msg,0,strlen(msg));
+	sprintf(msg,"HCLK: %ld \r\n", HAL_RCC_GetHCLKFreq());
+	if (HAL_OK != HAL_UART_Transmit(&huart3,(uint8_t *)msg, strlen(msg), HAL_MAX_DELAY))
 	{
 		Error_Handler();
 	}
+
+	memset(msg,0,strlen(msg));
+	sprintf(msg,"PCLK1: %ld \r\n", HAL_RCC_GetPCLK1Freq());
+	if (HAL_OK != HAL_UART_Transmit(&huart3,(uint8_t *)msg, strlen(msg), HAL_MAX_DELAY))
+	{
+		Error_Handler();
+	}
+
+	memset(msg,0,strlen(msg));
+	sprintf(msg,"PCLK2 %ld \r\n", HAL_RCC_GetPCLK2Freq());
+	if (HAL_OK != HAL_UART_Transmit(&huart3,(uint8_t *)msg, strlen(msg), HAL_MAX_DELAY))
+	{
+		Error_Handler();
+	}
+
 
 	while(1);
 
@@ -62,19 +99,6 @@ int main()
 void SystemClockConfig(void)
 {
 	//internal RC oscillator - 16 Mhz
-}
-
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
-{
-	if(recvd_data == '\r')
-	{
-		data_buffer[count++] = '\n';
-		reception_complete = 1;
-	}
-	else
-	{
-		data_buffer[count++] = lower_to_upper(recvd_data);
-	}
 }
 
 void USART3_Init(void)
