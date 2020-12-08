@@ -26,8 +26,19 @@ uint32_t input_captures[2];
 uint8_t count = 1;
 uint8_t is_capture_done = 0;
 double capture_difference;
+double timer2_cnt_freq;
+double timer2_time;
+double user_signal_time_period;
+double user_signal_frq;
 
 UART_HandleTypeDef huart3;
+char usr_msg[100];
+
+/** Connect PA8 to PA0
+ *
+ * LSE (32.768 Khz)
+ *
+ * **/
 
 
 int main()
@@ -47,13 +58,20 @@ int main()
 		if(is_capture_done)
 		{
 
-			if(input_captures[1] > input_captures[2])
+			if(input_captures[0] > input_captures[1])
 			{
-				capture_difference = (0xFFFFFFFF - input_captures[1]) + input_captures[2];
+				capture_difference = (0xFFFFFFFF - input_captures[0]) + input_captures[1];
 			}
 			else
 			{
-				capture_difference = input_captures[2] - input_captures[1];
+				capture_difference = input_captures[1] - input_captures[0];
+				timer2_cnt_freq = (HAL_RCC_GetPCLK1Freq() * 2) /(tim2.Init.Prescaler + 1);
+				timer2_time = 1/timer2_cnt_freq;
+				user_signal_time_period = capture_difference * timer2_time;
+				user_signal_frq = 1/user_signal_time_period;
+				sprintf(usr_msg,"User signal freq is %f\r\n",user_signal_frq);
+				HAL_UART_Transmit(&huart3,(uint8_t *)usr_msg, strlen(usr_msg), HAL_MAX_DELAY);
+				is_capture_done = 0;
 			}
 
 
