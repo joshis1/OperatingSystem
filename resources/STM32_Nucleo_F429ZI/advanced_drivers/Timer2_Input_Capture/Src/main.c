@@ -9,68 +9,37 @@
 #include "main.h"
 #include <stdio.h> //sprintf
 #include <string.h> //memset and strlen
+#include "stm32f4_hal_uart.h"
 
 /*TIM6 is a basic timer - 16 bits counter
- *
- */
-/**Connect PA9 to PA0 to test 50Khz clock
- * the 50Khz is generated via. Timer 6 i.e. basic timer.
- * The 50Khz is generated to GPIO PA9.
- * so connect PA9 to PA0 so that input capture can work.
- */
-
-/** Connect PA8 to PA0 to test LSE - i.e. 32.768Khz
  *
  */
 
 void Timer2_Init(void);
 void Error_Handler(void);
-void Gpio_Init(void);
+void Led_Init(void);
 void SystemClockConfig(uint32_t sysclk);
 void LSE_Configuration(void);
 void USART3_Init(void);
-void Timer6_Init(void);
 
 TIM_HandleTypeDef tim2;
 uint32_t input_captures[2];
 uint8_t count = 1;
 uint8_t is_capture_done = 0;
 double capture_difference;
-double timer2_cnt_freq;
-double timer2_time;
-double user_signal_time_period;
-double user_signal_frq;
 
 UART_HandleTypeDef huart3;
-TIM_HandleTypeDef tim6;
-char usr_msg[100];
-
-/** Connect PA8 to PA0
- *
- * LSE (32.768 Khz)
- *
- * **/
 
 
 int main()
 {
 	HAL_Init();
 	SystemClockConfig(CLK_50MHZ);
-	Gpio_Init();
+	Led_Init();
 	Timer2_Init();
-	USART3_Init();
 
 	LSE_Configuration();
-	Timer6_Init();
 
-	//start the timer 6- basically 50Khz toggling
-	// as input to Timer 2 channel.
-	if( HAL_OK != HAL_TIM_Base_Start_IT(&tim6))
-	{
-		Error_Handler();
-	}
-
-	//start the input capture - timer 2
 	HAL_TIM_IC_Start_IT(&tim2, TIM_CHANNEL_1);
 
 	while(1)
@@ -78,20 +47,13 @@ int main()
 		if(is_capture_done)
 		{
 
-			if(input_captures[0] > input_captures[1])
+			if(input_captures[1] > input_captures[2])
 			{
-				capture_difference = (0xFFFFFFFF - input_captures[0]) + input_captures[1];
+				capture_difference = (0xFFFFFFFF - input_captures[1]) + input_captures[2];
 			}
 			else
 			{
-				capture_difference = input_captures[1] - input_captures[0];
-				timer2_cnt_freq = (HAL_RCC_GetPCLK1Freq() * 2) /(tim2.Init.Prescaler + 1);
-				timer2_time = 1/timer2_cnt_freq;
-				user_signal_time_period = capture_difference * timer2_time;
-				user_signal_frq = 1/user_signal_time_period;
-				sprintf(usr_msg,"User signal freq is %f\r\n",user_signal_frq);
-				HAL_UART_Transmit(&huart3,(uint8_t *)usr_msg, strlen(usr_msg), HAL_MAX_DELAY);
-				is_capture_done = 0;
+               capture_difference = input_captures[2] - input_captures[1];
 			}
 
 
@@ -107,14 +69,14 @@ void Error_Handler(void)
 	while(1);
 }
 
-void Gpio_Init(void)
+void Led_Init(void)
 {
-	GPIO_InitTypeDef pa9; //connect PA9 to PA0 and check the frequency.
+	GPIO_InitTypeDef led;
 	__HAL_RCC_GPIOB_CLK_ENABLE();
-	pa9.Mode = GPIO_MODE_OUTPUT_PP;
-	pa9.Pin = GPIO_PIN_9;
-	pa9.Pull = GPIO_NOPULL;
-	HAL_GPIO_Init(GPIOA, &pa9);
+	led.Mode = GPIO_MODE_OUTPUT_PP;
+	led.Pin = GPIO_PIN_7;
+	led.Pull = GPIO_NOPULL;
+	HAL_GPIO_Init(GPIOB, &led);
 }
 
 /** Clock is running at 16 Mhz
@@ -143,15 +105,15 @@ void Timer2_Init(void)
 	{
 		Error_Handler();
 	}
-	tim2_ic_config.ICPolarity = TIM_ICPOLARITY_RISING;
-	tim2_ic_config.ICSelection = TIM_ICSELECTION_DIRECTTI;
-	tim2_ic_config.ICPrescaler = TIM_ICPSC_DIV1;
-	tim2_ic_config.ICFilter = 0;
+    tim2_ic_config.ICPolarity = TIM_ICPOLARITY_RISING;
+    tim2_ic_config.ICSelection = TIM_ICSELECTION_DIRECTTI;
+    tim2_ic_config.ICPrescaler = TIM_ICPSC_DIV1;
+    tim2_ic_config.ICFilter = 0;
 
-	if(HAL_OK != HAL_TIM_IC_ConfigChannel(&tim2, &tim2_ic_config, TIM_CHANNEL_1))
-	{
-		Error_Handler();
-	}
+    if(HAL_OK != HAL_TIM_IC_ConfigChannel(&tim2, &tim2_ic_config, TIM_CHANNEL_1))
+    {
+       Error_Handler();
+    }
 }
 
 void SystemClockConfig(uint32_t sysclk)
@@ -162,10 +124,9 @@ void SystemClockConfig(uint32_t sysclk)
 
 	memset(&oscillator_init,0, sizeof(oscillator_init));
 
-	oscillator_init.OscillatorType = RCC_OSCILLATORTYPE_HSI | RCC_OSCILLATORTYPE_LSE | RCC_OSCILLATORTYPE_HSE;
+	oscillator_init.OscillatorType = RCC_OSCILLATORTYPE_HSI | RCC_OSCILLATORTYPE_LSE;
 	oscillator_init.HSIState = RCC_HSI_ON;
 	oscillator_init.LSEState = RCC_LSE_ON;
-	oscillator_init.HSEState = RCC_HSE_ON;
 	oscillator_init.HSICalibrationValue = 16; // assuming we are running at normal operating environment
 	oscillator_init.PLL.PLLSource = RCC_PLLSOURCE_HSI;
 	oscillator_init.PLL.PLLState = RCC_PLL_ON;
@@ -221,20 +182,20 @@ void LSE_Configuration(void)
 
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 {
-	if(!is_capture_done)
-	{
-		if(count == 1)
-		{
-			input_captures[0] = __HAL_TIM_GET_COMPARE(htim, TIM_CHANNEL_1);
-			count++;
-		}
-		else
-		{
-			input_captures[1] = __HAL_TIM_GET_COMPARE(htim, TIM_CHANNEL_1);
-			is_capture_done = 1;
-			count = 1;
-		}
-	}
+   if(!is_capture_done)
+   {
+	   if(count == 1)
+	   {
+		 input_captures[0] = __HAL_TIM_GET_COMPARE(htim, TIM_CHANNEL_1);
+         count++;
+	   }
+	   else
+	   {
+		  input_captures[1] = __HAL_TIM_GET_COMPARE(htim, TIM_CHANNEL_1);
+		  is_capture_done = 1;
+          count = 1;
+	   }
+   }
 }
 
 void USART3_Init(void)
@@ -252,14 +213,3 @@ void USART3_Init(void)
 	}
 }
 
-void Timer6_Init(void)
-{
-	//50Khz generation here.
-	tim6.Instance = TIM6;
-	tim6.Init.Prescaler = 9;  //the prescaler is actually 25 - (24 +1)
-	tim6.Init.Period = 50 -1; //-1 is required since the event is updated one count late.
-	if(HAL_OK != HAL_TIM_Base_Init(&tim6))
-	{
-		Error_Handler();
-	}
-}

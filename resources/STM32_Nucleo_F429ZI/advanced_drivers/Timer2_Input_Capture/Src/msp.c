@@ -37,33 +37,3 @@ void HAL_TIM_IC_MspInit(TIM_HandleTypeDef *htim)
 	//Setup the priority
 	HAL_NVIC_SetPriority(TIM2_IRQn,15,0);
 }
-
-void HAL_UART_MspInit(UART_HandleTypeDef *huart)
-{
-  //USART3 peripheral
-   GPIO_InitTypeDef gpio;
-  //Enable the clock for USART3 peripheral
-  __HAL_RCC_USART3_CLK_ENABLE();
-  __HAL_RCC_GPIOD_CLK_ENABLE();
-  //do the pin muxing configurations
-  gpio.Mode = GPIO_MODE_AF_PP;
-  gpio.Pull = GPIO_PULLUP;
-  gpio.Speed = GPIO_SPEED_FREQ_LOW;
-  gpio.Alternate = GPIO_AF7_USART3;
-  gpio.Pin = GPIO_PIN_8; //Tx
-  HAL_GPIO_Init(GPIOD, &gpio);
-  gpio.Pin = GPIO_PIN_9; //Rx
-  HAL_GPIO_Init(GPIOD, &gpio);
-  //Enable the IRQ and setup the priority - NVIC settings
-  HAL_NVIC_EnableIRQ(USART3_IRQn);
-  HAL_NVIC_SetPriority(USART3_IRQn,15,0);
-}
-
-void HAL_TIM_Base_MspInit(TIM_HandleTypeDef *htim)
-{
-	__HAL_RCC_TIM6_CLK_ENABLE();
-	//Enable the IRQ of TIM6
-	HAL_NVIC_EnableIRQ(TIM6_DAC_IRQn);
-	//Setup the priority
-    HAL_NVIC_SetPriority(TIM6_DAC_IRQn,15,0);
-}
