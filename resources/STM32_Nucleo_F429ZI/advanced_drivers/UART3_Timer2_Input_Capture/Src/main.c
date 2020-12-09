@@ -89,7 +89,7 @@ int main()
 				timer2_time = 1/timer2_cnt_freq;
 				user_signal_time_period = capture_difference * timer2_time;
 				user_signal_frq = 1/user_signal_time_period;
-				sprintf(usr_msg,"User signal freq is %f\r\n",user_signal_frq);
+				sprintf(usr_msg,"User signal freq is %f Hz\r\n",user_signal_frq);
 				HAL_UART_Transmit(&huart3,(uint8_t *)usr_msg, strlen(usr_msg), HAL_MAX_DELAY);
 				is_capture_done = 0;
 			}
@@ -110,7 +110,7 @@ void Error_Handler(void)
 void Gpio_Init(void)
 {
 	GPIO_InitTypeDef pa9; //connect PA9 to PA0 and check the frequency.
-	__HAL_RCC_GPIOB_CLK_ENABLE();
+	__HAL_RCC_GPIOA_CLK_ENABLE();
 	pa9.Mode = GPIO_MODE_OUTPUT_PP;
 	pa9.Pin = GPIO_PIN_9;
 	pa9.Pull = GPIO_NOPULL;
