@@ -8,6 +8,7 @@
 #include "it.h"
 
 extern TIM_HandleTypeDef tim2;
+extern TIM_HandleTypeDef tim6;
 
 void SysTick_Handler()
 {
@@ -18,6 +19,11 @@ void SysTick_Handler()
 void TIM2_IRQHandler()
 {
 	HAL_TIM_IRQHandler(&tim2);
+}
+
+void TIM6_DAC_IRQHandler()
+{
+	HAL_TIM_IRQHandler(&tim6);
 }
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
