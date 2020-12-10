@@ -13,7 +13,7 @@
 
 void Timer2_Init(void);
 void Error_Handler(void);
-void SystemClockConfig(uint32_t sysclk);
+void SystemClockConfigHSE(uint32_t sysclk);
 
 
 TIM_HandleTypeDef tim2;
@@ -59,12 +59,17 @@ TIM_HandleTypeDef tim2;
 
 uint32_t pulse[4] = {25000, 12500, 6250, 3125};
 
+void GPIO_Init(void);
+
 
 int main()
 {
 	HAL_Init();
-	SystemClockConfig(CLK_50MHZ);
+	SystemClockConfigHSE(CLK_50MHZ);
+	GPIO_Init();
 	Timer2_Init();
+
+	//HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
 
 	if(HAL_OK !=HAL_TIM_OC_Start_IT(&tim2,TIM_CHANNEL_1))
 	{
@@ -137,7 +142,7 @@ void Timer2_Init(void)
 
 }
 
-void SystemClockConfig(uint32_t sysclk)
+void SystemClockConfigHSE(uint32_t sysclk)
 {
 	RCC_OscInitTypeDef oscillator_init;
 	RCC_ClkInitTypeDef clk_init;
@@ -145,32 +150,31 @@ void SystemClockConfig(uint32_t sysclk)
 
 	memset(&oscillator_init,0, sizeof(oscillator_init));
 
-	oscillator_init.OscillatorType = RCC_OSCILLATORTYPE_HSI | RCC_OSCILLATORTYPE_LSE | RCC_OSCILLATORTYPE_HSE;
-	oscillator_init.HSIState = RCC_HSI_ON;
-	oscillator_init.LSEState = RCC_LSE_ON;
+	oscillator_init.OscillatorType = RCC_OSCILLATORTYPE_HSE | RCC_OSCILLATORTYPE_LSE | RCC_OSCILLATORTYPE_HSI;
 	oscillator_init.HSEState = RCC_HSE_ON;
-	oscillator_init.HSICalibrationValue = 16; // assuming we are running at normal operating environment
-	oscillator_init.PLL.PLLSource = RCC_PLLSOURCE_HSI;
+	oscillator_init.LSEState = RCC_LSE_ON;
+	oscillator_init.HSIState = RCC_HSI_ON;
+	oscillator_init.PLL.PLLSource = RCC_PLLSOURCE_HSE;
 	oscillator_init.PLL.PLLState = RCC_PLL_ON;
 
 	switch(sysclk)
 	{
 	case CLK_50MHZ:
-		oscillator_init.PLL.PLLM = 16; // so 16/16 for HSI is 1 Mhz.
-		oscillator_init.PLL.PLLN = 100; // now multiply i.e. 100Mhz
-		oscillator_init.PLL.PLLP = 2; //now divide by 2 i.e. 50Mhz. which will be HCLK i.e. AHB Clock.
-		oscillator_init.PLL.PLLQ = 4; // now divide by 2 i..e 25Mhz which will be PCLK1 and PCLK2 - APB1 and APB2
+		oscillator_init.PLL.PLLM = 4; // so 8/8 for HSE is 1 Mhz.
+		oscillator_init.PLL.PLLN = 50; // now multiply i.e. 100Mhz
+		oscillator_init.PLL.PLLP = RCC_PLLP_DIV2; //now divide by 2 i.e. 50Mhz. which will be HCLK i.e. AHB Clock.
+		oscillator_init.PLL.PLLQ = 2; // now divide by 2 i..e 25Mhz which will be PCLK1 and PCLK2 - APB1 and APB2
 		fLatency = FLASH_ACR_LATENCY_1WS;
 		break;
 	case CLK_84MHZ:
-		oscillator_init.PLL.PLLM = 16; // so 16/16 for HSI is 1 Mhz.
+		oscillator_init.PLL.PLLM = 8; // so 8/8 for HSE is 1 Mhz.
 		oscillator_init.PLL.PLLN = 168; // now multiply i.e. 168Mhz
 		oscillator_init.PLL.PLLP = 2; //now divide by 2 i.e. 84Mhz. which will be HCLK i.e. AHB Clock.
 		oscillator_init.PLL.PLLQ = 4; // now divide by 4 i..e 42Mhz which will be PCLK1 and PCLK2 - APB1 and APB2
 		fLatency = FLASH_ACR_LATENCY_2WS;
 		break;
 	case CLK_120MHZ:
-		oscillator_init.PLL.PLLM = 16; // so 16/16 for HSI is 1 Mhz.
+		oscillator_init.PLL.PLLM = 8; // so 8/8 for HSE is 1 Mhz.
 		oscillator_init.PLL.PLLN = 240; // now multiply i.e. 240 Mhz
 		oscillator_init.PLL.PLLP = 2; //now divide by 2 i.e. 120Mhz. which will be HCLK i.e. AHB Clock.
 		oscillator_init.PLL.PLLQ = 4; //now divide by 4 i.e. 30Mhz. which will be PCLK1 i.e. APB1 and APB2 Clock
@@ -188,40 +192,59 @@ void SystemClockConfig(uint32_t sysclk)
 	clk_init.ClockType = RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
 	clk_init.AHBCLKDivider = RCC_SYSCLK_DIV1;
 	clk_init.APB1CLKDivider = RCC_HCLK_DIV2;
-	clk_init.APB2CLKDivider = RCC_HCLK_DIV4;
+	clk_init.APB2CLKDivider = RCC_HCLK_DIV1;
 
 	if( HAL_OK != HAL_RCC_ClockConfig(&clk_init,fLatency) )
 	{
 		Error_Handler();
 	}
+	/*Configure the systick timer interrupt frequency (for every 1 ms) */
+	uint32_t hclk_freq = HAL_RCC_GetHCLKFreq();
+	HAL_SYSTICK_Config(hclk_freq/1000);
+
+	/**Configure the Systick
+	 */
+	HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
+
+	/* SysTick_IRQn interrupt configuration */
+	HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
 }
 
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+uint32_t ccr_content = 0;
+
+void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
 {
-	uint32_t ccr_content = 0;
 
-	if(htim->Channel == TIM_CHANNEL_1)
+	if(htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1)
 	{
-		ccr_content = HAL_TIM_ReadCapturedValue(htim,htim->Channel);
-		__HAL_TIM_SET_COMPARE(htim,htim->Channel, ccr_content + pulse[0]);
+		ccr_content = HAL_TIM_ReadCapturedValue(htim,TIM_CHANNEL_1);
+		__HAL_TIM_SET_COMPARE(htim,TIM_CHANNEL_1, ccr_content + pulse[0]);
 	}
-	if(htim->Channel == TIM_CHANNEL_2)
+	if(htim->Channel == HAL_TIM_ACTIVE_CHANNEL_2)
 	{
-		ccr_content = HAL_TIM_ReadCapturedValue(htim,htim->Channel);
-		__HAL_TIM_SET_COMPARE(htim,htim->Channel, ccr_content + pulse[1]);
-	}
-
-	if(htim->Channel == TIM_CHANNEL_3)
-	{
-		ccr_content = HAL_TIM_ReadCapturedValue(htim,htim->Channel);
-		__HAL_TIM_SET_COMPARE(htim,htim->Channel, ccr_content + pulse[2]);
+		ccr_content = HAL_TIM_ReadCapturedValue(htim,TIM_CHANNEL_2);
+		__HAL_TIM_SET_COMPARE(htim,TIM_CHANNEL_2, ccr_content + pulse[1]);
 	}
 
-	if(htim->Channel == TIM_CHANNEL_4)
+	if(htim->Channel == HAL_TIM_ACTIVE_CHANNEL_3)
 	{
-		ccr_content = HAL_TIM_ReadCapturedValue(htim,htim->Channel);
-		__HAL_TIM_SET_COMPARE(htim,htim->Channel, ccr_content + pulse[3]);
+		ccr_content = HAL_TIM_ReadCapturedValue(htim,TIM_CHANNEL_3);
+		__HAL_TIM_SET_COMPARE(htim,TIM_CHANNEL_3, ccr_content + pulse[2]);
 	}
 
+	if(htim->Channel == HAL_TIM_ACTIVE_CHANNEL_4)
+	{
+		ccr_content = HAL_TIM_ReadCapturedValue(htim,TIM_CHANNEL_4);
+		__HAL_TIM_SET_COMPARE(htim,TIM_CHANNEL_4, ccr_content + pulse[3]);
+	}
 }
 
+void GPIO_Init(void)
+{
+	__HAL_RCC_GPIOA_CLK_ENABLE();
+	GPIO_InitTypeDef ledgpio;
+	ledgpio.Pin = GPIO_PIN_5;
+	ledgpio.Mode = GPIO_MODE_OUTPUT_PP;
+	ledgpio.Pull = GPIO_NOPULL;
+	HAL_GPIO_Init(GPIOA,&ledgpio);
+}
