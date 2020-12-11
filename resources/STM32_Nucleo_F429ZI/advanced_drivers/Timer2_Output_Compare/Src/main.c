@@ -32,7 +32,7 @@ TIM_HandleTypeDef tim2;
  */
 
 /** User Leds
- * User LD1 - green user LED is connected to STM32 I/O PB0 or  PA5
+ * User LD1 - green user LED is connected to STM32 I/O PB0
  * LD2 -- a blue user LED is connected to PB7
  * LD3 -- a red user LED is connected to PB14
  * user LEDs are on when the I/O is high value, and are off when the I/O is low.
@@ -106,6 +106,7 @@ void Timer2_Init(void)
 {
 	TIM_OC_InitTypeDef  oc_config;
 	tim2.Instance = TIM2;
+	tim2.Init.CounterMode = TIM_COUNTERMODE_UP;
 	tim2.Init.Period = 0xFFFFFFFF;
 	tim2.Init.Prescaler = 1; //basically this will become 2.
 	//Timer 2 running at 25Mhz.
