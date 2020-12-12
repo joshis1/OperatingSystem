@@ -11,25 +11,11 @@
 #include <string.h> //memset and strlen
 
 
-void Timer2_Init(void);
+void Timer4_Init(void);
 void Error_Handler(void);
 void SystemClockConfigHSE(uint32_t sysclk);
+void GPIO_Init(void);
 
-
-TIM_HandleTypeDef tim2;
-
-/** Write an application by using TIMER2 to produce a square waveforms of
- *  500Hz -- Channel 1
- *  1Khz - Channel 2
- *  2Khz - Channel 3
- *  4Khz - Channel 4
- */
-
-/** Output compare is reverse of input capture
- *  Store the value in CCR1 i.e. Pulse Value
- *  Produce waveforms using Output compare mode.
- *  When the value of CNT equals CCR1 then the o/p channel will be toggled.
- */
 
 /** User Leds
  * User LD1 - green user LED is connected to STM32 I/O PB0
@@ -38,60 +24,44 @@ TIM_HandleTypeDef tim2;
  * user LEDs are on when the I/O is high value, and are off when the I/O is low.
  */
 
-/*
- *  25Mhz- Clock running
- *  We need 500Hz- 1/500 = 0.002, time on = 0.001
- *  freq on = 1000
- *  counts = 25 * 10^6/1000 = 25000
- *
- *  We need 1Khz - 1/1000 = 0.001, time on - 0.0005
- *  freq on - 2000
- *  counts = 25* 10^6/ 2000 = 12500
- *
- *  We need 2Khz - 1/2000 =0.0005, time on - 0.00025
- *  freq on - 4000
- *  counts = 25*10^6/4000 = 6250
- *
- *  We need 4Khz - 1/4000 = 0.00025, time on - 0.000125
- *  freq on - 8000
- *  counts = 25 *10^6/8000 = 3125
+/** Change the blue user LED brightness using PWM **/
+/** As we can see that we need to use Timer 4 Channel 2-  AF2 to change the brightness
+ *  of the Blue LED
  */
 
-uint32_t pulse[4] = {25000, 12500, 6250, 3125};
 
-void GPIO_Init(void);
-
+TIM_HandleTypeDef tim4;
+uint16_t brightness = 0;
 
 int main()
 {
 	HAL_Init();
+	//Higher Clock will have more precision
 	SystemClockConfigHSE(CLK_50MHZ);
 	GPIO_Init();
-	Timer2_Init();
+	Timer4_Init();
 
-	//HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
-
-	if(HAL_OK !=HAL_TIM_OC_Start_IT(&tim2,TIM_CHANNEL_1))
+	if(HAL_OK != HAL_TIM_PWM_Start(&tim4, TIM_CHANNEL_2))
 	{
 		Error_Handler();
 	}
 
-	if(HAL_OK !=HAL_TIM_OC_Start_IT(&tim2,TIM_CHANNEL_2))
+	while(1)
 	{
-		Error_Handler();
-	}
+		while(brightness < tim4.Init.Period)
+		{
+			brightness+=20;
+			__HAL_TIM_SET_COMPARE(&tim4, TIM_CHANNEL_2, brightness);
+			HAL_Delay(1);
+		}
 
-	if(HAL_OK !=HAL_TIM_OC_Start_IT(&tim2,TIM_CHANNEL_3))
-	{
-		Error_Handler();
+		while(brightness > 0 )
+		{
+			brightness-=20;
+			__HAL_TIM_SET_COMPARE(&tim4, TIM_CHANNEL_2, brightness);
+			HAL_Delay(1);
+		}
 	}
-
-	if(HAL_OK !=HAL_TIM_OC_Start_IT(&tim2,TIM_CHANNEL_4))
-	{
-		Error_Handler();
-	}
-
-	while(1);
 
 	return 0;
 }
@@ -102,47 +72,25 @@ void Error_Handler(void)
 	while(1);
 }
 
-void Timer2_Init(void)
+void Timer4_Init(void)
 {
-	TIM_OC_InitTypeDef  oc_config;
-	tim2.Instance = TIM2;
-	tim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-	tim2.Init.Period = 0xFFFFFFFF;
-	tim2.Init.Prescaler = 1; //basically this will become 2.
-	//Timer 2 running at 25Mhz.
-	if(HAL_OK != HAL_TIM_OC_Init(&tim2))
+	TIM_OC_InitTypeDef  pwm_config;
+	tim4.Instance = TIM4;
+	tim4.Init.Period = 10000-1;// 1 second - ARR
+	tim4.Init.Prescaler = 4;
+	if(HAL_OK != HAL_TIM_PWM_Init(&tim4))
 	{
 		Error_Handler();
 	}
+	memset(&pwm_config,0,sizeof(pwm_config));
+	pwm_config.OCMode = TIM_OCMODE_PWM1;
+	pwm_config.OCPolarity = TIM_OCPOLARITY_HIGH;
 
-	memset(&oc_config,0,sizeof(oc_config));
-
-	oc_config.OCMode = TIM_OCMODE_TOGGLE;
-	oc_config.OCPolarity = TIM_OCPOLARITY_HIGH;
-
-	oc_config.Pulse = pulse[0];
-	if(HAL_OK !=HAL_TIM_OC_ConfigChannel(&tim2, &oc_config, TIM_CHANNEL_1))
+	pwm_config.Pulse = (tim4.Init.Period * 80)/100;
+	if(HAL_OK != HAL_TIM_PWM_ConfigChannel(&tim4, &pwm_config, TIM_CHANNEL_2))
 	{
 		Error_Handler();
 	}
-
-	oc_config.Pulse = pulse[1];
-	if(HAL_OK !=HAL_TIM_OC_ConfigChannel(&tim2, &oc_config, TIM_CHANNEL_2))
-	{
-		Error_Handler();
-	}
-
-	oc_config.Pulse = pulse[2];
-	if(HAL_OK !=HAL_TIM_OC_ConfigChannel(&tim2, &oc_config, TIM_CHANNEL_3))
-	{
-		Error_Handler();
-	}
-	oc_config.Pulse = pulse[3];
-	if(HAL_OK !=HAL_TIM_OC_ConfigChannel(&tim2, &oc_config, TIM_CHANNEL_4))
-	{
-		Error_Handler();
-	}
-
 
 }
 
@@ -214,41 +162,12 @@ void SystemClockConfigHSE(uint32_t sysclk)
 	HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
 }
 
-uint32_t ccr_content = 0;
-
-void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
-{
-
-	if(htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1)
-	{
-		ccr_content = HAL_TIM_ReadCapturedValue(htim,TIM_CHANNEL_1);
-		__HAL_TIM_SET_COMPARE(htim,TIM_CHANNEL_1, ccr_content + pulse[0]);
-	}
-	if(htim->Channel == HAL_TIM_ACTIVE_CHANNEL_2)
-	{
-		ccr_content = HAL_TIM_ReadCapturedValue(htim,TIM_CHANNEL_2);
-		__HAL_TIM_SET_COMPARE(htim,TIM_CHANNEL_2, ccr_content + pulse[1]);
-	}
-
-	if(htim->Channel == HAL_TIM_ACTIVE_CHANNEL_3)
-	{
-		ccr_content = HAL_TIM_ReadCapturedValue(htim,TIM_CHANNEL_3);
-		__HAL_TIM_SET_COMPARE(htim,TIM_CHANNEL_3, ccr_content + pulse[2]);
-	}
-
-	if(htim->Channel == HAL_TIM_ACTIVE_CHANNEL_4)
-	{
-		ccr_content = HAL_TIM_ReadCapturedValue(htim,TIM_CHANNEL_4);
-		__HAL_TIM_SET_COMPARE(htim,TIM_CHANNEL_4, ccr_content + pulse[3]);
-	}
-}
-
 void GPIO_Init(void)
 {
-	__HAL_RCC_GPIOA_CLK_ENABLE();
+	__HAL_RCC_GPIOB_CLK_ENABLE();
 	GPIO_InitTypeDef ledgpio;
-	ledgpio.Pin = GPIO_PIN_5;
+	ledgpio.Pin = GPIO_PIN_7;
 	ledgpio.Mode = GPIO_MODE_OUTPUT_PP;
 	ledgpio.Pull = GPIO_NOPULL;
-	HAL_GPIO_Init(GPIOA,&ledgpio);
+	HAL_GPIO_Init(GPIOB,&ledgpio);
 }
