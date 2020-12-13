@@ -147,7 +147,7 @@ void Timer2_Init(void)
 	tim2.Instance = TIM2;
 	tim2.Init.CounterMode = TIM_COUNTERMODE_UP;
 	tim2.Init.Period = 0xFFFF - 1;
-	tim2.Init.Prescaler = 1; //basically this will become 2.
+	tim2.Init.Prescaler = 5000; //basically this will become 2.
 	//Timer 2 running at 25Mhz.
 	if(HAL_OK != HAL_TIM_OC_Init(&tim2))
 	{
