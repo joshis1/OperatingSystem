@@ -12,11 +12,16 @@
 
 
 void Timer2_Init(void);
+void Timer4_Init(void);
 void Error_Handler(void);
 void SystemClockConfigHSE(uint32_t sysclk);
+void GPIO_Init(void);
 
 
 TIM_HandleTypeDef tim2;
+
+//For Blue LED - Timer 4 Channel 2 - PB7 LED
+TIM_HandleTypeDef tim4;
 
 /** Write an application by using TIMER2 to produce a square waveforms of
  *  500Hz -- Channel 1
@@ -59,17 +64,23 @@ TIM_HandleTypeDef tim2;
 
 uint32_t pulse[4] = {25000, 12500, 6250, 3125};
 
-void GPIO_Init(void);
+
 
 
 int main()
 {
 	HAL_Init();
 	SystemClockConfigHSE(CLK_50MHZ);
-	GPIO_Init();
+	//GPIO_Init();
 	Timer2_Init();
+	Timer4_Init(); // For blue user LED
 
-	//HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+	if(HAL_OK !=HAL_TIM_OC_Start_IT(&tim4,TIM_CHANNEL_2))
+	{
+		Error_Handler();
+	}
+
+#if 1
 
 	if(HAL_OK !=HAL_TIM_OC_Start_IT(&tim2,TIM_CHANNEL_1))
 	{
@@ -90,6 +101,7 @@ int main()
 	{
 		Error_Handler();
 	}
+#endif
 
 	while(1);
 
@@ -101,6 +113,32 @@ void Error_Handler(void)
 {
 	while(1);
 }
+
+void Timer4_Init(void)
+{
+	TIM_OC_InitTypeDef  oc_config;
+	tim4.Instance = TIM4;
+	tim4.Init.CounterMode = TIM_COUNTERMODE_UP;
+	tim4.Init.Period = 0xFFFFFFFF;
+	tim4.Init.Prescaler = 1; //basically this will become 2.
+	//Timer 2 running at 25Mhz.
+	if(HAL_OK != HAL_TIM_OC_Init(&tim4))
+	{
+		Error_Handler();
+	}
+
+	memset(&oc_config,0,sizeof(oc_config));
+
+	oc_config.OCMode = TIM_OCMODE_TOGGLE;
+	oc_config.OCPolarity = TIM_OCPOLARITY_HIGH;
+
+	oc_config.Pulse = pulse[3];
+	if(HAL_OK !=HAL_TIM_OC_ConfigChannel(&tim4, &oc_config, TIM_CHANNEL_2))
+	{
+		Error_Handler();
+	}
+}
+
 
 void Timer2_Init(void)
 {
@@ -251,4 +289,11 @@ void GPIO_Init(void)
 	ledgpio.Mode = GPIO_MODE_OUTPUT_PP;
 	ledgpio.Pull = GPIO_NOPULL;
 	HAL_GPIO_Init(GPIOA,&ledgpio);
+
+	__HAL_RCC_GPIOB_CLK_ENABLE();
+	GPIO_InitTypeDef led_bluegpio;
+	led_bluegpio.Pin = GPIO_PIN_7;
+	led_bluegpio.Mode = GPIO_MODE_OUTPUT_PP;
+	led_bluegpio.Pull = GPIO_NOPULL;
+	HAL_GPIO_Init(GPIOB,&led_bluegpio);
 }

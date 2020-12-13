@@ -31,7 +31,10 @@ void HAL_TIM_OC_MspInit(TIM_HandleTypeDef *htim)
 	//PB-11 - TIM2 CH4 - AF1
 
 	GPIO_InitTypeDef tim2ch1_gpio;
+	GPIO_InitTypeDef tim4ch2_gpio;
+
 	__HAL_RCC_TIM2_CLK_ENABLE();
+	__HAL_RCC_TIM4_CLK_ENABLE(); // For BLue Led user.
 	__HAL_RCC_GPIOA_CLK_ENABLE();
 	__HAL_RCC_GPIOB_CLK_ENABLE();
 
@@ -51,8 +54,18 @@ void HAL_TIM_OC_MspInit(TIM_HandleTypeDef *htim)
 	tim2ch1_gpio.Pin = GPIO_PIN_11;
 	HAL_GPIO_Init(GPIOB, &tim2ch1_gpio);
 
+
+	tim4ch2_gpio.Pin = GPIO_PIN_7;
+	tim4ch2_gpio.Mode = GPIO_MODE_AF_PP;
+	tim4ch2_gpio.Pull = GPIO_NOPULL;
+	tim4ch2_gpio.Speed = GPIO_SPEED_FREQ_LOW;
+	tim4ch2_gpio.Alternate = GPIO_AF2_TIM4;
+	HAL_GPIO_Init(GPIOB, &tim4ch2_gpio);
+
 	//Enable the IRQ of TIM2
 	HAL_NVIC_EnableIRQ(TIM2_IRQn);
+	HAL_NVIC_EnableIRQ(TIM4_IRQn);
 	//Setup the priority
 	HAL_NVIC_SetPriority(TIM2_IRQn,15,0);
+	HAL_NVIC_SetPriority(TIM4_IRQn,15,0);
 }

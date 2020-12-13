@@ -8,6 +8,7 @@
 #include "it.h"
 
 extern TIM_HandleTypeDef tim2;
+extern TIM_HandleTypeDef tim4;
 
 void SysTick_Handler()
 {
@@ -18,5 +19,10 @@ void SysTick_Handler()
 void TIM2_IRQHandler()
 {
 	HAL_TIM_IRQHandler(&tim2);
+}
+
+void TIM4_IRQHandler()
+{
+	HAL_TIM_IRQHandler(&tim4);
 }
 
