@@ -57,7 +57,7 @@ void HAL_TIM_OC_MspInit(TIM_HandleTypeDef *htim)
 
 	tim4ch2_gpio.Pin = GPIO_PIN_7;
 	tim4ch2_gpio.Mode = GPIO_MODE_AF_PP;
-	tim4ch2_gpio.Pull = GPIO_NOPULL;
+	//tim4ch2_gpio.Pull = GPIO_NOPULL;
 	tim4ch2_gpio.Speed = GPIO_SPEED_FREQ_LOW;
 	tim4ch2_gpio.Alternate = GPIO_AF2_TIM4;
 	HAL_GPIO_Init(GPIOB, &tim4ch2_gpio);

@@ -1,7 +1,7 @@
 [PreviousGenFiles]
-HeaderPath=E:/UART3_Timer2_Input_Capture/Inc
+HeaderPath=E:/github_arrangements/OperatingSystem/resources/STM32_Nucleo_F429ZI/advanced_drivers/Timer2_Timer4_Output_Compare/Inc
 HeaderFiles=stm32f4xx_it.h;stm32f4xx_hal_conf.h;main.h;
-SourcePath=E:/UART3_Timer2_Input_Capture/Src
+SourcePath=E:/github_arrangements/OperatingSystem/resources/STM32_Nucleo_F429ZI/advanced_drivers/Timer2_Timer4_Output_Compare/Src
 SourceFiles=stm32f4xx_it.c;stm32f4xx_hal_msp.c;main.c;
 
 [PreviousLibFiles]
