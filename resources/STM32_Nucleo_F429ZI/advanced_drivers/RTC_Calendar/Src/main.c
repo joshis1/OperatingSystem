@@ -45,6 +45,8 @@ int main()
 
 	RTC_Init();
 
+	RTC_CalendarConfig();
+
 
 	while(1)
 	{
