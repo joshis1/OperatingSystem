@@ -9,6 +9,7 @@
 #include "main.h"
 #include <stdio.h> //sprintf
 #include <string.h> //memset and strlen
+#include <stdarg.h>
 
 void Error_Handler(void);
 void Gpio_Init(void);
@@ -17,6 +18,8 @@ void LSE_Configuration(void);
 void USART3_Init(void);
 void RTC_Init(void);
 void RTC_CalendarConfig(void);
+void printmsg(char *format, ...);
+static char* getDayOfWeek(uint8_t number);
 
 
 UART_HandleTypeDef huart3;
@@ -65,11 +68,24 @@ void Error_Handler(void)
 void Gpio_Init(void)
 {
 	__HAL_RCC_GPIOB_CLK_ENABLE();
+	__HAL_RCC_GPIOC_CLK_ENABLE();
+
 	GPIO_InitTypeDef ledgpio;
+	GPIO_InitTypeDef button_gpio;
 	ledgpio.Pin = GPIO_PIN_7;
 	ledgpio.Mode = GPIO_MODE_OUTPUT_PP;
 	ledgpio.Pull = GPIO_NOPULL;
 	HAL_GPIO_Init(GPIOB,&ledgpio);
+
+	button_gpio.Pull = GPIO_NOPULL;
+	button_gpio.Mode = GPIO_MODE_IT_FALLING;
+	button_gpio.Pin = GPIO_PIN_13;
+
+	HAL_GPIO_Init(GPIOC,&button_gpio);//button is PC13
+
+	HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);  // button interrupt priority set.
+
+	HAL_NVIC_EnableIRQ(EXTI15_10_IRQn); // button interrupt Enable
 }
 
 
@@ -155,22 +171,71 @@ void USART3_Init(void)
 
 void RTC_Init(void)
 {
-   hrtc.Instance = RTC;
-   hrtc.Init.HourFormat = RTC_HOURFORMAT_24;
-   hrtc.Init.AsynchPrediv = 0x7F; // 128
-   hrtc.Init.SynchPrediv = 0XFF; //255 or 255+1 i.e 256
-   hrtc.Init.OutPut = RTC_OUTPUT_DISABLE;
-   hrtc.Init.OutPutPolarity = RTC_OUTPUT_POLARITY_LOW;
-   hrtc.Init.OutPutType = RTC_OUTPUT_TYPE_OPENDRAIN;
+	hrtc.Instance = RTC;
+	hrtc.Init.HourFormat = RTC_HOURFORMAT_24;
+	hrtc.Init.AsynchPrediv = 0x7F; // 128
+	hrtc.Init.SynchPrediv = 0XFF; //255 or 255+1 i.e 256
+	hrtc.Init.OutPut = RTC_OUTPUT_DISABLE;
+	hrtc.Init.OutPutPolarity = RTC_OUTPUT_POLARITY_LOW;
+	hrtc.Init.OutPutType = RTC_OUTPUT_TYPE_OPENDRAIN;
 
-   if(HAL_RTC_Init(&hrtc) != HAL_OK)
-   {
-	   Error_Handler();
-   }
+	if(HAL_RTC_Init(&hrtc) != HAL_OK)
+	{
+		Error_Handler();
+	}
 }
 
 void RTC_CalendarConfig(void)
 {
+	RTC_TimeTypeDef sTime;
+	RTC_DateTypeDef date;
+	sTime.Hours = 11;
+	sTime.Minutes = 22;
+	sTime.TimeFormat = RTC_HOURFORMAT12_AM;
+	if(HAL_OK != HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BIN))
+	{
+		Error_Handler();
+	}
 
+	date.Date = 18;
+	date.Month = RTC_MONTH_DECEMBER;
+	date.Year = 20; //basically it means 2020, the min value of Year is 2000.
+	date.WeekDay = RTC_WEEKDAY_FRIDAY;
+
+	if(HAL_OK != HAL_RTC_SetDate(&hrtc, &date,RTC_FORMAT_BIN))
+	{
+		Error_Handler();
+	}
 }
 
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+	RTC_TimeTypeDef sTime;
+	RTC_DateTypeDef date;
+
+	HAL_RTC_GetTime(&hrtc, &sTime, RTC_FORMAT_BIN);
+	printmsg("Current time is %02d:%02d:%02d", sTime.Hours, sTime.Minutes, sTime.Seconds);
+
+	HAL_RTC_GetDate(&hrtc, &date, RTC_FORMAT_BIN);
+
+	printmsg("Current date is %02d-%02d-%02d <%s> \r\n", date.Date,date.Month, date.Year, getDayOfWeek(date.WeekDay));
+}
+
+//Variadic functions
+void printmsg(char *format, ...)
+{
+	char str[80];
+	/**Extract the argument list using VA Apis*/
+	va_list args;
+	va_start(args, format);
+	//vsprintf - sends formatted output to a string, using an argument list
+	vsprintf(str, format, args);
+	HAL_UART_Transmit(&huart3, (uint8_t *)str, strlen(str), HAL_MAX_DELAY);
+	va_end(args);
+}
+
+static char* getDayOfWeek(uint8_t number)
+{
+	char *weekday[] = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
+	return weekday[number -1];
+}
