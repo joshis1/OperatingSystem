@@ -22,6 +22,8 @@ void printmsg(char *format, ...);
 static char* getDayOfWeek(uint8_t number);
 void RTC_Alarm_Config(void);
 
+//In order to wakeup connect a jumper PA0 to Vdd
+
 
 UART_HandleTypeDef huart3;
 RTC_HandleTypeDef hrtc;
@@ -52,10 +54,49 @@ int main()
 	RTC_CalendarConfig();
 	RTC_Alarm_Config();
 
+	printmsg("Booting up..\r\n");
+
+	//Enable clock to Back up SRAM.
+	__HAL_RCC_BKPSRAM_CLK_ENABLE();
+	//Enable Clock for Power Controller block
+	__HAL_RCC_PWR_CLK_ENABLE();
+	//Enable Access  to  Back up SRAM.
+	HAL_PWR_EnableBkUpAccess();
+
+	__HAL_RCC_PWR_CLK_ENABLE();
+
+	uint32_t *pBackupSRAM = (uint32_t *)BKPSRAM_BASE;
+	char write_buf[] = "Hello";
+
+	if(__HAL_PWR_GET_FLAG(PWR_FLAG_SB))
+	{
+		printmsg("Wakeup from Stand by mode \r\n");
+		__HAL_PWR_CLEAR_FLAG(PWR_FLAG_SB); //clear the stand by flag.
+		__HAL_PWR_CLEAR_FLAG(PWR_FLAG_WU); //clear the wakeup flag.
+
+		uint8_t data = (uint8_t)*pBackupSRAM;
+		if(data != 'H')
+		{
+			printmsg("Back up SRAM failed to read \r\n");
+		}
+		else
+		{
+			printmsg("Back up SRAM successful\r\n");
+		}
+	}
+	else
+	{
+		printmsg("Writing to Backup SRAM\r\n");
+		for(uint32_t i = 0; i < strlen(write_buf) +1 ; i++)
+		{
+			*(pBackupSRAM +i) = write_buf[i];
+		}
+	}
+
 
 	while(1)
 	{
-
+		__WFI(); // Save current Wait for interrupt.
 	}
 
 	return 0;
@@ -221,6 +262,12 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 	HAL_RTC_GetDate(&hrtc, &date, RTC_FORMAT_BIN);
 
 	printmsg("Current date is %02d-%02d-%02d <%s> \r\n", date.Date,date.Month, date.Year, getDayOfWeek(date.WeekDay));
+
+	printmsg("Going to Standby mode \r\n");
+	HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN1);  //Wake up pin is PA0.
+	HAL_PWR_EnableBkUpReg(); //Enable the backup voltage regulator so that Back up SRAM is sustained
+	HAL_PWR_EnterSTANDBYMode(); //Enter Power Stand by mode
+
 }
 
 //Variadic functions
@@ -244,26 +291,26 @@ static char* getDayOfWeek(uint8_t number)
 
 void RTC_Alarm_Config(void)
 {
-   RTC_AlarmTypeDef alarmA_set;
+	RTC_AlarmTypeDef alarmA_set;
 
-   memset(&alarmA_set,0, sizeof(alarmA_set));
+	memset(&alarmA_set,0, sizeof(alarmA_set));
 
-   HAL_RTC_DeactivateAlarm(&hrtc, RTC_ALARM_A);
+	HAL_RTC_DeactivateAlarm(&hrtc, RTC_ALARM_A);
 
-   alarmA_set.Alarm = RTC_ALARM_A;
-   alarmA_set.AlarmTime.Minutes = 45;
-   alarmA_set.AlarmTime.Seconds = 9;
-   alarmA_set.AlarmMask = RTC_ALARMMASK_HOURS | RTC_ALARMMASK_DATEWEEKDAY;
-   alarmA_set.AlarmSubSecondMask = RTC_ALARMSUBSECONDMASK_NONE;
+	alarmA_set.Alarm = RTC_ALARM_A;
+	alarmA_set.AlarmTime.Minutes = 45;
+	alarmA_set.AlarmTime.Seconds = 9;
+	alarmA_set.AlarmMask = RTC_ALARMMASK_HOURS | RTC_ALARMMASK_DATEWEEKDAY;
+	alarmA_set.AlarmSubSecondMask = RTC_ALARMSUBSECONDMASK_NONE;
 
-   if(HAL_OK != HAL_RTC_SetAlarm_IT(&hrtc, &alarmA_set,RTC_FORMAT_BIN))
-   {
-	   Error_Handler();
-   }
+	if(HAL_OK != HAL_RTC_SetAlarm_IT(&hrtc, &alarmA_set,RTC_FORMAT_BIN))
+	{
+		Error_Handler();
+	}
 
 }
 
 void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc)
 {
-   HAL_GPIO_WritePin(GPIOB,GPIO_PIN_7,GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOB,GPIO_PIN_7,GPIO_PIN_SET);
 }
