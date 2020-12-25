@@ -93,9 +93,11 @@ int main()
 		}
 	}
 
-
+	HAL_SuspendTick(); // for WFI not to wake up
 	while(1)
 	{
+		//SCB->SCR |= (0x1 <<1); // sleep on exit.
+		printmsg("Going to execute WFI instruction\r\n");
 		__WFI(); // Save current Wait for interrupt.
 	}
 
@@ -115,16 +117,40 @@ void Gpio_Init(void)
 
 	GPIO_InitTypeDef ledgpio;
 	GPIO_InitTypeDef button_gpio;
+	GPIO_InitTypeDef unused_portB_analog;
+	GPIO_InitTypeDef unused_portC_analog;
 	ledgpio.Pin = GPIO_PIN_7;
 	ledgpio.Mode = GPIO_MODE_OUTPUT_PP;
 	ledgpio.Pull = GPIO_NOPULL;
+	// put unused pins to analog mode to save some power and reduce current consumption.
 	HAL_GPIO_Init(GPIOB,&ledgpio);
+	unused_portB_analog.Pin = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2
+			| GPIO_PIN_3 | GPIO_PIN_4 | GPIO_PIN_5
+			| GPIO_PIN_6 | GPIO_PIN_8 | GPIO_PIN_9 | GPIO_PIN_10
+			| GPIO_PIN_11 | GPIO_PIN_12 | GPIO_PIN_13 | GPIO_PIN_14 | GPIO_PIN_15;
+
+	unused_portB_analog.Mode = GPIO_MODE_ANALOG;
+	HAL_GPIO_Init(GPIOB,&unused_portB_analog);
+
+
 
 	button_gpio.Pull = GPIO_NOPULL;
 	button_gpio.Mode = GPIO_MODE_IT_FALLING;
 	button_gpio.Pin = GPIO_PIN_13;
 
 	HAL_GPIO_Init(GPIOC,&button_gpio);//button is PC13
+
+    // put unused pins to analog mode to save some power and reduce current consumption.
+
+	unused_portC_analog.Pin = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2
+				| GPIO_PIN_3 | GPIO_PIN_4 | GPIO_PIN_5
+				| GPIO_PIN_6 | GPIO_PIN_7 | GPIO_PIN_8 | GPIO_PIN_9 | GPIO_PIN_10
+				| GPIO_PIN_11 | GPIO_PIN_12 | GPIO_PIN_14 | GPIO_PIN_15;
+
+	unused_portC_analog.Mode = GPIO_MODE_ANALOG;
+
+	HAL_GPIO_Init(GPIOC,&unused_portC_analog);
+
 
 	HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);  // button interrupt priority set.
 
