@@ -24,6 +24,15 @@ void RTC_Alarm_Config(void);
 
 //In order to wakeup connect a jumper PA0 to Vdd
 
+/** How long your battery last?
+
+9V battery -- 500mAH -->
+
+500MA of current continously for 1 hour before going dead.
+
+11mA = 500mA/11mA = 45hrs like 2 days .
+**/
+
 
 UART_HandleTypeDef huart3;
 RTC_HandleTypeDef hrtc;
