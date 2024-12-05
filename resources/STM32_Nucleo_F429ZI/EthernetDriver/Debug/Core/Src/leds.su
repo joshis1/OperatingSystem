@@ -1,0 +1,3 @@
+../Core/Src/leds.c:11:6:leds_init	4	static
+../Core/Src/leds.c:35:6:led_on	16	static
+../Core/Src/leds.c:52:6:led_off	16	static

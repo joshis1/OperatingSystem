@@ -1,0 +1,6 @@
+../Core/Src/timer.c:27:6:tick_increment	4	static
+../Core/Src/timer.c:32:10:get_tick	4	static
+../Core/Src/timer.c:37:6:SysTick_Handler	8	static
+../Core/Src/timer.c:42:6:delay_ms	24	static
+../Core/Src/timer.c:57:6:timebase_init	4	static
+../Core/Src/timer.c:75:6:clock_config	4	static

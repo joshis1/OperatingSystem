@@ -1,0 +1,2 @@
+../Core/Src/uart.c:30:5:__io_putchar	0	static
+../Core/Src/uart.c:37:6:uart3_tx_init	0	static

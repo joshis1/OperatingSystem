@@ -1,0 +1,10 @@
+23:19:44 **** Incremental Build of configuration Release for project EthernetDriver ****
+make -j6 all 
+arm-none-eabi-size  EthernetDriver.elf 
+   text	   data	    bss	    dec	    hex	filename
+   3852	     96	   1904	   5852	   16dc	EthernetDriver.elf
+Finished building: default.size.stdout
+ 
+
+23:19:45 Build Finished. 0 errors, 0 warnings. (took 1s.607ms)
+

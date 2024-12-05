@@ -1,0 +1,11 @@
+../mw/Third_Party/LwIP/src/apps/sntp/sntp.c:366:1:sntp_retry	8	static
+../mw/Third_Party/LwIP/src/apps/sntp/sntp.c:436:1:sntp_recv	24	static
+../mw/Third_Party/LwIP/src/apps/sntp/sntp.c:603:1:sntp_request	24	static
+../mw/Third_Party/LwIP/src/apps/sntp/sntp.c:648:1:sntp_init	16	static
+../mw/Third_Party/LwIP/src/apps/sntp/sntp.c:686:1:sntp_stop	16	static
+../mw/Third_Party/LwIP/src/apps/sntp/sntp.c:707:6:sntp_enabled	0	static
+../mw/Third_Party/LwIP/src/apps/sntp/sntp.c:718:1:sntp_setoperatingmode	8	static
+../mw/Third_Party/LwIP/src/apps/sntp/sntp.c:731:1:sntp_getoperatingmode	0	static
+../mw/Third_Party/LwIP/src/apps/sntp/sntp.c:744:1:sntp_getreachability	0	static
+../mw/Third_Party/LwIP/src/apps/sntp/sntp.c:777:1:sntp_setserver	0	static
+../mw/Third_Party/LwIP/src/apps/sntp/sntp.c:828:1:sntp_getserver	0	static
