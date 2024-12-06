@@ -1,0 +1,30 @@
+# Ignore IDE and build files
+.metadata/
+.project
+.cproject
+*.launch
+*.log
+
+# Ignore build directories
+/Release/
+/Debug/
+/build/
+
+# Ignore object files, dependency files, and other build artifacts
+*.o
+*.d
+*.su
+*.a
+*.so
+*.pdb
+*.ilk
+*.lib
+*.dll
+
+# Ignore any temporary or system files
+*.tmp
+*.swp
+*.bak
+*.swo
+.DS_Store
+Thumbs.db
