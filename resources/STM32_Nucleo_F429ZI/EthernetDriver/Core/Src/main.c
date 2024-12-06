@@ -21,6 +21,7 @@
 #include "timer.h"
 #include "leds.h"
 #include "uart.h"
+#include "adc.h"
 
 #if 0  //SJ - disable warning.
 #if !defined(__SOFT_FP__) && defined(__ARM_FP)
@@ -35,6 +36,10 @@ int main(void)
 	timebase_init();
     uart3_tx_init();
 
+    pc0_adc1_init();
+
+    uint32_t sensor_value = 0;
+
 	/* Loop forever */
 	for(;;)
 	{
@@ -42,6 +47,8 @@ int main(void)
 		led_on(RED_LED);
 		led_on(GREEN_LED);
 		led_on(BLUE_LED);
+
+		sensor_value = adc1_get_data();
 
 		delay_ms(1000);
 
